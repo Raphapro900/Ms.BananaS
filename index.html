@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Ms. BananaS - Menu</title>
+  <title>Ms. BananaS - Menú</title>
   <style>
     body {
       margin: 0;
@@ -55,7 +55,7 @@
 </head>
 <body>
   <h1>Ms. BananaS</h1>
-  <p class="menu-text">Click the banana to start</p>
+  <p class="menu-text">Haz clic en la banana para comenzar</p>
   <img id="banana" src="banana.png" alt="Ms. BananaS">
 
   <audio id="menuMusic" src="bananamenu.mp3" autoplay loop></audio>
@@ -67,17 +67,17 @@
     banana.addEventListener("click", () => {
       menuMusic.pause();
 
-      // Simulate current day (replace with save system later)
-      let currentDay = 1; // Change to 2, 3, 4, or 5
+      // Día actual (puedes cambiarlo según el progreso del jugador)
+      let currentDay = 1; // Cambia a 2, 3, 4 o 5 según el avance
 
-      const dialogue = new Audio(currentDay === 1 ? "Primer dia.mp3" : "dias.mp3");
+      const dialogue = new Audio(currentDay === 1 ? "Primer dia.wav" : "dias.wav");
       dialogue.play();
 
-      // Redirect or load game logic
-      alert("Game is loading...");
+      // Aquí puedes redirigir a otra página o iniciar el juego
+      alert("¡El juego está cargando!");
     });
   </script>
 
-  <footer>© 2026 Ms. BananaS Project</footer>
+  <footer>© Raphapro900 2026</footer>
 </body>
 </html>
