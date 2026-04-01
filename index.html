@@ -7,7 +7,7 @@
     body {
       margin: 0;
       padding: 0;
-      font-family: 'Courier New', monospace;
+      font-family: Papyrus, fantasy;
       background-color: black;
       color: #FFD700;
       text-align: center;
@@ -123,6 +123,20 @@
       display: none;
     }
 
+    #subtitleBox {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80%;
+      padding: 10px;
+      background-color: rgba(0,0,0,0.6);
+      color: #FFD700;
+      font-size: 1.1em;
+      border: 1px solid #FFD700;
+      display: none;
+    }
+
     #rageText {
       position: absolute;
       top: 20px;
@@ -170,6 +184,7 @@
       <button>Snake</button>
     </div>
     <div id="dialogueBox">¡Bienvenido al primer día!</div>
+    <div id="subtitleBox"></div>
     <audio id="dialogueAudio"></audio>
     <div id="rageText">Furia: 0</div>
   </div>
@@ -188,6 +203,7 @@
     const bananaGame = document.getElementById("bananaGame");
     const animalImg = document.getElementById("animal");
     const dialogueBox = document.getElementById("dialogueBox");
+    const subtitleBox = document.getElementById("subtitleBox");
     const dialogueAudio = document.getElementById("dialogueAudio");
     const rageText = document.getElementById("rageText");
     const jumpscare = document.getElementById("jumpscare");
@@ -196,7 +212,7 @@
     const animals = [
       {name:"Seal", file:"Seal.webp"},
       {name:"Dog", file:"Dog.jfif"},
-      {name:"Cat", file:"Cat.jpg"},
+      {name:"Cat", file:"Cat.jpj"},
       {name:"Duck", file:"Duck.avif"},
       {name:"Eagle", file:"Aguila.webp"},
       {name:"Snake", file:"Snake.jfif"}
@@ -214,7 +230,9 @@
       menuMusic.pause();
       roomMusic.play();
       dialogueBox.innerText = "¡Bienvenido al primer día!";
-      dialogueAudio.src = "Primer dia.wav";
+      dialogueAudio.src = "Primer dia.mp3";
+      subtitleBox.innerText = "Oh. Hello player, welcome. Here we'll be testing how many animals you know. I hope you know them all. Okay, let's begin.";
+      subtitleBox.style.display = "block";
       dialogueBox.style.display = "block";
       dialogueAudio.play();
     });
@@ -249,48 +267,57 @@
             btn.style.backgroundColor = "green";
             dialogueAudio.src = ["c1.wav","c2.wav","c3.wav","c4.wav"][Math.floor(Math.random()*4)];
             dialogueBox.innerText = "¡Correcto!";
+            subtitleBox.innerText = "Correct!";
+            subtitleBox.style.display = "block";
             dialogueBox.style.display = "block";
             dialogueAudio.play();
             setTimeout(nextAnimal, 2000);
           } else {
             btn.style.backgroundColor = "red";
             buttons.forEach(b => {
-              if (b.innerText === currentAnimal.name) b.style.backgroundColor = "yellow";
-            });
-            rage++;
-            rageText.innerText = "Furia: " + rage;
-            dialogueAudio.src = ["f1.wav","f2.wav","f3.wav","f4.wav"][Math.floor(Math.random()*4)];
-            dialogueBox.innerText = "¡Fallaste!";
-            dialogueBox.style.display = "block";
-            dialogueAudio.play();
-            if (rage >= 10) activateSpecialMode();
-            setTimeout(nextAnimal, 2000);
-          }
-        } else {
-          specialQuestions++;
-          if (btn.innerText === currentAnimal.name) {
-            dialogueBox.innerText = "¡Mal!";
-            dialogueBox.style.display = "block";
-            dialogueAudio.src = ["c1.wav","c2.wav","c3.wav","c4.wav"][Math.floor(Math.random()*4)];
-            dialogueAudio.play();
-            setTimeout(nextAnimal, 2000);
-          } else {
-            // Fallo en modo especial
-            btn.style.backgroundColor = "red";
-            specialFails++;
-            dialogueBox.innerText = "¡Fallaste!";
-            dialogueBox.style.display = "block";
-            dialogueAudio.src = ["f1.wav","f2.wav","f3.wav","f4.wav"][Math.floor(Math.random()*4)];
-            dialogueAudio.play();
-            if (specialFails >= 3) {
-              triggerJumpscare();
-            } else {
-              setTimeout(nextAnimal, 2000);
+            if (b.innerText === currentAnimal.name) {
+              b.style.backgroundColor = "yellow";
             }
+          });
+          rage++;
+          rageText.innerText = "Furia: " + rage;
+          dialogueAudio.src = ["f1.wav","f2.wav","f3.wav","f4.wav"][Math.floor(Math.random()*4)];
+          dialogueBox.innerText = "¡Fallaste!";
+          subtitleBox.innerText = "Wrong!";
+          subtitleBox.style.display = "block";
+          dialogueBox.style.display = "block";
+          dialogueAudio.play();
+          if (rage >= 10) activateSpecialMode();
+          setTimeout(nextAnimal, 2000);
+        }
+      } else {
+        specialQuestions++;
+        if (btn.innerText === currentAnimal.name) {
+          dialogueBox.innerText = "¡Mal!";
+          subtitleBox.innerText = "Bad!";
+          subtitleBox.style.display = "block";
+          dialogueBox.style.display = "block";
+          dialogueAudio.src = ["c1.wav","c2.wav","c3.wav","c4.wav"][Math.floor(Math.random()*4)];
+          dialogueAudio.play();
+          setTimeout(nextAnimal, 2000);
+        } else {
+          btn.style.backgroundColor = "red";
+          specialFails++;
+          dialogueBox.innerText = "¡Fallaste!";
+          subtitleBox.innerText = "Wrong!";
+          subtitleBox.style.display = "block";
+          dialogueBox.style.display = "block";
+          dialogueAudio.src = ["f1.wav","f2.wav","f3.wav","f4.wav"][Math.floor(Math.random()*4)];
+          dialogueAudio.play();
+          if (specialFails >= 3) {
+            triggerJumpscare();
+          } else {
+            setTimeout(nextAnimal, 2000);
           }
         }
-      });
+      }
     });
+  });
   </script>
 </body>
 </html>
