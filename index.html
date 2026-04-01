@@ -190,6 +190,7 @@
     const dialogueAudio = document.getElementById("dialogueAudio");
     const animalImg = document.getElementById("animal");
     const rageText = document.getElementById("rageText");
+    const bananaGame = document.getElementById("bananaGame");
     const buttons = document.querySelectorAll(".options button");
 
     const animals = [
@@ -225,6 +226,17 @@
       });
     }
 
+    function checkFury() {
+      if (rage >= 10) {
+        rageText.innerText = "Furia: 10 (¡Máxima!)";
+        // Cambiar banana
+        bananaGame.src = "banana2.png";
+        // Música lenta y reversa (simulación con playbackRate negativo no funciona en todos los navegadores)
+        roomMusic.playbackRate = 0.5; // más lenta
+        // Para simular reversa se necesitaría un audio editado, aquí solo se baja la velocidad
+      }
+    }
+
     buttons.forEach(btn => {
       btn.addEventListener("click", () => {
         if (btn.innerText === currentAnimal.name) {
@@ -246,15 +258,59 @@
           });
           rage++;
           rageText.innerText = "Furia: " + rage;
+          checkFury();
           const failAudios = ["f1.wav","f2.wav","f3.wav","f4.wav"];
           dialogueAudio.src = failAudios[Math.floor(Math.random()*failAudios.length)];
-          dialogueBox.innerText = "¡Fallaste!";
-          dialogueBox.style.display = "block";
-          dialogueAudio.play();
-          setTimeout(nextAnimal, 2000);
-        }
-      });
+        dialogueBox.innerText = "¡Fallaste!";
+        dialogueBox.style.display = "block";
+        dialogueAudio.play();
+        setTimeout(nextAnimal, 2000);
+      }
     });
-  </script>
+  });
+
+  function checkFury() {
+    if (rage >= 10) {
+      rageText.innerText = "Furia: 10 (¡Máxima!)";
+      // Cambiar banana
+      bananaGame.src = "banana2.png";
+      // Música lenta (simulación)
+      roomMusic.playbackRate = 0.5;
+      // Nota: reversa real requiere un audio editado previamente
+    }
+  }
+
+  buttons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      if (btn.innerText === currentAnimal.name) {
+        // Correcto
+        btn.style.backgroundColor = "green";
+        const correctAudios = ["c1.wav","c2.wav","c3.wav","c4.wav"];
+        dialogueAudio.src = correctAudios[Math.floor(Math.random()*correctAudios.length)];
+        dialogueBox.innerText = "¡Correcto!";
+        dialogueBox.style.display = "block";
+        dialogueAudio.play();
+        setTimeout(nextAnimal, 2000);
+      } else {
+        // Incorrecto
+        btn.style.backgroundColor = "red";
+        buttons.forEach(b => {
+          if (b.innerText === currentAnimal.name) {
+            b.style.backgroundColor = "yellow";
+          }
+        });
+        rage++;
+        rageText.innerText = "Furia: " + rage;
+        checkFury();
+        const failAudios = ["f1.wav","f2.wav","f3.wav","f4.wav"];
+        dialogueAudio.src = failAudios[Math.floor(Math.random()*failAudios.length)];
+        dialogueBox.innerText = "¡Fallaste!";
+        dialogueBox.style.display = "block";
+        dialogueAudio.play();
+        setTimeout(nextAnimal, 2000);
+      }
+    });
+  });
+</script>
 </body>
 </html>
