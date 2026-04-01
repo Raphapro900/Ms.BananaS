@@ -2,82 +2,95 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Ms. BananaS - Menú</title>
+  <title>Ms. BananaS - Juego</title>
   <style>
     body {
       margin: 0;
       padding: 0;
-      background: radial-gradient(circle at center, #111 0%, #000 100%);
-      color: #FFD700;
+      background-image: url('Room.png');
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-position: center;
+      overflow: hidden;
       font-family: 'Courier New', monospace;
-      text-align: center;
-    }
-
-    h1 {
-      font-size: 3em;
-      margin-top: 40px;
-      text-shadow: 2px 2px 8px red;
-      letter-spacing: 2px;
     }
 
     #banana {
-      width: 220px;
-      cursor: pointer;
-      margin-top: 60px;
-      transition: transform 0.3s ease, filter 0.3s ease;
-    }
-
-    #banana:hover {
-      transform: scale(1.15) rotate(-5deg);
-      filter: drop-shadow(0 0 15px yellow);
-    }
-
-    .menu-text {
-      margin-top: 20px;
-      font-size: 1.5em;
-      animation: blink 1.5s infinite;
-    }
-
-    @keyframes blink {
-      0% { opacity: 1; }
-      50% { opacity: 0.2; }
-      100% { opacity: 1; }
-    }
-
-    footer {
       position: absolute;
-      bottom: 10px;
+      left: 50%;
+      top: 20%;
+      transform: translateX(-50%);
+      width: 180px;
+      opacity: 0;
+      animation: float 3s ease-in-out infinite, appear 2s ease forwards;
+      animation-delay: 2s;
+    }
+
+    @keyframes float {
+      0% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(-10px); }
+      100% { transform: translateX(-50%) translateY(0); }
+    }
+
+    @keyframes appear {
+      to { opacity: 1; }
+    }
+
+    #tv {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 480px;
+      height: 270px;
+      background-color: black;
+      border: 4px solid #333;
+      box-shadow: 0 0 20px #000;
+    }
+
+    #animal {
       width: 100%;
-      font-size: 0.9em;
-      color: #888;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .options {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 20px;
+    }
+
+    .options button {
+      font-size: 1.2em;
+      padding: 10px 20px;
+      background-color: #222;
+      color: #FFD700;
+      border: 2px solid #FFD700;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .options button:hover {
+      background-color: #444;
     }
   </style>
 </head>
 <body>
-  <h1>Ms. BananaS</h1>
-  <p class="menu-text">Haz clic en la banana para comenzar</p>
+  <audio src="Room Theme.mp3" autoplay loop></audio>
+
   <img id="banana" src="banana.png" alt="Ms. BananaS">
 
-  <audio id="menuMusic" src="bananamenu.mp3" autoplay loop></audio>
+  <div id="tv">
+    <img id="animal" src="cat.png" alt="Animal">
+  </div>
 
-  <script>
-    const banana = document.getElementById("banana");
-    const menuMusic = document.getElementById("menuMusic");
-
-    banana.addEventListener("click", () => {
-      menuMusic.pause();
-
-      // Día actual (puedes cambiarlo según el progreso del jugador)
-      let currentDay = 1; // Cambia a 2, 3, 4 o 5 según el avance
-
-      const dialogue = new Audio(currentDay === 1 ? "Primer dia.wav" : "dias.wav");
-      dialogue.play();
-
-      // Aquí puedes redirigir a otra página o iniciar el juego
-      alert("¡El juego está cargando!");
-    });
-  </script>
-
-  <footer>© Raphapro900 2026</footer>
+  <div class="options">
+    <button>Gato</button>
+    <button>Perro</button>
+    <button>Conejo</button>
+  </div>
 </body>
 </html>
