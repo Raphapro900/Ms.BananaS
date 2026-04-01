@@ -67,10 +67,10 @@
 
     #bananaGame {
       position: absolute;
-      left: 15%;
+      left: 10%;
       top: 50%;
       transform: translateY(-50%);
-      width: 180px;
+      width: 300px; /* más grande */
       opacity: 0;
       animation: appear 2s ease forwards;
       animation-delay: 2s;
@@ -82,7 +82,7 @@
 
     #tv {
       position: absolute;
-      left: 50%;
+      left: 55%;
       top: 50%;
       transform: translate(-50%, -50%);
       width: 480px;
@@ -135,6 +135,24 @@
       border: 2px solid #FFD700;
       display: none;
     }
+
+    /* Barra de furia */
+    #rageBar {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 300px;
+      height: 20px;
+      border: 2px solid red;
+      background-color: #333;
+    }
+
+    #rageFill {
+      height: 100%;
+      width: 0%;
+      background-color: red;
+    }
   </style>
 </head>
 <body>
@@ -166,6 +184,8 @@
 
     <div id="dialogueBox">¡Bienvenido al primer día!</div>
     <audio id="dialogueAudio"></audio>
+
+    <div id="rageBar"><div id="rageFill"></div></div>
   </div>
 
   <script>
@@ -176,6 +196,21 @@
     const roomMusic = document.getElementById("roomMusic");
     const dialogueBox = document.getElementById("dialogueBox");
     const dialogueAudio = document.getElementById("dialogueAudio");
+    const animalImg = document.getElementById("animal");
+    const rageFill = document.getElementById("rageFill");
+    const buttons = document.querySelectorAll(".options button");
+
+    const animals = [
+      {name:"Seal", file:"Seal.webp"},
+      {name:"Dog", file:"Dog.jfif"},
+      {name:"Cat", file:"Cat.jpj"},
+      {name:"Duck", file:"Duck.avif"},
+      {name:"Eagle", file:"Aguila.webp"},
+      {name:"Snake", file:"Snake.jfif"}
+    ];
+
+    let currentAnimal = animals[0];
+    let rage = 0;
 
     bananaStart.addEventListener("click", () => {
       startScreen.style.display = "none";
@@ -183,19 +218,50 @@
       menuMusic.pause();
       roomMusic.play();
 
-      // Día actual (puedes cambiarlo según progreso)
-      let currentDay = 1;
-
-      if (currentDay === 1) {
-        dialogueBox.innerText = "¡Bienvenido al primer día!";
-        dialogueAudio.src = "Primer dia.wav";
-      } else {
-        dialogueBox.innerText = "Continuemos con los siguientes días...";
-        dialogueAudio.src = "dias.wav";
-      }
-
+      dialogueBox.innerText = "¡Bienvenido al primer día!";
+      dialogueAudio.src = "Primer dia.wav";
       dialogueBox.style.display = "block";
       dialogueAudio.play();
+    });
+
+    function nextAnimal() {
+      currentAnimal = animals[Math.floor(Math.random()*animals.length)];
+      animalImg.src = currentAnimal.file;
+      animalImg.alt = currentAnimal.name;
+      buttons.forEach(btn => {
+        btn.style.backgroundColor = "#222";
+      });
+    }
+
+    buttons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        if (btn.innerText === currentAnimal.name) {
+          // Correcto
+          btn.style.backgroundColor = "green";
+          const correctAudios = ["c1.wav","c2.wav","c3.wav","c4.wav"];
+          dialogueAudio.src = correctAudios[Math.floor(Math.random()*correctAudios.length)];
+          dialogueBox.innerText = "¡Correcto!";
+          dialogueBox.style.display = "block";
+          dialogueAudio.play();
+          setTimeout(nextAnimal, 2000);
+        } else {
+          // Incorrecto
+          btn.style.backgroundColor = "red";
+          buttons.forEach(b => {
+            if (b.innerText === currentAnimal.name) {
+              b.style.backgroundColor = "yellow";
+            }
+          });
+          rage++;
+          rageFill.style.width = (rage*20) + "%";
+          const failAudios = ["f1.wav","f2.wav","f3.wav","f4.wav"];
+          dialogueAudio.src = failAudios[Math.floor(Math.random()*failAudios.length)];
+          dialogueBox.innerText = "¡Fallaste!";
+          dialogueBox.style.display = "block";
+          dialogueAudio.play();
+          setTimeout(nextAnimal, 2000);
+        }
+      });
     });
   </script>
 </body>
