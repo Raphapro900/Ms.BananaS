@@ -2,20 +2,70 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Ms. BananaS - Juego</title>
+  <title>Ms. BananaS - Juego Completo</title>
   <style>
     body {
       margin: 0;
       padding: 0;
+      font-family: 'Courier New', monospace;
+      color: #FFD700;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    /* Pantalla de inicio */
+    #startScreen {
+      width: 100%;
+      height: 100vh;
+      background: black;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #startScreen h1 {
+      font-size: 3em;
+      text-shadow: 2px 2px 8px red;
+    }
+
+    #bananaStart {
+      width: 220px;
+      cursor: pointer;
+      margin-top: 40px;
+      transition: transform 0.3s ease, filter 0.3s ease;
+    }
+
+    #bananaStart:hover {
+      transform: scale(1.15) rotate(-5deg);
+      filter: drop-shadow(0 0 15px yellow);
+    }
+
+    .menu-text {
+      margin-top: 20px;
+      font-size: 1.5em;
+      animation: blink 1.5s infinite;
+    }
+
+    @keyframes blink {
+      0% { opacity: 1; }
+      50% { opacity: 0.2; }
+      100% { opacity: 1; }
+    }
+
+    /* Pantalla de juego */
+    #gameScreen {
+      display: none;
+      width: 100%;
+      height: 100vh;
       background-image: url('Room.png');
       background-size: cover;
       background-repeat: no-repeat;
       background-position: center;
-      overflow: hidden;
-      font-family: 'Courier New', monospace;
+      position: relative;
     }
 
-    #banana {
+    #bananaGame {
       position: absolute;
       left: 50%;
       top: 20%;
@@ -79,18 +129,46 @@
   </style>
 </head>
 <body>
-  <audio src="Room Theme.mp3" autoplay loop></audio>
-
-  <img id="banana" src="banana.png" alt="Ms. BananaS">
-
-  <div id="tv">
-    <img id="animal" src="cat.png" alt="Animal">
+  <!-- Pantalla de inicio -->
+  <div id="startScreen">
+    <h1>Ms. BananaS</h1>
+    <p class="menu-text">Haz clic en la banana para comenzar</p>
+    <img id="bananaStart" src="banana.png" alt="Ms. BananaS">
+    <audio id="menuMusic" src="bananamenu.mp3" autoplay loop></audio>
   </div>
 
-  <div class="options">
-    <button>Gato</button>
-    <button>Perro</button>
-    <button>Conejo</button>
+  <!-- Pantalla de juego -->
+  <div id="gameScreen">
+    <audio id="roomMusic" src="Room Theme.mp3" loop></audio>
+    <img id="bananaGame" src="banana.png" alt="Ms. BananaS">
+
+    <div id="tv">
+      <img id="animal" src="Seal.webp" alt="Animal">
+    </div>
+
+    <div class="options">
+      <button>Seal</button>
+      <button>Dog</button>
+      <button>Cat</button>
+      <button>Duck</button>
+      <button>Eagle</button>
+      <button>Snake</button>
+    </div>
   </div>
+
+  <script>
+    const startScreen = document.getElementById("startScreen");
+    const gameScreen = document.getElementById("gameScreen");
+    const bananaStart = document.getElementById("bananaStart");
+    const menuMusic = document.getElementById("menuMusic");
+    const roomMusic = document.getElementById("roomMusic");
+
+    bananaStart.addEventListener("click", () => {
+      startScreen.style.display = "none";
+      gameScreen.style.display = "block";
+      menuMusic.pause();
+      roomMusic.play();
+    });
+  </script>
 </body>
 </html>
