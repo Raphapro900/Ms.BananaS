@@ -4,16 +4,19 @@
   <meta charset="UTF-8">
   <title>Ms. BananaS</title>
   <style>
+    @font-face {
+      font-family: 'IndieFlower';
+      src: url('https://fonts.gstatic.com/s/indieflower/v24/m8JVjfNVeKWVnh3QMuKkFcZVZ0uH5dI.woff2') format('woff2');
+    }
     body {
       margin: 0;
       padding: 0;
-      font-family: Papyrus, fantasy;
+      font-family: 'IndieFlower', cursive;
       background-color: black;
       color: #FFD700;
       text-align: center;
       overflow: hidden;
     }
-
     #startScreen {
       width: 100%;
       height: 100vh;
@@ -22,30 +25,15 @@
       align-items: center;
       justify-content: center;
     }
-
     #bananaStart {
       width: 240px;
       cursor: pointer;
       transition: transform 0.3s ease, filter 0.3s ease;
     }
-
     #bananaStart:hover {
       transform: scale(1.1) rotate(-5deg);
       filter: drop-shadow(0 0 15px yellow);
     }
-
-    .menu-text {
-      font-size: 1.5em;
-      margin-top: 20px;
-      animation: blink 1.5s infinite;
-    }
-
-    @keyframes blink {
-      0% { opacity: 1; }
-      50% { opacity: 0.2; }
-      100% { opacity: 1; }
-    }
-
     footer {
       position: absolute;
       bottom: 10px;
@@ -54,7 +42,6 @@
       font-size: 0.9em;
       color: #888;
     }
-
     #gameScreen {
       display: none;
       width: 100%;
@@ -64,7 +51,6 @@
       background-position: center;
       position: relative;
     }
-
     #bananaGame {
       position: absolute;
       left: 10%;
@@ -72,7 +58,6 @@
       transform: translateY(-50%);
       width: 300px;
     }
-
     #tv {
       position: absolute;
       left: 55%;
@@ -84,13 +69,11 @@
       border: 4px solid #333;
       box-shadow: 0 0 20px #000;
     }
-
     #animal {
       width: 100%;
       height: 100%;
       object-fit: contain;
     }
-
     .options {
       position: absolute;
       bottom: 40px;
@@ -99,7 +82,6 @@
       display: flex;
       gap: 20px;
     }
-
     .options button {
       font-size: 1.2em;
       padding: 10px 20px;
@@ -108,7 +90,6 @@
       border: 2px solid #FFD700;
       cursor: pointer;
     }
-
     #dialogueBox {
       position: absolute;
       bottom: 120px;
@@ -122,7 +103,6 @@
       border: 2px solid #FFD700;
       display: none;
     }
-
     #subtitleBox {
       position: absolute;
       bottom: 20px;
@@ -136,7 +116,6 @@
       border: 1px solid #FFD700;
       display: none;
     }
-
     #rageText {
       position: absolute;
       top: 20px;
@@ -145,7 +124,14 @@
       font-size: 1.5em;
       color: red;
     }
-
+    #dayText {
+      position: absolute;
+      top: 60px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 1.3em;
+      color: #FFD700;
+    }
     #jumpscare {
       display: none;
       position: fixed;
@@ -154,8 +140,7 @@
       background:black;
       z-index:9999;
     }
-
-    #jumpscare img {
+    #jumpscare video {
       width:100%; height:100%;
       object-fit:cover;
     }
@@ -164,7 +149,7 @@
 <body>
   <div id="startScreen">
     <h1>Ms. BananaS</h1>
-    <p class="menu-text">Haz clic en Ms. BananaS para comenzar</p>
+    <p>Haz clic en Ms. BananaS para comenzar</p>
     <img id="bananaStart" src="banana.png" alt="Ms. BananaS">
     <audio id="menuMusic" src="bananamenu.mp3" autoplay loop></audio>
     <footer>©Raphapro900 2026 — Este juego no tiene copyright</footer>
@@ -187,10 +172,11 @@
     <div id="subtitleBox"></div>
     <audio id="dialogueAudio"></audio>
     <div id="rageText">Furia: 0</div>
+    <div id="dayText">Día 1 — Animales: 0/15</div>
   </div>
 
   <div id="jumpscare">
-    <img src="jumpscare.png" alt="¡Jumpscare!">
+    <video id="jumpscareVideo" src="jumpscare.mp4"></video>
   </div>
 
   <script>
@@ -206,7 +192,9 @@
     const subtitleBox = document.getElementById("subtitleBox");
     const dialogueAudio = document.getElementById("dialogueAudio");
     const rageText = document.getElementById("rageText");
+    const dayText = document.getElementById("dayText");
     const jumpscare = document.getElementById("jumpscare");
+    const jumpscareVideo = document.getElementById("jumpscareVideo");
     const buttons = document.querySelectorAll(".options button");
 
     const animals = [
@@ -220,9 +208,9 @@
 
     let currentAnimal = animals[0];
     let rage = 0;
-    let specialMode = false;
-    let specialFails = 0;
-    let specialQuestions = 0;
+    let day = 1;
+    let correctCount = 0;
+    const dayTargets = {1:15, 2:22, 3:31, 4:39, 5:46};
 
     bananaStart.addEventListener("click", () => {
       startScreen.style.display = "none";
@@ -231,10 +219,13 @@
       roomMusic.play();
       dialogueBox.innerText = "¡Bienvenido al primer día!";
       dialogueAudio.src = "Primer dia.mp3";
-      subtitleBox.innerText = "Oh. Hello player, welcome. Here we'll be testing how many animals you know. I hope you know them all. Okay, let's begin.";
+      subtitleBox.innerText = "Primer dia.mp3: Oh. Hello player, welcome. Here we'll be testing how many animals you know. I hope you know them all. Okay, let's begin.";
       subtitleBox.style.display = "block";
       dialogueBox.style.display = "block";
       dialogueAudio.play();
+      dialogueAudio.onended = () => {
+        subtitleBox.style.display = "none";
+      };
     });
 
     function nextAnimal() {
@@ -244,80 +235,13 @@
       buttons.forEach(btn => btn.style.backgroundColor = "#222");
     }
 
-    function activateSpecialMode() {
-      specialMode = true;
-      roomMusic.pause();
-      ayayaMusic.play();
-      bananaGame.src = "banana2.png";
-      dialogueBox.innerText = "¡Ms. BananaS está furiosa!";
-      dialogueBox.style.display = "block";
-    }
-
     function triggerJumpscare() {
       jumpscare.style.display = "block";
-      setTimeout(() => {
+      jumpscareVideo.play();
+      jumpscareVideo.onended = () => {
         window.location.href = "https://example.com";
-      }, 2000);
+      };
     }
-
-    buttons.forEach(btn => {
-      btn.addEventListener("click", () => {
-        if (!specialMode) {
-          if (btn.innerText === currentAnimal.name) {
-            btn.style.backgroundColor = "green";
-            dialogueAudio.src = ["c1.wav","c2.wav","c3.wav","c4.wav"][Math.floor(Math.random()*4)];
-            dialogueBox.innerText = "¡Correcto!";
-            subtitleBox.innerText = "Correct!";
-            subtitleBox.style.display = "block";
-            dialogueBox.style.display = "block";
-            dialogueAudio.play();
-            setTimeout(nextAnimal, 2000);
-          } else {
-            btn.style.backgroundColor = "red";
-            buttons.forEach(b => {
-            if (b.innerText === currentAnimal.name) {
-              b.style.backgroundColor = "yellow";
-            }
-          });
-          rage++;
-          rageText.innerText = "Furia: " + rage;
-          dialogueAudio.src = ["f1.wav","f2.wav","f3.wav","f4.wav"][Math.floor(Math.random()*4)];
-          dialogueBox.innerText = "¡Fallaste!";
-          subtitleBox.innerText = "Wrong!";
-          subtitleBox.style.display = "block";
-          dialogueBox.style.display = "block";
-          dialogueAudio.play();
-          if (rage >= 10) activateSpecialMode();
-          setTimeout(nextAnimal, 2000);
-        }
-      } else {
-        specialQuestions++;
-        if (btn.innerText === currentAnimal.name) {
-          dialogueBox.innerText = "¡Mal!";
-          subtitleBox.innerText = "Bad!";
-          subtitleBox.style.display = "block";
-          dialogueBox.style.display = "block";
-          dialogueAudio.src = ["c1.wav","c2.wav","c3.wav","c4.wav"][Math.floor(Math.random()*4)];
-          dialogueAudio.play();
-          setTimeout(nextAnimal, 2000);
-        } else {
-          btn.style.backgroundColor = "red";
-          specialFails++;
-          dialogueBox.innerText = "¡Fallaste!";
-          subtitleBox.innerText = "Wrong!";
-          subtitleBox.style.display = "block";
-          dialogueBox.style.display = "block";
-          dialogueAudio.src = ["f1.wav","f2.wav","f3.wav","f4.wav"][Math.floor(Math.random()*4)];
-          dialogueAudio.play();
-          if (specialFails >= 3) {
-            triggerJumpscare();
-          } else {
-            setTimeout(nextAnimal, 2000);
-          }
-        }
-      }
-    });
-  });
   </script>
 </body>
 </html>
