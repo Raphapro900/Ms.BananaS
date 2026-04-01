@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Ms. BananaS - Menu</title>
+  <style>
+    body {
+      background-color: black;
+      color: yellow;
+      text-align: center;
+      font-family: 'Arial', sans-serif;
+    }
+    #banana {
+      width: 200px;
+      cursor: pointer;
+      margin-top: 50px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Ms. BananaS</h1>
+  <p>Click the banana to start</p>
+  <img id="banana" src="banana.png" alt="Ms. BananaS">
+
+  <audio id="menuMusic" src="bananamenu.mp3" autoplay loop></audio>
+
+  <script>
+    const banana = document.getElementById("banana");
+    const menuMusic = document.getElementById("menuMusic");
+
+    banana.addEventListener("click", () => {
+      menuMusic.pause();
+
+      // Simulate current day (change this manually or link to a save system)
+      const currentDay = 1; // Change to 2, 3, 4, or 5 as needed
+
+      const dialogue = new Audio(currentDay === 1 ? "Primer dia.mp3" : "dias.mp3");
+      dialogue.play();
+
+      // You can redirect to the game page or load game logic here
+      alert("Game is loading...");
+    });
+  </script>
+</body>
+</html>
