@@ -1,25 +1,51 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Ms. BananaS - Menu</title>
+  <title>Ms. BananaS - Menú</title>
   <style>
     body {
-      background-color: black;
-      color: yellow;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(to bottom, #000000, #222222);
+      color: #FFD700;
+      font-family: 'Courier New', monospace;
       text-align: center;
-      font-family: 'Arial', sans-serif;
     }
+
+    h1 {
+      font-size: 3em;
+      margin-top: 40px;
+      text-shadow: 2px 2px 5px red;
+    }
+
     #banana {
-      width: 200px;
+      width: 220px;
       cursor: pointer;
-      margin-top: 50px;
+      margin-top: 60px;
+      transition: transform 0.3s ease;
+    }
+
+    #banana:hover {
+      transform: scale(1.1) rotate(-5deg);
+    }
+
+    .menu-text {
+      margin-top: 20px;
+      font-size: 1.5em;
+      animation: blink 1.5s infinite;
+    }
+
+    @keyframes blink {
+      0% { opacity: 1; }
+      50% { opacity: 0.3; }
+      100% { opacity: 1; }
     }
   </style>
 </head>
 <body>
   <h1>Ms. BananaS</h1>
-  <p>Click the banana to start</p>
+  <p class="menu-text">Haz clic en la banana para comenzar</p>
   <img id="banana" src="banana.png" alt="Ms. BananaS">
 
   <audio id="menuMusic" src="bananamenu.mp3" autoplay loop></audio>
@@ -31,14 +57,14 @@
     banana.addEventListener("click", () => {
       menuMusic.pause();
 
-      // Simulate current day (change this manually or link to a save system)
-      const currentDay = 1; // Change to 2, 3, 4, or 5 as needed
+      // Simulación del día actual (puedes cambiarlo según progreso)
+      let currentDay = 1; // Cambia a 2, 3, 4 o 5
 
       const dialogue = new Audio(currentDay === 1 ? "Primer dia.mp3" : "dias.mp3");
       dialogue.play();
 
-      // You can redirect to the game page or load game logic here
-      alert("Game is loading...");
+      // Aquí puedes cargar otra página o iniciar la lógica del juego
+      alert("¡El juego está cargando!");
     });
   </script>
 </body>
