@@ -67,19 +67,13 @@
 
     #bananaGame {
       position: absolute;
-      left: 50%;
-      top: 20%;
-      transform: translateX(-50%);
+      left: 15%;
+      top: 50%;
+      transform: translateY(-50%);
       width: 180px;
       opacity: 0;
-      animation: float 3s ease-in-out infinite, appear 2s ease forwards;
+      animation: appear 2s ease forwards;
       animation-delay: 2s;
-    }
-
-    @keyframes float {
-      0% { transform: translateX(-50%) translateY(0); }
-      50% { transform: translateX(-50%) translateY(-10px); }
-      100% { transform: translateX(-50%) translateY(0); }
     }
 
     @keyframes appear {
@@ -126,6 +120,21 @@
     .options button:hover {
       background-color: #444;
     }
+
+    /* Cuadro de diálogo */
+    #dialogueBox {
+      position: absolute;
+      bottom: 120px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 70%;
+      padding: 15px;
+      background-color: rgba(0,0,0,0.7);
+      color: #FFD700;
+      font-size: 1.2em;
+      border: 2px solid #FFD700;
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -154,6 +163,9 @@
       <button>Eagle</button>
       <button>Snake</button>
     </div>
+
+    <div id="dialogueBox">¡Bienvenido al primer día!</div>
+    <audio id="dialogueAudio"></audio>
   </div>
 
   <script>
@@ -162,12 +174,28 @@
     const bananaStart = document.getElementById("bananaStart");
     const menuMusic = document.getElementById("menuMusic");
     const roomMusic = document.getElementById("roomMusic");
+    const dialogueBox = document.getElementById("dialogueBox");
+    const dialogueAudio = document.getElementById("dialogueAudio");
 
     bananaStart.addEventListener("click", () => {
       startScreen.style.display = "none";
       gameScreen.style.display = "block";
       menuMusic.pause();
       roomMusic.play();
+
+      // Día actual (puedes cambiarlo según progreso)
+      let currentDay = 1;
+
+      if (currentDay === 1) {
+        dialogueBox.innerText = "¡Bienvenido al primer día!";
+        dialogueAudio.src = "Primer dia.wav";
+      } else {
+        dialogueBox.innerText = "Continuemos con los siguientes días...";
+        dialogueAudio.src = "dias.wav";
+      }
+
+      dialogueBox.style.display = "block";
+      dialogueAudio.play();
     });
   </script>
 </body>
