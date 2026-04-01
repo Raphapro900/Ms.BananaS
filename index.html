@@ -70,7 +70,7 @@
       left: 10%;
       top: 50%;
       transform: translateY(-50%);
-      width: 300px; /* más grande */
+      width: 300px;
       opacity: 0;
       animation: appear 2s ease forwards;
       animation-delay: 2s;
@@ -136,22 +136,14 @@
       display: none;
     }
 
-    /* Barra de furia */
-    #rageBar {
+    /* Texto de furia */
+    #rageText {
       position: absolute;
       top: 20px;
       left: 50%;
       transform: translateX(-50%);
-      width: 300px;
-      height: 20px;
-      border: 2px solid red;
-      background-color: #333;
-    }
-
-    #rageFill {
-      height: 100%;
-      width: 0%;
-      background-color: red;
+      font-size: 1.5em;
+      color: red;
     }
   </style>
 </head>
@@ -185,7 +177,7 @@
     <div id="dialogueBox">¡Bienvenido al primer día!</div>
     <audio id="dialogueAudio"></audio>
 
-    <div id="rageBar"><div id="rageFill"></div></div>
+    <div id="rageText">Furia: 0</div>
   </div>
 
   <script>
@@ -197,7 +189,7 @@
     const dialogueBox = document.getElementById("dialogueBox");
     const dialogueAudio = document.getElementById("dialogueAudio");
     const animalImg = document.getElementById("animal");
-    const rageFill = document.getElementById("rageFill");
+    const rageText = document.getElementById("rageText");
     const buttons = document.querySelectorAll(".options button");
 
     const animals = [
@@ -253,7 +245,7 @@
             }
           });
           rage++;
-          rageFill.style.width = (rage*20) + "%";
+          rageText.innerText = "Furia: " + rage;
           const failAudios = ["f1.wav","f2.wav","f3.wav","f4.wav"];
           dialogueAudio.src = failAudios[Math.floor(Math.random()*failAudios.length)];
           dialogueBox.innerText = "¡Fallaste!";
