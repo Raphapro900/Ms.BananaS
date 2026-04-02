@@ -21,14 +21,18 @@
       transition:transform .2s ease;
     }
     .menuBtn:hover {transform:scale(1.1);}
+    #bananaPlay {
+      width:240px;cursor:pointer;transition:transform .3s ease,filter .3s ease;
+      animation:float 3s ease-in-out infinite;margin:20px;
+    }
+    #bananaPlay:hover {transform:scale(1.1) rotate(-5deg);filter:drop-shadow(0 0 15px yellow);}
+    @keyframes float {0%{transform:translateY(0);}50%{transform:translateY(-15px);}100%{transform:translateY(0);}}
     footer {position:absolute;bottom:10px;width:100%;text-align:center;font-size:.9em;color:#222;}
     #infoBox {
       display:none;position:absolute;top:20%;left:50%;transform:translateX(-50%);
       width:70%;padding:20px;background:rgba(0,0,0,.8);color:#FFD700;border:2px solid #FFD700;
     }
-    #closeBtn {
-      position:absolute;top:5px;right:10px;cursor:pointer;color:#FFD700;font-size:1.2em;
-    }
+    #closeBtn {position:absolute;top:5px;right:10px;cursor:pointer;color:#FFD700;font-size:1.2em;}
     #intro {
       display:none;position:fixed;top:0;left:0;width:100%;height:100%;
       background:black;color:#FFD700;z-index:9999;
@@ -42,7 +46,6 @@
     }
     #gameScreen {display:none;width:100%;height:100vh;background:url('Room.png') center/cover no-repeat;position:relative;}
     #bananaGame {position:absolute;left:10%;top:50%;transform:translateY(-50%);width:300px;animation:float 3s ease-in-out infinite;}
-    @keyframes float {0%{transform:translateY(0);}50%{transform:translateY(-15px);}100%{transform:translateY(0);}}
     #tv {position:absolute;left:55%;top:50%;transform:translate(-50%,-50%);width:480px;height:270px;background:black;border:4px solid #333;box-shadow:0 0 20px #000;}
     #animal {width:100%;height:100%;object-fit:contain;}
     .options {position:absolute;bottom:40px;left:50%;transform:translateX(-50%);display:flex;gap:20px;}
@@ -57,7 +60,7 @@
 <body>
   <div id="startScreen">
     <h1>Ms. BananaS</h1>
-    <button class="menuBtn" id="playBtn">Ms.BananaS</button>
+    <img id="bananaPlay" src="banana.png" alt="Ms.BananaS">
     <button class="menuBtn" id="howBtn">How to Play</button>
     <button class="menuBtn" id="shopBtn">Shop</button>
     <button class="menuBtn" id="exitBtn">Exit</button>
@@ -87,7 +90,7 @@
   </div>
 
   <script>
-    const playBtn=document.getElementById("playBtn"),
+    const bananaPlay=document.getElementById("bananaPlay"),
           howBtn=document.getElementById("howBtn"),
           shopBtn=document.getElementById("shopBtn"),
           exitBtn=document.getElementById("exitBtn"),
@@ -112,10 +115,10 @@
     let currentAnimal=animals[0],rage=0,day=1,correctCount=0;
     const dayTargets={1:15,2:22,3:31,4:39,5:46};
 
-    playBtn.addEventListener("click",()=>{
+    bananaPlay.addEventListener("click",()=>{
       intro.style.display="flex";
       setTimeout(()=>{
-        intro.style.display="none";
+        intro.remove(); // elimina el logo del DOM
         startScreen.style.display="none";
         gameScreen.style.display="block";
         menuMusic.pause();roomMusic.play();
@@ -135,7 +138,6 @@
     });
 
     exitBtn.addEventListener("click",()=>{
-      // Cierra la ventana directamente
       window.close();
     });
 
