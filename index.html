@@ -4,19 +4,11 @@
   <meta charset="UTF-8">
   <title>Ms. BananaS V1.0</title>
   <style>
-    body {
-      margin:0;padding:0;
-      font-family:'IndieFlower',cursive;
-      background:black;color:#FFD700;
-      text-align:center;overflow:hidden;
-    }
+    body {margin:0;padding:0;font-family:'IndieFlower',cursive;background:black;color:#FFD700;text-align:center;overflow:hidden;}
     #startScreen {
-      height:100vh;
-      display:flex;flex-direction:column;
-      align-items:center;justify-content:center;
+      height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
       background:linear-gradient(-45deg,#ffcc00,#ff6600,#ffaa00,#ff3300);
-      background-size:400% 400%;
-      animation:gradientBG 8s ease infinite;
+      background-size:400% 400%;animation:gradientBG 8s ease infinite;
     }
     @keyframes gradientBG {
       0%{background-position:0% 50%;}
@@ -37,87 +29,31 @@
       transition:transform .2s ease,box-shadow .2s ease;
       border-radius:8px;
     }
-    .menuBtn:hover {
-      transform:scale(1.1);
-      box-shadow:0 0 15px #FFD700;
-    }
+    .menuBtn:hover {transform:scale(1.1);box-shadow:0 0 15px #FFD700;}
     #bananaPlay {
       width:180px;cursor:pointer;
       transition:transform .3s ease,filter .3s ease;
-      animation:float 3s ease-in-out infinite;
+      animation:float 3s ease-in-out infinite;margin:20px;
     }
-    #bananaPlay:hover {
-      transform:scale(1.1) rotate(-5deg);
-      filter:drop-shadow(0 0 15px yellow);
-    }
-    @keyframes float {
-      0%{transform:translateY(0);}
-      50%{transform:translateY(-15px);}
-      100%{transform:translateY(0);}
-    }
-    footer {
-      margin-top:20px;font-size:.9em;color:#222;
-    }
+    #bananaPlay:hover {transform:scale(1.1) rotate(-5deg);filter:drop-shadow(0 0 15px yellow);}
+    @keyframes float {0%{transform:translateY(0);}50%{transform:translateY(-15px);}100%{transform:translateY(0);}}
+    footer {margin-top:20px;font-size:.9em;color:#222;}
     #infoBox {
-      display:none;position:absolute;top:20%;left:50%;
-      transform:translateX(-50%);
-      width:70%;padding:20px;
-      background:rgba(0,0,0,.8);color:#FFD700;
+      display:none;position:absolute;top:20%;left:50%;transform:translateX(-50%);
+      width:70%;padding:20px;background:rgba(0,0,0,.8);color:#FFD700;
       border:2px solid #FFD700;border-radius:10px;
     }
-    #closeBtn {
-      position:absolute;top:5px;right:10px;
-      cursor:pointer;color:#FFD700;font-size:1.2em;
-    }
-    #gameScreen {
-      display:none;width:100%;height:100vh;
-      background:url('Room.png') center/cover no-repeat;
-      position:relative;
-    }
-    #bananaGame {
-      position:absolute;left:10%;top:50%;
-      transform:translateY(-50%);
-      width:300px;animation:float 3s ease-in-out infinite;
-    }
-    #tv {
-      position:absolute;left:55%;top:50%;
-      transform:translate(-50%,-50%);
-      width:480px;height:270px;background:black;
-      border:4px solid #333;box-shadow:0 0 20px #000;
-    }
+    #closeBtn {position:absolute;top:5px;right:10px;cursor:pointer;color:#FFD700;font-size:1.2em;}
+    #gameScreen {display:none;width:100%;height:100vh;background:url('Room.png') center/cover no-repeat;position:relative;}
+    #bananaGame {position:absolute;left:10%;top:50%;transform:translateY(-50%);width:300px;animation:float 3s ease-in-out infinite;}
+    #tv {position:absolute;left:55%;top:50%;transform:translate(-50%,-50%);width:480px;height:270px;background:black;border:4px solid #333;box-shadow:0 0 20px #000;}
     #animal {width:100%;height:100%;object-fit:contain;}
-    .options {
-      position:absolute;bottom:40px;left:50%;
-      transform:translateX(-50%);
-      display:flex;gap:20px;
-    }
-    .options button {
-      font-size:1.2em;padding:10px 20px;
-      background:#222;color:#FFD700;
-      border:2px solid #FFD700;cursor:pointer;
-    }
-    #dialogueBox {
-      position:absolute;top:20px;left:50%;
-      transform:translateX(-50%);
-      width:70%;padding:15px;
-      background:rgba(0,0,0,.7);color:#FFD700;
-      font-size:1.2em;border:2px solid #FFD700;
-      display:none;
-    }
-    #rageText {
-      position:absolute;top:80px;left:50%;
-      transform:translateX(-50%);
-      font-size:1.5em;color:red;
-    }
-    #dayText {
-      position:absolute;top:120px;left:50%;
-      transform:translateX(-50%);
-      font-size:1.3em;color:#FFD700;
-    }
-    #jumpscare {
-      display:none;position:fixed;top:0;left:0;
-      width:100%;height:100%;background:black;z-index:9999;
-    }
+    .options {position:absolute;bottom:40px;left:50%;transform:translateX(-50%);display:flex;gap:20px;}
+    .options button {font-size:1.2em;padding:10px 20px;background:#222;color:#FFD700;border:2px solid #FFD700;cursor:pointer;}
+    #dialogueBox {position:absolute;top:20px;left:50%;transform:translateX(-50%);width:70%;padding:15px;background:rgba(0,0,0,.7);color:#FFD700;font-size:1.2em;border:2px solid #FFD700;display:none;}
+    #rageText {position:absolute;top:80px;left:50%;transform:translateX(-50%);font-size:1.5em;color:red;}
+    #dayText {position:absolute;top:120px;left:50%;transform:translateX(-50%);font-size:1.3em;color:#FFD700;}
+    #jumpscare {display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:black;z-index:9999;}
     #jumpscare video {width:100%;height:100%;object-fit:cover;}
   </style>
 </head>
@@ -176,41 +112,16 @@
           jumpscareVideo=document.getElementById("jumpscareVideo"),
           buttons=document.querySelectorAll(".options button");
 
-    const animals=[{name:"Seal",file:"Seal.webp"},{name:"Dog",file:"Dog.jfif"},{name:"Cat",file:"Cat.jpg"},{name:"Duck",file:"Duck.avif"},{name:"Eagle",file:"Aguila.webp"},{name:"Snake",file:"Snake.jfif"}];
+    const animals=[{name:"Seal",file:"Seal.webp"},{name:"Dog",file:"Dog.jfif"},{name:"Cat",file:"Cat.jpj"},{name:"Duck",file:"Duck.avif"},{name:"Eagle",file:"Aguila.webp"},{name:"Snake",file:"Snake.jfif"}];
     let currentAnimal=animals[0],rage=0,day=1,correctCount=0;
     const dayTargets={1:15,2:22,3:31,4:39,5:46};
-
-    bananaPlay.addEventListener("click",()=>{
-      startScreen.style.display="none";
-      gameScreen.style.display="block";
-      menuMusic.pause();roomMusic.play();
-      showDialogue("¡Bienvenido al primer día!","Primer dia.mp3");
-      nextAnimal();
-    });
-
-    howBtn.addEventListener("click",()=>{
-      infoBox.style.display="block";
-      infoContent.innerHTML="<h2>How to Play</h2><p>Selecciona el animal correcto en cada día. Si fallas, aumenta tu furia. Al llegar a 10 de furia ocurre un evento especial.</p>";
-    });
-
-    shopBtn.addEventListener("click",()=>{
-      infoBox.style.display="block";
-      infoContent.innerHTML="<h2>Shop</h2><p><span style='color:gold'>At this time we have nothing in the Store</span>. <span style='color:gold'>In a future update</span> there will be items here.</p>";
-    });
-
-    exitBtn.addEventListener("click",()=>{
-      window.close();
-    });
-
-    closeBtn.addEventListener("click",()=>{
-      infoBox.style.display="none";
-    });
 
     function showDialogue(text,audioFile){
       dialogueBox.innerText=text;
       dialogueBox.style.display="block";
       dialogueAudio.src=audioFile;
-      dialogueAudio.play();
+      dialogueAudio.currentTime=0;
+      dialogueAudio.play().catch(e=>console.log(e));
       dialogueAudio.onended=()=>{dialogueBox.style.display="none";};
     }
 
@@ -229,38 +140,69 @@
       };
     }
 
-    buttons.forEach(btn=>{
-      btn.addEventListener("click",()=>{
-        if(btn.innerText===currentAnimal.name){
-          btn.style.backgroundColor="green";
-          correctCount++;
-          dayText.innerText="Día "+day+" — Animales: "+correctCount+"/"+dayTargets[day];
-          showDialogue("¡Correcto!","c1.mp3");
-          if(correctCount>=dayTargets[day]){
-            showDialogue("¡Has completado el día "+day+"!","c2.mp3");
-            setTimeout(()=>{
-              gameScreen.style.display="none";
-              startScreen.style.display="flex";
-              menuMusic.play();
-            },4000);
-          }
-          setTimeout(nextAnimal,2000);
-        }else{
-          btn.style.backgroundColor="red";
-          buttons.forEach(b=>{
-            if(b.innerText===currentAnimal.name) b.style.backgroundColor="yellow";
-          });
-          rage++;
-          rageText.innerText="Furia: "+rage;
-          showDialogue("¡Fallaste!","f1.mp3");
-          if(rage>=10){
-            triggerJumpscare();
-          } else {
-            setTimeout(nextAnimal,2000);
-          }
-        }
+bananaPlay.addEventListener("click",()=>{
+  startScreen.style.display="none";
+  gameScreen.style.display="block";
+  menuMusic.pause();
+  roomMusic.currentTime=0;
+  roomMusic.play();
+  showDialogue("¡Bienvenido al primer día!","Primer dia.mp3");
+  nextAnimal();
+});
+
+howBtn.addEventListener("click",()=>{
+  infoBox.style.display="block";
+  infoContent.innerHTML="<h2>How to Play</h2><p>Selecciona el animal correcto en cada día. Si fallas, aumenta tu furia. Al llegar a 10 de furia ocurre un evento especial.</p>";
+});
+
+shopBtn.addEventListener("click",()=>{
+  infoBox.style.display="block";
+  infoContent.innerHTML="<h2>Shop</h2><p><span style='color:gold'>At this time we have nothing in the Store</span>. <span style='color:gold'>In a future update</span> there will be items here.</p>";
+});
+
+exitBtn.addEventListener("click",()=>{
+  window.close();
+});
+
+closeBtn.addEventListener("click",()=>{
+  infoBox.style.display="none";
+});
+
+buttons.forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    if(btn.innerText===currentAnimal.name){
+      btn.style.backgroundColor="green";
+      correctCount++;
+      dayText.innerText="Día "+day+" — Animales: "+correctCount+"/"+dayTargets[day];
+      showDialogue("¡Correcto!","c1.mp3");
+      if(correctCount>=dayTargets[day]){
+        showDialogue("¡Has completado el día "+day+"!","c2.mp3");
+        setTimeout(()=>{
+          gameScreen.style.display="none";
+          roomMusic.pause();
+          menuMusic.currentTime=0;
+          menuMusic.play();
+          startScreen.style.display="flex";
+        },4000);
+      }
+      setTimeout(nextAnimal,2000);
+    }else{
+      btn.style.backgroundColor="red";
+      buttons.forEach(b=>{
+        if(b.innerText===currentAnimal.name) b.style.backgroundColor="yellow";
       });
-    });
-  </script>
+      rage++;
+      rageText.innerText="Furia: "+rage;
+      showDialogue("¡Fallaste!","f1.mp3");
+      if(rage>=10){
+        triggerJumpscare();
+      } else {
+        setTimeout(nextAnimal,2000);
+      }
+    }
+  });
+});
+</script>
 </body>
 </html>
+
