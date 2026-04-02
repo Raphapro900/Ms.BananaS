@@ -116,11 +116,12 @@
           rage++;rageText.innerText="Furia: "+rage;
           showDialogue("¡Fallaste!","f1.wav");
           if(rage>=10){triggerJumpscare();}
-          else{setTimeout(nextAnimal,2000);}
+          else {
+            setTimeout(nextAnimal,2000);
+          }
         }
       });
     });
   </script>
 </body>
 </html>
-
