@@ -26,46 +26,72 @@
       display:none;position:absolute;top:20%;left:50%;transform:translateX(-50%);
       width:70%;padding:20px;background:rgba(0,0,0,.8);color:#FFD700;border:2px solid #FFD700;
     }
+    #closeBtn {
+      position:absolute;top:5px;right:10px;cursor:pointer;color:#FFD700;font-size:1.2em;
+    }
+    /* Intro animada */
+    #intro {
+      display:none;position:fixed;top:0;left:0;width:100%;height:100%;
+      background:black;color:#FFD700;z-index:9999;
+      display:flex;align-items:center;justify-content:center;
+      font-size:3em;animation:introAnim 3s ease forwards;
+    }
+    @keyframes introAnim {
+      0%{opacity:0;transform:scale(0.5);}
+      50%{opacity:1;transform:scale(1.2);}
+      100%{opacity:0;transform:scale(1);}
+    }
   </style>
 </head>
 <body>
   <div id="startScreen">
     <h1>Ms. BananaS</h1>
-    <button class="menuBtn" id="playBtn">Play</button>
+    <button class="menuBtn" id="playBtn">Ms.BananaS</button>
     <button class="menuBtn" id="howBtn">How to Play</button>
     <button class="menuBtn" id="shopBtn">Shop</button>
     <button class="menuBtn" id="exitBtn">Exit</button>
     <audio id="menuMusic" src="bananamenu.mp3" autoplay loop></audio>
     <footer>©Raphapro900 2026 — Versión V1.0</footer>
-    <div id="infoBox"></div>
+    <div id="infoBox"><span id="closeBtn">✖</span><div id="infoContent"></div></div>
   </div>
+
+  <div id="intro">Raphapro900</div>
 
   <script>
     const playBtn=document.getElementById("playBtn"),
           howBtn=document.getElementById("howBtn"),
           shopBtn=document.getElementById("shopBtn"),
           exitBtn=document.getElementById("exitBtn"),
-          infoBox=document.getElementById("infoBox");
+          infoBox=document.getElementById("infoBox"),
+          infoContent=document.getElementById("infoContent"),
+          closeBtn=document.getElementById("closeBtn"),
+          intro=document.getElementById("intro");
 
     playBtn.addEventListener("click",()=>{
-      infoBox.style.display="block";
-      infoBox.innerHTML="<h2>Iniciando juego...</h2>";
-      // Aquí llamas a tu intro y luego al juego
+      intro.style.display="flex";
+      setTimeout(()=>{
+        intro.style.display="none";
+        alert("Aquí comienza el juego Ms.BananaS...");
+        // Aquí puedes enganchar tu lógica de juego
+      },3000);
     });
 
     howBtn.addEventListener("click",()=>{
       infoBox.style.display="block";
-      infoBox.innerHTML="<h2>How to Play</h2><p>Selecciona el animal correcto en cada día. Si fallas, aumenta tu furia. Al llegar a 10 de furia ocurre un evento especial.</p>";
+      infoContent.innerHTML="<h2>How to Play</h2><p>Selecciona el animal correcto en cada día. Si fallas, aumenta tu furia. Al llegar a 10 de furia ocurre un evento especial.</p>";
     });
 
     shopBtn.addEventListener("click",()=>{
       infoBox.style.display="block";
-      infoBox.innerHTML="<h2>Shop</h2><p><span style='color:gold'>At this time we have nothing in the Store</span>. <span style='color:gold'>In a future update</span> there will be items here.</p>";
+      infoContent.innerHTML="<h2>Shop</h2><p><span style='color:gold'>At this time we have nothing in the Store</span>. <span style='color:gold'>In a future update</span> there will be items here.</p>";
     });
 
     exitBtn.addEventListener("click",()=>{
-      infoBox.style.display="block";
-      infoBox.innerHTML="<h2>Exit</h2><p>Gracias por jugar. Cierra la ventana para salir.</p>";
+      window.close();
+    });
+
+    closeBtn.addEventListener("click",()=>{
+      infoBox.style.display="none";
     });
   </script>
 </body>
