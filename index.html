@@ -119,7 +119,7 @@
     }
     #chaseContainer:active { cursor: grabbing; }
     
-    /* Efecto VHS */
+    /* Efecto VHS suave */
     .vhs-overlay {
       position: absolute;
       top: 0;
@@ -129,11 +129,11 @@
       pointer-events: none;
       z-index: 1002;
       background: repeating-linear-gradient(0deg, 
-        rgba(0,0,0,0.3) 0px, 
-        rgba(0,0,0,0.3) 2px, 
+        rgba(0,0,0,0.15) 0px, 
+        rgba(0,0,0,0.15) 2px, 
         transparent 2px, 
         transparent 6px);
-      animation: vhsScanlines 0.15s infinite linear;
+      animation: vhsScanlines 0.2s infinite linear;
     }
     
     .vhs-noise {
@@ -144,9 +144,9 @@
       height: 100%;
       pointer-events: none;
       z-index: 1003;
-      background: repeating-radial-gradient(circle at 20% 30%, rgba(255,255,255,0.03) 0px, rgba(0,0,0,0.2) 2px);
-      animation: vhsFlicker 0.08s infinite;
-      opacity: 0.5;
+      background: repeating-radial-gradient(circle at 20% 30%, rgba(255,255,255,0.02) 0px, rgba(0,0,0,0.1) 2px);
+      animation: vhsFlicker 0.15s infinite;
+      opacity: 0.3;
     }
     
     @keyframes vhsScanlines {
@@ -155,12 +155,11 @@
     }
     
     @keyframes vhsFlicker {
-      0% { opacity: 0.3; }
-      50% { opacity: 0.6; }
-      100% { opacity: 0.3; }
+      0% { opacity: 0.2; }
+      100% { opacity: 0.35; }
     }
     
-    /* Transición glitch */
+    /* Transición glitch suave */
     .glitch-transition {
       position: fixed;
       top: 0;
@@ -170,20 +169,17 @@
       background: black;
       z-index: 2000;
       pointer-events: none;
-      animation: glitchEffect 1s steps(2, start);
+      animation: glitchEffect 0.8s ease-out;
     }
     
     @keyframes glitchEffect {
-      0% { opacity: 0; transform: translate(0); }
-      10% { opacity: 1; transform: translate(-10px, 5px); background: #ff00ff; }
-      20% { opacity: 1; transform: translate(10px, -5px); background: #00ff00; }
-      30% { opacity: 1; transform: translate(-5px, 10px); background: #ff0000; }
-      40% { opacity: 1; transform: translate(5px, -10px); background: #00ffff; }
-      50% { opacity: 1; transform: translate(-10px, 0); background: #ffff00; }
-      60% { opacity: 0.8; transform: translate(10px, 5px); background: #ff00ff; }
-      70% { opacity: 0.5; transform: translate(0, -5px); background: #000000; }
-      80% { opacity: 0.2; transform: translate(0, 0); }
-      100% { opacity: 0; transform: translate(0); }
+      0% { opacity: 0; }
+      10% { opacity: 1; background: #0a0a0a; transform: translate(0); }
+      20% { opacity: 1; background: #1a0000; transform: translate(-3px, 0); }
+      30% { opacity: 1; background: #001a00; transform: translate(3px, 0); }
+      40% { opacity: 0.8; background: #00001a; transform: translate(0, 0); }
+      60% { opacity: 0.5; background: #0a0a0a; }
+      100% { opacity: 0; background: black; transform: translate(0); }
     }
     
     .chaseUI {
@@ -226,7 +222,7 @@
       <button>Duck</button><button>Eagle</button><button>Snake</button>
     </div>
     <div id="dialogueBox"></div>
-    <audio id="dialogueAudio"></audio>
+    <audio id="dialogueAudio" preload="auto"></audio>
     <div id="rageText">💢 Furia: 0</div>
     <div id="dayText">🌙 Día 1 — Animales: 0/15</div>
   </div>
@@ -240,7 +236,8 @@
     <div class="vhs-overlay"></div>
     <div class="vhs-noise"></div>
     <div class="chaseUI">🍌 ¡TE PERSIGUE!</div>
-    <audio id="chaseMusic" src="chase.mp3" loop></audio>
+    <audio id="chaseMusic" src="chase.mp3" loop preload="auto"></audio>
+    <audio id="heartbeatSound" src="latido de corazon.mp3" preload="auto"></audio>
   </div>
 
   <script type="importmap">
@@ -276,14 +273,15 @@
     const buttons = document.querySelectorAll(".options button");
     const chaseContainer = document.getElementById("chaseContainer");
     const chaseMusic = document.getElementById("chaseMusic");
+    const heartbeatSound = document.getElementById("heartbeatSound");
 
     const animals = [
-      { name: "Seal", file: "Seal.webp" },
-      { name: "Dog", file: "Dog.jfif" },
-      { name: "Cat", file: "Cat.jpj" },
-      { name: "Duck", file: "Duck.avif" },
-      { name: "Eagle", file: "Aguila.webp" },
-      { name: "Snake", file: "Snake.jfif" }
+      { name: "Seal", file: "Seal.webp", correctSound: "c1.mp3", wrongSound: "f1.mp3" },
+      { name: "Dog", file: "Dog.jfif", correctSound: "c1.mp3", wrongSound: "f1.mp3" },
+      { name: "Cat", file: "Cat.jpj", correctSound: "c1.mp3", wrongSound: "f1.mp3" },
+      { name: "Duck", file: "Duck.avif", correctSound: "c1.mp3", wrongSound: "f1.mp3" },
+      { name: "Eagle", file: "Aguila.webp", correctSound: "c1.mp3", wrongSound: "f1.mp3" },
+      { name: "Snake", file: "Snake.jfif", correctSound: "c1.mp3", wrongSound: "f1.mp3" }
     ];
     let currentAnimal = animals[0];
     let rage = 0;
@@ -291,19 +289,36 @@
     let correctCount = 0;
     const dayTargets = { 1: 15, 2: 22, 3: 31, 4: 39, 5: 46 };
     let gameActive = true;
+    let currentTimeout = null;
 
-    function showDialogue(text, audioFile) {
+    function playSound(audioElement, src, volume = 1.0) {
+      if (!audioElement) return;
+      audioElement.volume = volume;
+      audioElement.src = src;
+      audioElement.currentTime = 0;
+      audioElement.play().catch(e => console.log("Error reproduciendo audio:", e));
+    }
+
+    function showDialogue(text, audioSrc) {
       if (!gameActive) return;
       dialogueBox.innerText = text;
       dialogueBox.style.display = "block";
-      dialogueAudio.src = audioFile;
-      dialogueAudio.currentTime = 0;
-      dialogueAudio.play().catch(e => console.log(e));
-      dialogueAudio.onended = () => { if(gameActive) dialogueBox.style.display = "none"; };
+      
+      if (audioSrc) {
+        playSound(dialogueAudio, audioSrc, 0.8);
+        dialogueAudio.onended = () => {
+          if (gameActive) dialogueBox.style.display = "none";
+        };
+      } else {
+        setTimeout(() => {
+          if (gameActive) dialogueBox.style.display = "none";
+        }, 2000);
+      }
     }
 
     function nextAnimal() {
       if (!gameActive) return;
+      if (currentTimeout) clearTimeout(currentTimeout);
       currentAnimal = animals[Math.floor(Math.random() * animals.length)];
       animalImg.src = currentAnimal.file;
       animalImg.alt = currentAnimal.name;
@@ -318,7 +333,7 @@
       };
     }
 
-    // ==================== PERSECUCIÓN 3D CON EFECTO VHS ====================
+    // ==================== PERSECUCIÓN 3D ====================
     let chaseActive = false;
     let chaseAnimationId = null;
     let scene, camera, renderer;
@@ -334,57 +349,72 @@
     let gameOverTriggered = false;
     let shakeTimeout = null;
     let chaseStartTime = 0;
+    let heartbeatInterval = null;
     
-    // Audio con efecto de velocidad/reverb simulada
-    let audioContext = null;
-    let audioSource = null;
-    let convolver = null;
-    let gainNode = null;
+    const treeTextureUrl = "https://raw.githubusercontent.com/Raphapro900/Ms.BananaS/refs/heads/main/tree_ps1.png";
     
-    function initAudioContext() {
-      if (!audioContext && chaseMusic) {
-        audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        const track = audioContext.createMediaElementSource(chaseMusic);
-        convolver = audioContext.createConvolver();
-        gainNode = audioContext.createGain();
-        
-        // Crear impulso de reverb simple
-        const rate = audioContext.sampleRate;
-        const length = rate * 2;
-        const impulse = audioContext.createBuffer(2, length, rate);
-        for (let channel = 0; channel < 2; channel++) {
-          const channelData = impulse.getChannelData(channel);
-          for (let i = 0; i < length; i++) {
-            channelData[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / length, 1.5);
-          }
-        }
-        convolver.buffer = impulse;
-        track.connect(gainNode);
-        gainNode.connect(convolver);
-        convolver.connect(audioContext.destination);
-      }
+    function createTreeSprite(x, z) {
+      const textureLoader = new THREE.TextureLoader();
+      const treeTexture = textureLoader.load(treeTextureUrl);
+      const material = new THREE.SpriteMaterial({ map: treeTexture, transparent: true });
+      const sprite = new THREE.Sprite(material);
+      sprite.scale.set(1.8, 2.2, 1);
+      sprite.position.set(x, 1.1, z);
+      return sprite;
     }
     
-    function updateAudioByDistance(distance) {
-      if (!chaseMusic) return;
-      if (distance < 8) {
-        chaseMusic.playbackRate = 1.3;
-        if (gainNode) gainNode.gain.value = 1.0;
-        if (convolver) convolver.gain = 0.1;
-      } else if (distance < 15) {
-        chaseMusic.playbackRate = 1.0;
-        if (gainNode) gainNode.gain.value = 0.8;
-        if (convolver) convolver.gain = 0.5;
+    function updateHeartbeat(distance) {
+      if (!heartbeatSound) return;
+      
+      let speed = 0;
+      if (distance < 3) {
+        speed = 2.2;
+      } else if (distance < 5) {
+        speed = 1.6;
+      } else if (distance < 8) {
+        speed = 1.1;
+      } else if (distance < 12) {
+        speed = 0.7;
       } else {
-        chaseMusic.playbackRate = 0.6;
-        if (gainNode) gainNode.gain.value = 0.6;
-        if (convolver) convolver.gain = 0.9;
+        if (heartbeatInterval) {
+          clearInterval(heartbeatInterval);
+          heartbeatInterval = null;
+          heartbeatSound.pause();
+          heartbeatSound.currentTime = 0;
+        }
+        return;
+      }
+      
+      if (heartbeatInterval) clearInterval(heartbeatInterval);
+      
+      heartbeatSound.playbackRate = speed;
+      heartbeatSound.volume = Math.min(0.8, 0.3 + (12 - distance) / 20);
+      heartbeatSound.loop = true;
+      heartbeatSound.play().catch(e => console.log("heartbeat error", e));
+      
+      const intervalTime = 1000 / (speed * 1.5);
+      heartbeatInterval = setInterval(() => {
+        if (chaseActive && !gameOverTriggered && distance < 12) {
+          heartbeatSound.currentTime = 0;
+          heartbeatSound.play().catch(e => {});
+        }
+      }, intervalTime);
+    }
+    
+    function stopHeartbeat() {
+      if (heartbeatInterval) {
+        clearInterval(heartbeatInterval);
+        heartbeatInterval = null;
+      }
+      if (heartbeatSound) {
+        heartbeatSound.pause();
+        heartbeatSound.currentTime = 0;
       }
     }
 
     function applyShake(intensity) {
       if (!chaseActive || gameOverTriggered) return;
-      const strength = Math.min(intensity, 14);
+      const strength = Math.min(intensity, 12);
       const canvas = renderer.domElement;
       const xShake = (Math.random() - 0.5) * strength;
       const yShake = (Math.random() - 0.5) * strength;
@@ -403,13 +433,13 @@
       let r = 0.03, g = 0.11, b = 0.23;
       if (distance < 5) {
         const intensity = Math.min(1, (5 - distance) / 3);
-        r = 0.3 + intensity * 0.5;
-        g = 0.05 + intensity * 0.1;
+        r = 0.25 + intensity * 0.4;
+        g = 0.05 + intensity * 0.08;
         b = 0.05;
       } else if (distance < 10) {
         const intensity = (10 - distance) / 5;
-        r = 0.15 + intensity * 0.2;
-        g = 0.08 + intensity * 0.05;
+        r = 0.12 + intensity * 0.15;
+        g = 0.08 + intensity * 0.04;
         b = 0.1;
       } else {
         r = 0.03;
@@ -419,11 +449,25 @@
       scene.background = new THREE.Color(r, g, b);
       if (scene.fog) scene.fog.color = new THREE.Color(r, g, b);
     }
+    
+    function updateChaseAudio(distance) {
+      if (!chaseMusic) return;
+      if (distance < 8) {
+        chaseMusic.playbackRate = 1.2;
+        chaseMusic.volume = 0.9;
+      } else if (distance < 15) {
+        chaseMusic.playbackRate = 1.0;
+        chaseMusic.volume = 0.7;
+      } else {
+        chaseMusic.playbackRate = 0.7;
+        chaseMusic.volume = 0.5;
+      }
+    }
 
     function initChaseGame() {
       scene = new THREE.Scene();
       scene.background = new THREE.Color(0x030b17);
-      scene.fog = new THREE.FogExp2(0x030b17, 0.028);
+      scene.fog = new THREE.FogExp2(0x030b17, 0.03);
       
       camera = new THREE.PerspectiveCamera(85, window.innerWidth / window.innerHeight, 0.05, 200);
       camera.position.set(0, 1.68, 0);
@@ -440,33 +484,34 @@
       ground.receiveShadow = true;
       scene.add(ground);
       
-      // Árboles
-      const trunkMat = new THREE.MeshStandardMaterial({ color: 0x4a2a1a });
-      const foliageMat = new THREE.MeshStandardMaterial({ color: 0x1e4a1e });
-      for (let i = 0; i < 220; i++) {
-        const treeGroup = new THREE.Group();
-        const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.65, 1.5), trunkMat);
-        trunk.position.y = 0.75;
-        trunk.castShadow = true;
-        const foliage1 = new THREE.Mesh(new THREE.ConeGeometry(0.8, 0.95, 6), foliageMat);
-        foliage1.position.y = 1.5;
-        const foliage2 = new THREE.Mesh(new THREE.ConeGeometry(0.6, 0.75, 6), foliageMat);
-        foliage2.position.y = 2.1;
-        treeGroup.add(trunk, foliage1, foliage2);
+      // Árboles con textura tree_ps1.png
+      const treePositions = [];
+      for (let i = 0; i < 180; i++) {
         let angle = Math.random() * Math.PI * 2;
-        let radius = 30 + Math.random() * 48;
+        let radius = 25 + Math.random() * 52;
         let x = Math.cos(angle) * radius;
         let z = Math.sin(angle) * radius;
-        treeGroup.position.set(x, 0, z);
-        scene.add(treeGroup);
+        treePositions.push({ x, z });
+      }
+      for (let i = 0; i < 80; i++) {
+        let x = (Math.random() - 0.5) * 110;
+        let z = (Math.random() - 0.5) * 110;
+        if (Math.abs(x) > 8 || Math.abs(z) > 8) {
+          treePositions.push({ x, z });
+        }
       }
       
+      treePositions.forEach(pos => {
+        const tree = createTreeSprite(pos.x, pos.z);
+        scene.add(tree);
+      });
+      
       // Luciérnagas
-      const fireflyMat = new THREE.PointsMaterial({ color: 0xffaa66, size: 0.08 });
-      const fireflyCount = 450;
+      const fireflyMat = new THREE.PointsMaterial({ color: 0xffaa66, size: 0.07 });
+      const fireflyCount = 400;
       const fireflyPositions = [];
       for (let i = 0; i < fireflyCount; i++) {
-        fireflyPositions.push((Math.random() - 0.5) * 120, Math.random() * 4, (Math.random() - 0.5) * 120);
+        fireflyPositions.push((Math.random() - 0.5) * 120, Math.random() * 3.5, (Math.random() - 0.5) * 120);
       }
       const fireflyGeo = new THREE.BufferGeometry();
       fireflyGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(fireflyPositions), 3));
@@ -476,21 +521,21 @@
       // Iluminación nocturna
       const ambientLight = new THREE.AmbientLight(0x1a1a2e);
       scene.add(ambientLight);
-      const moonLight = new THREE.DirectionalLight(0xccaa88, 0.8);
+      const moonLight = new THREE.DirectionalLight(0xccaa88, 0.7);
       moonLight.position.set(12, 24, -14);
       moonLight.castShadow = true;
       scene.add(moonLight);
-      const fillLight = new THREE.PointLight(0x664422, 0.4);
+      const fillLight = new THREE.PointLight(0x664422, 0.35);
       fillLight.position.set(-4, 5, -6);
       scene.add(fillLight);
       
-      // BANANA2.JPG - TAMAÑO ORIGINAL (más grande visualmente)
+      // BANANA2.JPG - MÁS ALTA
       const textureLoader = new THREE.TextureLoader();
       const banana2Texture = textureLoader.load("https://raw.githubusercontent.com/Raphapro900/Ms.BananaS/refs/heads/main/banana2.png");
       const spriteMaterial = new THREE.SpriteMaterial({ map: banana2Texture, transparent: true, rotation: 0 });
       bananaMonster = new THREE.Sprite(spriteMaterial);
-      bananaMonster.scale.set(2.5, 2.5, 1);
-      bananaMonster.position.set(monsterPos.x, 0.95, monsterPos.z);
+      bananaMonster.scale.set(1.8, 2.8, 1);
+      bananaMonster.position.set(monsterPos.x, 1.0, monsterPos.z);
       scene.add(bananaMonster);
       
       // Controles de ratón
@@ -547,10 +592,9 @@
         lastTimestamp = now;
         if (delta <= 0) delta = 0.016;
         
-        // Aumentar velocidad cada segundo
         const elapsedSeconds = (performance.now() / 1000) - chaseStartTime;
-        currentMonsterSpeed = baseMonsterSpeed + Math.floor(elapsedSeconds) * 0.35;
-        currentMonsterSpeed = Math.min(currentMonsterSpeed, 7.5);
+        currentMonsterSpeed = baseMonsterSpeed + Math.floor(elapsedSeconds) * 0.4;
+        currentMonsterSpeed = Math.min(currentMonsterSpeed, 7.8);
         
         const currentPlayerSpeed = playerSpeed * runningMult;
         let moveX = 0, moveZ = 0;
@@ -570,8 +614,8 @@
           playerPos.z += (forward.z * moveZ + right.z * moveX) * currentPlayerSpeed * delta;
         }
         
-        playerPos.x = Math.min(Math.max(playerPos.x, -58), 58);
-        playerPos.z = Math.min(Math.max(playerPos.z, -58), 58);
+        playerPos.x = Math.min(Math.max(playerPos.x, -60), 60);
+        playerPos.z = Math.min(Math.max(playerPos.z, -60), 60);
         camera.position.x = playerPos.x;
         camera.position.z = playerPos.z;
         
@@ -579,26 +623,22 @@
         const dz = playerPos.z - monsterPos.z;
         let distToPlayer = Math.hypot(dx, dz);
         
-        // Actualizar audio según distancia
-        updateAudioByDistance(distToPlayer);
-        
-        // Actualizar color del bosque según distancia
+        updateChaseAudio(distToPlayer);
+        updateHeartbeat(distToPlayer);
         updateForestColor(distToPlayer);
         
-        // Vibración
-        if (distToPlayer < 7.0) {
+        if (distToPlayer < 6.5) {
           let intensity = 0;
-          if (distToPlayer < 2.0) intensity = 14;
-          else if (distToPlayer < 3.5) intensity = 10;
-          else if (distToPlayer < 5.0) intensity = 6;
-          else if (distToPlayer < 7.0) intensity = 3;
+          if (distToPlayer < 2.0) intensity = 12;
+          else if (distToPlayer < 3.5) intensity = 8;
+          else if (distToPlayer < 5.0) intensity = 5;
+          else if (distToPlayer < 6.5) intensity = 3;
           if (intensity > 0) applyShake(intensity);
         }
         
-        // Velocidad adicional si está cerca
         let finalMonsterSpeed = currentMonsterSpeed;
-        if (distToPlayer < 5) finalMonsterSpeed += 1.2;
-        else if (distToPlayer < 10) finalMonsterSpeed += 0.6;
+        if (distToPlayer < 4) finalMonsterSpeed += 1.3;
+        else if (distToPlayer < 8) finalMonsterSpeed += 0.7;
         
         if (distToPlayer > 0.7) {
           const moveDirX = dx / distToPlayer;
@@ -607,29 +647,30 @@
           monsterPos.z += moveDirZ * finalMonsterSpeed * delta;
         }
         
-        bananaMonster.position.set(monsterPos.x, 0.95, monsterPos.z);
+        bananaMonster.position.set(monsterPos.x, 1.0, monsterPos.z);
         
-        // Escala dinámica - tamaño original aumentado
-        const scaleVal = Math.min(3.5, Math.max(2.2, 2.2 + (6.0 / (distToPlayer + 1.0))));
-        bananaMonster.scale.set(scaleVal, scaleVal, 1);
+        const scaleX = Math.min(2.2, Math.max(1.6, 1.6 + (3.5 / (distToPlayer + 1.0))));
+        const scaleY = Math.min(3.5, Math.max(2.6, 2.6 + (5.0 / (distToPlayer + 1.0))));
+        bananaMonster.scale.set(scaleX, scaleY, 1);
         
         if (distToPlayer <= 1.3 && !gameOverTriggered) {
           gameOverTriggered = true;
           chaseActive = false;
           if (chaseAnimationId) cancelAnimationFrame(chaseAnimationId);
+          stopHeartbeat();
           chaseMusic.pause();
           chaseContainer.style.display = "none";
           triggerJumpscareFinal();
           return;
         }
         
-        fireflies.rotation.y += 0.004;
+        fireflies.rotation.y += 0.003;
         renderer.render(scene, camera);
         chaseAnimationId = requestAnimationFrame(updateChase);
       }
       
       playerPos = { x: 0, z: 0 };
-      monsterPos = { x: 35, z: 30 };
+      monsterPos = { x: 38, z: 32 };
       yaw = 0;
       pitch = 0;
       camera.rotation.y = 0;
@@ -646,7 +687,6 @@
     function startChaseMinigame() {
       if (chaseActive) return;
       
-      // Transición glitch de 1 segundo
       const glitchDiv = document.createElement('div');
       glitchDiv.className = 'glitch-transition';
       document.body.appendChild(glitchDiv);
@@ -657,14 +697,13 @@
         chaseActive = true;
         chaseContainer.style.display = "flex";
         
-        // Inicializar audio con efectos
-        initAudioContext();
         chaseMusic.currentTime = 0;
         chaseMusic.loop = true;
+        chaseMusic.volume = 0.7;
         chaseMusic.play().catch(e => console.log("audio error", e));
         
         initChaseGame();
-      }, 1000);
+      }, 800);
     }
     
     function onRageReachedTen() {
@@ -683,7 +722,8 @@
           btn.style.backgroundColor = "#2a6a2a";
           correctCount++;
           dayText.innerText = "🌙 Día " + day + " — Animales: " + correctCount + "/" + dayTargets[day];
-          showDialogue("✅ ¡Correcto!", "c1.mp3");
+          showDialogue("✅ ¡Correcto!", currentAnimal.correctSound);
+          
           if (correctCount >= dayTargets[day]) {
             showDialogue("✨ ¡Completaste el día!", "c2.mp3");
             setTimeout(() => {
@@ -709,7 +749,7 @@
           });
           rage++;
           rageText.innerText = "💢 Furia: " + rage;
-          showDialogue("❌ ¡Fallaste!", "f1.mp3");
+          showDialogue("❌ ¡Fallaste!", currentAnimal.wrongSound);
           if (rage >= 10) {
             onRageReachedTen();
           } else {
@@ -741,7 +781,7 @@
     
     howBtn.addEventListener("click", () => {
       infoBox.style.display = "block";
-      infoContent.innerHTML = "<h2>📜 How to Play</h2><p>Elige el animal correcto en la tele. Cada fallo aumenta la FURIA. Al llegar a 10, entrarás al BOSQUE NOCTURNO con <strong style='color:#ff6600'>EFECTO VHS</strong>.<br><br>🎮 Controles:<br>W = Atrás<br>S = Adelante<br>A = Izquierda<br>D = Derecha<br>SHIFT = Correr<br>🖱️ Ratón = Mirar<br><br>⚠️ Características:<br>• Banana2.png se hace más grande al acercarse<br>• El bosque se vuelve ROJO cuando está cerca<br>• La música cambia de velocidad según distancia<br>• La velocidad de Banana2.png aumenta CADA SEGUNDO<br><br>Si te alcanza → JUMPSCARE.</p>";
+      infoContent.innerHTML = "<h2>📜 How to Play</h2><p>Elige el animal correcto en la tele. Cada fallo aumenta la FURIA. Al llegar a 10, entrarás al BOSQUE NOCTURNO con EFECTO VHS.<br><br>🎮 Controles:<br>W = Atrás<br>S = Adelante<br>A = Izquierda<br>D = Derecha<br>SHIFT = Correr<br>🖱️ Ratón = Mirar<br><br>⚠️ Características:<br>• Banana2.png se hace más grande al acercarse<br>• El bosque se vuelve ROJO cuando está cerca<br>• Latido del corazón más rápido según distancia<br>• La velocidad de Banana2.png aumenta CADA SEGUNDO<br><br>Si te alcanza → JUMPSCARE.</p>";
     });
     
     shopBtn.addEventListener("click", () => {
