@@ -6,349 +6,46 @@
   <title>Ms. BananaS - Persecución VHS</title>
   <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
   <style>
-    * {
-      user-select: none;
-      -webkit-tap-highlight-color: transparent;
-    }
-    
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: 'Courier New', monospace;
-      background: black;
-      color: #FFD700;
-      text-align: center;
-      overflow: hidden;
-    }
-    
-    #startScreen {
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      background: linear-gradient(-45deg, #1a0a00, #3d1a00, #1f0f00, #2a1500);
-      background-size: 400% 400%;
-      animation: gradientBG 8s ease infinite;
-      position: relative;
-      z-index: 10;
-    }
-    
-    @keyframes gradientBG {
-      0%, 100% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-    }
-    
-    .menuPanel {
-      background: rgba(0,0,0,0.7);
-      padding: 30px;
-      border: 3px solid #FF6600;
-      border-radius: 15px;
-      box-shadow: 0 0 30px #ff3300;
-      display: flex;
-      flex-direction: row;
-      gap: 40px;
-      align-items: center;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-    
-    .menuBtn {
-      font-size: 1.3em;
-      padding: 15px 25px;
-      margin: 10px;
-      background: #1a0a00;
-      color: #FF9900;
-      border: 2px solid #FF6600;
-      cursor: pointer;
-      transition: transform .2s ease, box-shadow .2s ease;
-      border-radius: 8px;
-      font-family: monospace;
-    }
-    
+    /* ========== ESTILOS COMPLETOS ========== */
+    * { user-select: none; -webkit-tap-highlight-color: transparent; }
+    body { margin: 0; padding: 0; font-family: 'Courier New', monospace; background: black; color: #FFD700; text-align: center; overflow: hidden; }
+    #startScreen { height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(-45deg, #1a0a00, #3d1a00, #1f0f00, #2a1500); background-size: 400% 400%; animation: gradientBG 8s ease infinite; position: relative; z-index: 10; }
+    @keyframes gradientBG { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+    .menuPanel { background: rgba(0,0,0,0.7); padding: 30px; border: 3px solid #FF6600; border-radius: 15px; box-shadow: 0 0 30px #ff3300; display: flex; flex-direction: row; gap: 40px; align-items: center; justify-content: center; flex-wrap: wrap; }
+    .menuBtn { font-size: 1.3em; padding: 15px 25px; margin: 10px; background: #1a0a00; color: #FF9900; border: 2px solid #FF6600; cursor: pointer; transition: transform .2s ease, box-shadow .2s ease; border-radius: 8px; font-family: monospace; }
     .menuBtn:hover { transform: scale(1.1); box-shadow: 0 0 15px #FF6600; background: #331100; }
-    
-    #bananaPlay {
-      width: 180px;
-      cursor: pointer;
-      transition: transform .3s ease, filter .3s ease;
-      animation: float 3s ease-in-out infinite;
-      margin: 20px;
-      filter: drop-shadow(0 0 10px #ffaa00);
-    }
-    
+    #bananaPlay { width: 180px; cursor: pointer; transition: transform .3s ease, filter .3s ease; animation: float 3s ease-in-out infinite; margin: 20px; filter: drop-shadow(0 0 10px #ffaa00); }
     #bananaPlay:hover { transform: scale(1.1) rotate(-5deg); filter: drop-shadow(0 0 20px #ffcc00); }
-    
-    @keyframes float {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-15px); }
-    }
-    
+    @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
     footer { margin-top: 20px; font-size: .9em; color: #884400; }
-    
-    #infoBox {
-      display: none;
-      position: absolute;
-      top: 20%;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 70%;
-      padding: 20px;
-      background: rgba(0,0,0,.95);
-      color: #FF9900;
-      border: 2px solid #FF6600;
-      border-radius: 10px;
-      z-index: 20;
-    }
-    
+    #infoBox { display: none; position: absolute; top: 20%; left: 50%; transform: translateX(-50%); width: 70%; padding: 20px; background: rgba(0,0,0,.95); color: #FF9900; border: 2px solid #FF6600; border-radius: 10px; z-index: 20; }
     #closeBtn { position: absolute; top: 5px; right: 10px; cursor: pointer; font-size: 1.2em; color: #FF6600; }
-    
-    #gameScreen {
-      display: none;
-      width: 100%;
-      height: 100vh;
-      background: url('Room.png') center/cover no-repeat;
-      position: relative;
-    }
-    
-    #bananaGame { 
-      position: absolute; 
-      left: 10%; 
-      top: 50%; 
-      transform: translateY(-50%); 
-      width: 300px; 
-      animation: float 3s ease-in-out infinite; 
-      pointer-events: none;
-    }
-    
-    #tv { 
-      position: absolute; 
-      left: 55%; 
-      top: 50%; 
-      transform: translate(-50%,-50%); 
-      width: 480px; 
-      height: 270px; 
-      background: black; 
-      border: 4px solid #333; 
-      box-shadow: 0 0 20px #000; 
-      border-radius: 10px; 
-    }
-    
+    #gameScreen { display: none; width: 100%; height: 100vh; background: url('Room.png') center/cover no-repeat; position: relative; }
+    #bananaGame { position: absolute; left: 10%; top: 50%; transform: translateY(-50%); width: 300px; animation: float 3s ease-in-out infinite; pointer-events: none; }
+    #tv { position: absolute; left: 55%; top: 50%; transform: translate(-50%,-50%); width: 480px; height: 270px; background: black; border: 4px solid #333; box-shadow: 0 0 20px #000; border-radius: 10px; }
     #animal { width: 100%; height: 100%; object-fit: contain; }
-    
-    .options { 
-      position: absolute; 
-      bottom: 40px; 
-      left: 50%; 
-      transform: translateX(-50%); 
-      display: flex; 
-      gap: 20px; 
-      flex-wrap: wrap; 
-      justify-content: center; 
-      z-index: 5;
-    }
-    
-    .options button { 
-      font-size: 1.2em; 
-      padding: 10px 20px; 
-      background: #1a0a00; 
-      color: #FF9900; 
-      border: 2px solid #FF6600; 
-      cursor: pointer; 
-      font-family: monospace; 
-      transition: 0.1s; 
-    }
-    
-    #dialogueBox { 
-      position: absolute; 
-      top: 20px; 
-      left: 50%; 
-      transform: translateX(-50%); 
-      width: 70%; 
-      padding: 15px; 
-      background: rgba(0,0,0,.9); 
-      color: #FFD700; 
-      font-size: 1.3em; 
-      border: 2px solid #FF6600; 
-      border-radius: 10px; 
-      display: none; 
-      z-index: 15; 
-      font-weight: bold;
-      text-shadow: 0 0 5px #ff6600;
-    }
-    
-    #rageText { 
-      position: absolute; 
-      top: 80px; 
-      left: 50%; 
-      transform: translateX(-50%); 
-      font-size: 1.5em; 
-      color: #ff4444; 
-      background: rgba(0,0,0,0.7); 
-      padding: 5px 15px; 
-      border-radius: 20px; 
-      font-weight: bold; 
-      font-family: monospace; 
-      z-index: 5;
-    }
-    
-    #dayText { 
-      position: absolute; 
-      top: 140px; 
-      left: 50%; 
-      transform: translateX(-50%); 
-      font-size: 1.2em; 
-      color: #FFAA44; 
-      background: rgba(0,0,0,0.7); 
-      padding: 5px 15px; 
-      border-radius: 20px; 
-      font-family: monospace; 
-      z-index: 5;
-    }
-    
+    .options { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; z-index: 5; }
+    .options button { font-size: 1.2em; padding: 10px 20px; background: #1a0a00; color: #FF9900; border: 2px solid #FF6600; cursor: pointer; font-family: monospace; transition: 0.1s; }
+    #dialogueBox { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); width: 70%; padding: 15px; background: rgba(0,0,0,.9); color: #FFD700; font-size: 1.3em; border: 2px solid #FF6600; border-radius: 10px; display: none; z-index: 15; font-weight: bold; text-shadow: 0 0 5px #ff6600; }
+    #rageText { position: absolute; top: 80px; left: 50%; transform: translateX(-50%); font-size: 1.5em; color: #ff4444; background: rgba(0,0,0,0.7); padding: 5px 15px; border-radius: 20px; font-weight: bold; font-family: monospace; z-index: 5; }
+    #dayText { position: absolute; top: 140px; left: 50%; transform: translateX(-50%); font-size: 1.2em; color: #FFAA44; background: rgba(0,0,0,0.7); padding: 5px 15px; border-radius: 20px; font-family: monospace; z-index: 5; }
     #jumpscare { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 9999; }
     #jumpscare video { width: 100%; height: 100%; object-fit: cover; }
-    
-    #chaseContainer {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 1000;
-      background: #000;
-      cursor: grab;
-    }
-    
-    .vhs-overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 1002;
-      background: repeating-linear-gradient(0deg, rgba(0,0,0,0.15) 0px, rgba(0,0,0,0.15) 2px, transparent 2px, transparent 6px);
-      animation: vhsScanlines 0.2s infinite linear;
-    }
-    
-    .vhs-noise {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 1003;
-      background: repeating-radial-gradient(circle at 20% 30%, rgba(255,255,255,0.02) 0px, rgba(0,0,0,0.1) 2px);
-      animation: vhsFlicker 0.15s infinite;
-      opacity: 0.3;
-    }
-    
-    @keyframes vhsScanlines {
-      0% { transform: translateY(0); }
-      100% { transform: translateY(4px); }
-    }
-    
-    @keyframes vhsFlicker {
-      0%, 100% { opacity: 0.2; }
-      50% { opacity: 0.35; }
-    }
-    
-    .glitch-transition {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: black;
-      z-index: 2000;
-      pointer-events: none;
-      animation: glitchEffect 0.8s ease-out;
-    }
-    
-    @keyframes glitchEffect {
-      0% { opacity: 0; }
-      10% { opacity: 1; background: #0a0a0a; transform: translate(0); }
-      20% { opacity: 1; background: #1a0000; transform: translate(-3px, 0); }
-      30% { opacity: 1; background: #001a00; transform: translate(3px, 0); }
-      40% { opacity: 0.8; background: #00001a; transform: translate(0, 0); }
-      60% { opacity: 0.5; background: #0a0a0a; }
-      100% { opacity: 0; background: black; transform: translate(0); }
-    }
-    
-    .chaseUI {
-      position: absolute;
-      bottom: 20px;
-      left: 20px;
-      color: #ffaa33;
-      font-family: monospace;
-      font-size: 14px;
-      background: rgba(0,0,0,0.5);
-      padding: 5px 10px;
-      border-radius: 5px;
-      z-index: 1004;
-      pointer-events: none;
-    }
-    
-    /* Pantalla de bloqueo */
-    .lock-screen {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: #0000aa;
-      z-index: 10000;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      font-family: 'Share Tech Mono', 'VCR OSD Mono', monospace;
-      color: white;
-      text-align: center;
-    }
-    
-    .lock-screen h1 {
-      font-size: 4rem;
-      margin-bottom: 1rem;
-      letter-spacing: 2px;
-    }
-    
-    .lock-screen p {
-      font-size: 1.5rem;
-      max-width: 80%;
-      line-height: 1.4;
-    }
-    
-    .reset-signal {
-      margin-top: 2rem;
-      font-size: 0.9rem;
-      opacity: 0.8;
-      background: rgba(0,0,0,0.5);
-      padding: 10px 20px;
-      border-radius: 8px;
-      max-width: 80%;
-      word-break: break-all;
-      font-family: monospace;
-    }
-    
-    .reset-link {
-      margin-top: 20px;
-      color: #ffaa44;
-      font-size: 0.9rem;
-    }
-    
-    .reset-link a {
-      color: #ffaa44;
-      text-decoration: none;
-      border-bottom: 1px solid #ffaa44;
-    }
-    
-    .reset-link a:hover {
-      color: #ffdd88;
-    }
+    #chaseContainer { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1000; background: #000; cursor: grab; }
+    .vhs-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1002; background: repeating-linear-gradient(0deg, rgba(0,0,0,0.15) 0px, rgba(0,0,0,0.15) 2px, transparent 2px, transparent 6px); animation: vhsScanlines 0.2s infinite linear; }
+    .vhs-noise { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1003; background: repeating-radial-gradient(circle at 20% 30%, rgba(255,255,255,0.02) 0px, rgba(0,0,0,0.1) 2px); animation: vhsFlicker 0.15s infinite; opacity: 0.3; }
+    @keyframes vhsScanlines { 0% { transform: translateY(0); } 100% { transform: translateY(4px); } }
+    @keyframes vhsFlicker { 0%,100% { opacity: 0.2; } 50% { opacity: 0.35; } }
+    .glitch-transition { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 2000; pointer-events: none; animation: glitchEffect 0.8s ease-out; }
+    @keyframes glitchEffect { 0% { opacity: 0; } 10% { opacity: 1; background: #0a0a0a; transform: translate(0); } 20% { opacity: 1; background: #1a0000; transform: translate(-3px, 0); } 30% { opacity: 1; background: #001a00; transform: translate(3px, 0); } 40% { opacity: 0.8; background: #00001a; transform: translate(0, 0); } 60% { opacity: 0.5; background: #0a0a0a; } 100% { opacity: 0; background: black; transform: translate(0); } }
+    .chaseUI { position: absolute; bottom: 20px; left: 20px; color: #ffaa33; font-family: monospace; font-size: 14px; background: rgba(0,0,0,0.5); padding: 5px 10px; border-radius: 5px; z-index: 1004; pointer-events: none; }
+    .lock-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #0000aa; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Share Tech Mono', 'VCR OSD Mono', monospace; color: white; text-align: center; }
+    .lock-screen h1 { font-size: 4rem; margin-bottom: 1rem; letter-spacing: 2px; }
+    .lock-screen p { font-size: 1.5rem; max-width: 80%; line-height: 1.4; }
+    .reset-signal { margin-top: 2rem; font-size: 0.9rem; opacity: 0.8; background: rgba(0,0,0,0.5); padding: 10px 20px; border-radius: 8px; max-width: 80%; word-break: break-all; font-family: monospace; }
+    .reset-link { margin-top: 20px; color: #ffaa44; font-size: 0.9rem; }
+    .reset-link a { color: #ffaa44; text-decoration: none; border-bottom: 1px solid #ffaa44; }
+    .reset-link a:hover { color: #ffdd88; }
   </style>
 </head>
 <body>
@@ -357,9 +54,7 @@
     <h1>GAME NOT FOUND.</h1>
     <p>Juego bloqueado. Esperando señal de reseteo...</p>
     <div class="reset-signal" id="resetSignal">🔄 Buscando señal en localStorage...</div>
-    <div class="reset-link">
-      🔗 <a href="https://raphapro900.github.io/reset/" target="_blank">Ir al panel de reset</a>
-    </div>
+    <div class="reset-link">🔗 <a href="https://raphapro900.github.io/reset/" target="_blank">Ir al panel de reset</a></div>
   </div>
 
   <div id="gameContent">
@@ -387,6 +82,7 @@
         <button>Duck</button><button>Eagle</button><button>Snake</button>
       </div>
       <div id="dialogueBox"></div>
+      <audio id="dialogueAudio" preload="auto"></audio>
       <div id="rageText">💢 Furia: 0</div>
       <div id="dayText">🌙 Día 1 — Animales: 0/15</div>
     </div>
@@ -416,100 +112,14 @@
   <script type="module">
     import * as THREE from 'three';
 
-    // ==================== SISTEMA DE AUDIO CON FALLBACK ====================
-    // Clase para manejar voz sintética cuando no hay archivos MP3
-    class SpeechDialog {
-      constructor() {
-        this.synth = window.speechSynthesis;
-        this.voice = null;
-        this.initVoice();
-      }
-      
-      initVoice() {
-        // Esperar a que las voces estén cargadas
-        if (this.synth.getVoices().length > 0) {
-          this.selectVoice();
-        } else {
-          this.synth.addEventListener('voiceschanged', () => this.selectVoice());
-        }
-      }
-      
-      selectVoice() {
-        const voices = this.synth.getVoices();
-        // Buscar voz en español o femenina
-        this.voice = voices.find(v => v.lang === 'es-ES' || v.lang === 'es-MX') || voices[0];
-      }
-      
-      speak(text, onEnd) {
-        if (!this.synth) return;
-        
-        // Detener cualquier voz anterior
-        this.synth.cancel();
-        
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.voice = this.voice;
-        utterance.rate = 0.9;
-        utterance.pitch = 1.1;
-        utterance.volume = 0.8;
-        utterance.lang = 'es-ES';
-        
-        if (onEnd) {
-          utterance.onend = onEnd;
-        }
-        
-        this.synth.speak(utterance);
-      }
-    }
-    
-    const speechDialog = new SpeechDialog();
-    
-    // Intentar cargar audio MP3, si falla usar voz sintética
-    function playDialogSound(text, audioUrl) {
-      const audio = new Audio();
-      audio.volume = 0.7;
-      
-      const tryPlayAudio = () => {
-        audio.src = audioUrl;
-        audio.play().then(() => {
-          console.log(`🔊 Reproduciendo: ${audioUrl}`);
-        }).catch((error) => {
-          console.log(`⚠️ No se pudo reproducir ${audioUrl}, usando voz sintética`);
-          speechDialog.speak(text);
-        });
-      };
-      
-      tryPlayAudio();
-    }
-
-    // ==================== SISTEMA DE BLOQUEO CON LOCALSTORAGE ====================
+    // ==================== SISTEMA DE BLOQUEO ====================
     const LOCK_STORAGE_KEY = "gameLocked_V5";
     const RESET_SIGNAL_KEY = "resetSignal";
     
-    function setGameLocked() {
-      localStorage.setItem(LOCK_STORAGE_KEY, "true");
-      localStorage.removeItem(RESET_SIGNAL_KEY);
-      console.log("🔒 Juego bloqueado");
-    }
-
-    function isGameLocked() {
-      return localStorage.getItem(LOCK_STORAGE_KEY) === "true";
-    }
-
-    function clearGameLocked() {
-      localStorage.removeItem(LOCK_STORAGE_KEY);
-      console.log("🔓 Juego desbloqueado");
-    }
-    
-    function checkForResetSignal() {
-      const signal = localStorage.getItem(RESET_SIGNAL_KEY);
-      if (signal === "reset") {
-        console.log("✅ SEÑAL DE RESET ENCONTRADA");
-        localStorage.removeItem(RESET_SIGNAL_KEY);
-        clearGameLocked();
-        return true;
-      }
-      return false;
-    }
+    function setGameLocked() { localStorage.setItem(LOCK_STORAGE_KEY, "true"); localStorage.removeItem(RESET_SIGNAL_KEY); console.log("🔒 Juego bloqueado"); }
+    function isGameLocked() { return localStorage.getItem(LOCK_STORAGE_KEY) === "true"; }
+    function clearGameLocked() { localStorage.removeItem(LOCK_STORAGE_KEY); console.log("🔓 Juego desbloqueado"); }
+    function checkForResetSignal() { const signal = localStorage.getItem(RESET_SIGNAL_KEY); if (signal === "reset") { localStorage.removeItem(RESET_SIGNAL_KEY); clearGameLocked(); return true; } return false; }
 
     const lockScreen = document.getElementById('lockScreen');
     const gameContent = document.getElementById('gameContent');
@@ -517,54 +127,29 @@
     const roomMusic = document.getElementById('roomMusic');
     const resetSignalDiv = document.getElementById('resetSignal');
 
-    function stopAllGameMusic() {
-      if (menuMusic) { menuMusic.pause(); menuMusic.currentTime = 0; }
-      if (roomMusic) { roomMusic.pause(); roomMusic.currentTime = 0; }
-    }
+    function stopAllGameMusic() { if (menuMusic) { menuMusic.pause(); menuMusic.currentTime = 0; } if (roomMusic) { roomMusic.pause(); roomMusic.currentTime = 0; } }
 
-    // Verificar estado al cargar
     if (isGameLocked()) {
-      if (checkForResetSignal()) {
-        window.location.reload();
-      } else {
-        gameContent.style.display = 'none';
-        lockScreen.style.display = 'flex';
-        stopAllGameMusic();
-        startPollingForReset();
-      }
-    } else {
-      gameContent.style.display = 'block';
-      lockScreen.style.display = 'none';
-      iniciarJuego();
-    }
+      if (checkForResetSignal()) { window.location.reload(); } 
+      else { gameContent.style.display = 'none'; lockScreen.style.display = 'flex'; stopAllGameMusic(); startPollingForReset(); }
+    } else { gameContent.style.display = 'block'; lockScreen.style.display = 'none'; iniciarJuego(); }
 
     function startPollingForReset() {
-      let pollInterval;
-      let attempts = 0;
-      
+      let pollInterval, attempts = 0;
       function checkLocalStorageSignal() {
         attempts++;
-        if (resetSignalDiv) {
-          resetSignalDiv.innerHTML = `🔄 Buscando señal... (Intento ${attempts})<br>📡 Revisando localStorage...`;
-        }
-        
+        if (resetSignalDiv) resetSignalDiv.innerHTML = `🔄 Buscando señal... (Intento ${attempts})<br>📡 Revisando localStorage...`;
         const signal = localStorage.getItem(RESET_SIGNAL_KEY);
         if (signal === "reset") {
-          if (resetSignalDiv) {
-            resetSignalDiv.innerHTML = '✅ ¡SEÑAL DE RESET DETECTADA! Desbloqueando...';
-          }
-          console.log("✅ SEÑAL DE RESET RECIBIDA");
+          if (resetSignalDiv) resetSignalDiv.innerHTML = '✅ ¡SEÑAL DE RESET DETECTADA! Desbloqueando...';
           localStorage.removeItem(RESET_SIGNAL_KEY);
           clearInterval(pollInterval);
           clearGameLocked();
-          setTimeout(() => {
-            window.location.reload();
-          }, 1000);
+          setTimeout(() => window.location.reload(), 1000);
           return true;
         }
         return false;
       }
-      
       checkLocalStorageSignal();
       pollInterval = setInterval(checkLocalStorageSignal, 2000);
     }
@@ -582,6 +167,7 @@
       const gameScreen = document.getElementById("gameScreen");
       const animalImg = document.getElementById("animal");
       const dialogueBox = document.getElementById("dialogueBox");
+      const dialogueAudio = document.getElementById("dialogueAudio");
       const rageText = document.getElementById("rageText");
       const dayText = document.getElementById("dayText");
       const jumpscareDiv = document.getElementById("jumpscare");
@@ -609,45 +195,35 @@
       let currentTimeout = null;
       let dialogueTimeout = null;
 
-      function showDialogue(text, audioUrl, useSpeech = true) {
+      function playSound(audioElement, src, volume = 0.8) {
+        if (!audioElement) return;
+        audioElement.volume = volume;
+        audioElement.src = src;
+        audioElement.currentTime = 0;
+        const playPromise = audioElement.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(error => {
+            console.warn(`⚠️ No se pudo reproducir ${src}:`, error);
+          });
+        }
+      }
+
+      function showDialogue(text, audioSrc) {
         if (!gameActive) return;
-        
-        // Limpiar timeout anterior
         if (dialogueTimeout) clearTimeout(dialogueTimeout);
         
         dialogueBox.innerText = text;
         dialogueBox.style.display = "block";
         
-        // Intentar reproducir audio MP3, si falla usar voz
-        if (audioUrl && useSpeech) {
-          const audio = new Audio();
-          audio.volume = 0.7;
-          audio.src = audioUrl;
-          audio.play().then(() => {
-            console.log(`🔊 Reproduciendo: ${audioUrl}`);
-            audio.onended = () => {
-              dialogueTimeout = setTimeout(() => {
-                if (gameActive) dialogueBox.style.display = "none";
-              }, 500);
-            };
-          }).catch((error) => {
-            console.log(`⚠️ No se pudo reproducir ${audioUrl}, usando voz sintética`);
-            speechDialog.speak(text, () => {
-              dialogueTimeout = setTimeout(() => {
-                if (gameActive) dialogueBox.style.display = "none";
-              }, 500);
-            });
-          });
-        } else if (useSpeech) {
-          speechDialog.speak(text, () => {
-            dialogueTimeout = setTimeout(() => {
-              if (gameActive) dialogueBox.style.display = "none";
-            }, 500);
-          });
+        if (audioSrc) {
+          playSound(dialogueAudio, audioSrc, 0.8);
+          dialogueAudio.onended = () => {
+            if (gameActive) {
+              dialogueTimeout = setTimeout(() => { dialogueBox.style.display = "none"; }, 500);
+            }
+          };
         } else {
-          dialogueTimeout = setTimeout(() => {
-            if (gameActive) dialogueBox.style.display = "none";
-          }, 2000);
+          dialogueTimeout = setTimeout(() => { if (gameActive) dialogueBox.style.display = "none"; }, 2000);
         }
       }
 
@@ -670,7 +246,7 @@
         };
       }
 
-      // ==================== PERSECUCIÓN 3D (SIMPLIFICADA Y FUNCIONAL) ====================
+      // ==================== PERSECUCIÓN 3D CON ÁRBOLES tree_ps1.png ====================
       let chaseActive = false;
       let chaseAnimationId = null;
       let scene, camera, renderer;
@@ -680,11 +256,24 @@
       let yaw = 0, pitch = 0;
       let keys = { w: false, s: false, a: false, d: false, shift: false };
       let monsterSpeed = 3.5;
-      let playerSpeed = 5.2;
+      let playerBaseSpeed = 5.2;
       let runningMult = 1.0;
       let gameOverTriggered = false;
       let chaseStartTime = 0;
       let heartbeatInterval = null;
+      
+      // Textura de árboles con tree_ps1.png (sprite billboard como Baldi's Basics)
+      const treeTextureUrl = "https://raw.githubusercontent.com/Raphapro900/Ms.BananaS/refs/heads/main/tree_ps1.png";
+      
+      function createTreeSprite(x, z) {
+        const textureLoader = new THREE.TextureLoader();
+        const treeTexture = textureLoader.load(treeTextureUrl);
+        const material = new THREE.SpriteMaterial({ map: treeTexture, transparent: true });
+        const sprite = new THREE.Sprite(material);
+        sprite.scale.set(1.8, 2.2, 1);
+        sprite.position.set(x, 1.1, z);
+        return sprite;
+      }
       
       function updateHeartbeat(distance) {
         if (!heartbeatSound) return;
@@ -694,17 +283,15 @@
         else if (distance < 8) speed = 1.1;
         else if (distance < 12) speed = 0.7;
         else {
-          if (heartbeatInterval) clearInterval(heartbeatInterval);
-          heartbeatInterval = null;
-          heartbeatSound.pause();
-          heartbeatSound.currentTime = 0;
+          if (heartbeatInterval) { clearInterval(heartbeatInterval); heartbeatInterval = null; }
+          heartbeatSound.pause(); heartbeatSound.currentTime = 0;
           return;
         }
         if (heartbeatInterval) clearInterval(heartbeatInterval);
         heartbeatSound.playbackRate = speed;
         heartbeatSound.volume = Math.min(0.8, 0.3 + (12 - distance) / 20);
         heartbeatSound.loop = true;
-        heartbeatSound.play().catch(e => console.log("heartbeat error", e));
+        heartbeatSound.play().catch(e => console.log("heartbeat error"));
         const intervalTime = 1000 / (speed * 1.5);
         heartbeatInterval = setInterval(() => {
           if (chaseActive && !gameOverTriggered) {
@@ -715,12 +302,34 @@
       }
       
       function stopHeartbeat() {
-        if (heartbeatInterval) clearInterval(heartbeatInterval);
-        heartbeatInterval = null;
-        if (heartbeatSound) {
-          heartbeatSound.pause();
-          heartbeatSound.currentTime = 0;
-        }
+        if (heartbeatInterval) { clearInterval(heartbeatInterval); heartbeatInterval = null; }
+        if (heartbeatSound) { heartbeatSound.pause(); heartbeatSound.currentTime = 0; }
+      }
+
+      function applyShake(intensity) {
+        if (!chaseActive || gameOverTriggered) return;
+        const strength = Math.min(intensity, 12);
+        const canvas = renderer.domElement;
+        const xShake = (Math.random() - 0.5) * strength;
+        const yShake = (Math.random() - 0.5) * strength;
+        canvas.style.transform = `translate(${xShake}px, ${yShake}px)`;
+        setTimeout(() => { if (canvas && chaseActive && !gameOverTriggered) canvas.style.transform = "translate(0px, 0px)"; }, 80);
+      }
+
+      function updateForestColor(distance) {
+        if (!scene) return;
+        let r = 0.03, g = 0.11, b = 0.23;
+        if (distance < 5) { const intensity = Math.min(1, (5 - distance) / 3); r = 0.25 + intensity * 0.4; g = 0.05 + intensity * 0.08; b = 0.05; }
+        else if (distance < 10) { const intensity = (10 - distance) / 5; r = 0.12 + intensity * 0.15; g = 0.08 + intensity * 0.04; b = 0.1; }
+        scene.background = new THREE.Color(r, g, b);
+        if (scene.fog) scene.fog.color = new THREE.Color(r, g, b);
+      }
+      
+      function updateChaseAudio(distance) {
+        if (!chaseMusic) return;
+        if (distance < 8) { chaseMusic.playbackRate = 1.2; chaseMusic.volume = 0.9; }
+        else if (distance < 15) { chaseMusic.playbackRate = 1.0; chaseMusic.volume = 0.7; }
+        else { chaseMusic.playbackRate = 0.7; chaseMusic.volume = 0.5; }
       }
 
       function initChaseGame() {
@@ -741,34 +350,25 @@
         ground.receiveShadow = true;
         scene.add(ground);
         
-        // Árboles simples (cilindros)
-        const trunkMat = new THREE.MeshStandardMaterial({ color: 0x4a2a1a });
-        const foliageMat = new THREE.MeshStandardMaterial({ color: 0x1e4a1e });
-        for (let i = 0; i < 150; i++) {
-          const treeGroup = new THREE.Group();
-          const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.65, 1.5), trunkMat);
-          trunk.position.y = 0.75;
-          trunk.castShadow = true;
-          const foliage1 = new THREE.Mesh(new THREE.ConeGeometry(0.8, 0.95, 6), foliageMat);
-          foliage1.position.y = 1.5;
-          const foliage2 = new THREE.Mesh(new THREE.ConeGeometry(0.6, 0.75, 6), foliageMat);
-          foliage2.position.y = 2.1;
-          treeGroup.add(trunk, foliage1, foliage2);
+        // Árboles con textura tree_ps1.png (sprites que siempre miran al jugador)
+        const treePositions = [];
+        for (let i = 0; i < 200; i++) {
           let angle = Math.random() * Math.PI * 2;
-          let radius = 30 + Math.random() * 48;
-          let x = Math.cos(angle) * radius;
-          let z = Math.sin(angle) * radius;
-          treeGroup.position.set(x, 0, z);
-          scene.add(treeGroup);
+          let radius = 25 + Math.random() * 52;
+          treePositions.push({ x: Math.cos(angle) * radius, z: Math.sin(angle) * radius });
         }
+        for (let i = 0; i < 80; i++) {
+          let x = (Math.random() - 0.5) * 110;
+          let z = (Math.random() - 0.5) * 110;
+          if (Math.abs(x) > 8 || Math.abs(z) > 8) treePositions.push({ x, z });
+        }
+        treePositions.forEach(pos => scene.add(createTreeSprite(pos.x, pos.z)));
         
         // Luciérnagas
         const fireflyMat = new THREE.PointsMaterial({ color: 0xffaa66, size: 0.07 });
-        const fireflyCount = 300;
+        const fireflyCount = 400;
         const fireflyPositions = [];
-        for (let i = 0; i < fireflyCount; i++) {
-          fireflyPositions.push((Math.random() - 0.5) * 120, Math.random() * 3.5, (Math.random() - 0.5) * 120);
-        }
+        for (let i = 0; i < fireflyCount; i++) fireflyPositions.push((Math.random() - 0.5) * 120, Math.random() * 3.5, (Math.random() - 0.5) * 120);
         const fireflyGeo = new THREE.BufferGeometry();
         fireflyGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(fireflyPositions), 3));
         const fireflies = new THREE.Points(fireflyGeo, fireflyMat);
@@ -781,8 +381,11 @@
         moonLight.position.set(12, 24, -14);
         moonLight.castShadow = true;
         scene.add(moonLight);
+        const fillLight = new THREE.PointLight(0x664422, 0.35);
+        fillLight.position.set(-4, 5, -6);
+        scene.add(fillLight);
         
-        // Banana monstruo
+        // Banana monstruo (banana2.png)
         const textureLoader = new THREE.TextureLoader();
         const banana2Texture = textureLoader.load("https://raw.githubusercontent.com/Raphapro900/Ms.BananaS/refs/heads/main/banana2.png");
         const spriteMaterial = new THREE.SpriteMaterial({ map: banana2Texture, transparent: true });
@@ -791,15 +394,12 @@
         bananaMonster.position.set(monsterPos.x, 1.0, monsterPos.z);
         scene.add(bananaMonster);
         
-        // Controles
+        // Controles de ratón
         chaseContainer.addEventListener('click', () => chaseContainer.requestPointerLock());
         document.addEventListener('pointerlockchange', lockChange);
         function lockChange() {
-          if (document.pointerLockElement === chaseContainer) {
-            document.addEventListener('mousemove', onMouseMove);
-          } else {
-            document.removeEventListener('mousemove', onMouseMove);
-          }
+          if (document.pointerLockElement === chaseContainer) document.addEventListener('mousemove', onMouseMove);
+          else document.removeEventListener('mousemove', onMouseMove);
         }
         function onMouseMove(e) {
           if (!chaseActive || gameOverTriggered) return;
@@ -812,6 +412,7 @@
           camera.rotation.x = pitch;
         }
         
+        // Controles WASD: W = atrás, S = adelante
         window.addEventListener('keydown', (e) => {
           const key = e.key.toLowerCase();
           if (key === 'w') keys.w = true;
@@ -840,12 +441,12 @@
           lastTimestamp = now;
           if (delta <= 0) delta = 0.016;
           
-          // Aumentar velocidad cada segundo
+          // Velocidad del monstruo aumenta cada segundo
           const elapsedSeconds = (performance.now() / 1000) - chaseStartTime;
-          let currentMonsterSpeed = monsterSpeed + Math.floor(elapsedSeconds) * 0.3;
-          currentMonsterSpeed = Math.min(currentMonsterSpeed, 7.0);
+          let currentMonsterSpeed = monsterSpeed + Math.floor(elapsedSeconds) * 0.35;
+          currentMonsterSpeed = Math.min(currentMonsterSpeed, 7.5);
           
-          const currentPlayerSpeed = playerSpeed * runningMult;
+          const currentPlayerSpeed = playerBaseSpeed * runningMult;
           let moveX = 0, moveZ = 0;
           if (keys.w) moveZ = 1;
           if (keys.s) moveZ = -1;
@@ -860,8 +461,8 @@
             playerPos.x += (forward.x * moveZ + right.x * moveX) * currentPlayerSpeed * delta;
             playerPos.z += (forward.z * moveZ + right.z * moveX) * currentPlayerSpeed * delta;
           }
-          playerPos.x = Math.min(Math.max(playerPos.x, -55), 55);
-          playerPos.z = Math.min(Math.max(playerPos.z, -55), 55);
+          playerPos.x = Math.min(Math.max(playerPos.x, -58), 58);
+          playerPos.z = Math.min(Math.max(playerPos.z, -58), 58);
           camera.position.x = playerPos.x;
           camera.position.z = playerPos.z;
           
@@ -869,19 +470,35 @@
           const dz = playerPos.z - monsterPos.z;
           let distToPlayer = Math.hypot(dx, dz);
           
+          updateChaseAudio(distToPlayer);
           updateHeartbeat(distToPlayer);
+          updateForestColor(distToPlayer);
           
-          // Movimiento del monstruo hacia el jugador
-          if (distToPlayer > 0.8) {
+          // Vibración al acercarse
+          if (distToPlayer < 6.5) {
+            let intensity = 0;
+            if (distToPlayer < 2.0) intensity = 12;
+            else if (distToPlayer < 3.5) intensity = 8;
+            else if (distToPlayer < 5.0) intensity = 5;
+            else if (distToPlayer < 6.5) intensity = 3;
+            if (intensity > 0) applyShake(intensity);
+          }
+          
+          // Velocidad extra si está cerca
+          let finalMonsterSpeed = currentMonsterSpeed;
+          if (distToPlayer < 4) finalMonsterSpeed += 1.2;
+          else if (distToPlayer < 8) finalMonsterSpeed += 0.6;
+          
+          if (distToPlayer > 0.7) {
             const moveDirX = dx / distToPlayer;
             const moveDirZ = dz / distToPlayer;
-            monsterPos.x += moveDirX * currentMonsterSpeed * delta;
-            monsterPos.z += moveDirZ * currentMonsterSpeed * delta;
+            monsterPos.x += moveDirX * finalMonsterSpeed * delta;
+            monsterPos.z += moveDirZ * finalMonsterSpeed * delta;
           }
           bananaMonster.position.set(monsterPos.x, 1.0, monsterPos.z);
           
           // Escala dinámica
-          const scaleVal = Math.min(3.0, Math.max(1.8, 1.8 + (5.0 / (distToPlayer + 1.0))));
+          const scaleVal = Math.min(3.2, Math.max(1.8, 1.8 + (6.0 / (distToPlayer + 1.0))));
           bananaMonster.scale.set(scaleVal, scaleVal, 1);
           
           if (distToPlayer <= 1.3 && !gameOverTriggered) {
@@ -901,7 +518,7 @@
         }
         
         playerPos = { x: 0, z: 0 };
-        monsterPos = { x: 35, z: 30 };
+        monsterPos = { x: 38, z: 32 };
         yaw = 0; pitch = 0;
         camera.rotation.y = 0; camera.rotation.x = 0;
         camera.position.set(0, 1.68, 0);
@@ -924,7 +541,7 @@
           chaseMusic.currentTime = 0;
           chaseMusic.loop = true;
           chaseMusic.volume = 0.7;
-          chaseMusic.play().catch(e => console.log("audio error", e));
+          chaseMusic.play().catch(e => console.log("chaseMusic error:", e));
           initChaseGame();
         }, 800);
       }
@@ -946,20 +563,18 @@
             btn.style.backgroundColor = "#2a6a2a";
             correctCount++;
             dayText.innerText = "🌙 Día " + day + " — Animales: " + correctCount + "/" + dayTargets[day];
-            showDialogue("✅ ¡Correcto! Has acertado.", "c1.mp3");
+            showDialogue("✅ ¡Correcto!", "c1.mp3");
             
             if (correctCount >= dayTargets[day]) {
-              showDialogue("✨ ¡Felicidades! Has completado el día " + day + ".", "c2.mp3");
+              showDialogue("✨ ¡Completaste el día " + day + "!", "c2.mp3");
               setTimeout(() => {
                 gameScreen.style.display = "none";
                 roomMusic.pause();
                 menuMusic.currentTime = 0;
-                menuMusic.play();
+                menuMusic.play().catch(e => console.log("menuMusic error:", e));
                 startScreen.style.display = "flex";
                 gameActive = true;
-                rage = 0;
-                correctCount = 0;
-                day = 1;
+                rage = 0; correctCount = 0; day = 1;
                 rageText.innerText = "💢 Furia: 0";
                 dayText.innerText = "🌙 Día 1 — Animales: 0/15";
                 nextAnimal();
@@ -968,27 +583,20 @@
             setTimeout(nextAnimal, 2000);
           } else {
             btn.style.backgroundColor = "#882222";
-            buttons.forEach(b => {
-              if (b.innerText === currentAnimal.name) b.style.backgroundColor = "#aa6644";
-            });
+            buttons.forEach(b => { if (b.innerText === currentAnimal.name) b.style.backgroundColor = "#aa6644"; });
             rage++;
             rageText.innerText = "💢 Furia: " + rage;
-            showDialogue("❌ ¡Incorrecto! El animal era " + currentAnimal.name + ". Pierdes una vida.", "f1.mp3");
+            showDialogue("❌ ¡Fallaste! El animal era " + currentAnimal.name, "f1.mp3");
             
-            if (rage >= 10) {
-              onRageReachedTen();
-            } else {
-              setTimeout(nextAnimal, 2000);
-            }
+            if (rage >= 10) { onRageReachedTen(); } 
+            else { setTimeout(nextAnimal, 2000); }
           }
         });
       });
       
       function resetGameScreenState() {
         gameActive = true;
-        rage = 0;
-        correctCount = 0;
-        day = 1;
+        rage = 0; correctCount = 0; day = 1;
         rageText.innerText = "💢 Furia: 0";
         dayText.innerText = "🌙 Día 1 — Animales: 0/15";
         nextAnimal();
@@ -1001,7 +609,7 @@
         roomMusic.currentTime = 0;
         roomMusic.play().catch(e => console.log("roomMusic error:", e));
         resetGameScreenState();
-        showDialogue("🍌 ¡Bienvenido al juego! Selecciona el animal correcto en la televisión. ¡No falles o la furia aumentará!", "Primer dia.mp3");
+        showDialogue("🍌 ¡Bienvenido al primer día! Selecciona el animal correcto en la televisión.", "Primer dia.mp3");
       });
       
       howBtn.addEventListener("click", () => {
@@ -1014,15 +622,9 @@
         infoContent.innerHTML = "<h2>🛒 Tienda</h2><p>Próximamente: objetos especiales para reducir furia.</p>";
       });
       
-      exitBtn.addEventListener("click", () => {
-        window.close();
-      });
+      exitBtn.addEventListener("click", () => window.close());
+      closeBtn.addEventListener("click", () => infoBox.style.display = "none");
       
-      closeBtn.addEventListener("click", () => {
-        infoBox.style.display = "none";
-      });
-      
-      // Inicializar
       nextAnimal();
     }
   </script>
