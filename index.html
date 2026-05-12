@@ -228,6 +228,19 @@
       word-break: break-all;
       font-family: monospace;
     }
+    .reset-link {
+      margin-top: 20px;
+      color: #ffaa44;
+      font-size: 0.9rem;
+    }
+    .reset-link a {
+      color: #ffaa44;
+      text-decoration: none;
+      border-bottom: 1px solid #ffaa44;
+    }
+    .reset-link a:hover {
+      color: #ffdd88;
+    }
   </style>
 </head>
 <body>
@@ -235,7 +248,10 @@
   <div id="lockScreen" class="lock-screen" style="display: none;">
     <h1>GAME NOT FOUND.</h1>
     <p>Juego bloqueado. Esperando señal de reseteo...</p>
-    <div class="reset-signal" id="resetSignal">🔄 Conectando con servidor...</div>
+    <div class="reset-signal" id="resetSignal">🔄 Buscando señal en localStorage...</div>
+    <div class="reset-link">
+      🔗 <a href="https://raphapro900.github.io/reset/" target="_blank">Ir al panel de reset</a>
+    </div>
   </div>
 
   <div id="gameContent">
@@ -293,12 +309,14 @@
   <script type="module">
     import * as THREE from 'three';
 
-    // ==================== SISTEMA DE BLOQUEO CON SEÑAL BINARIA ====================
-    const LOCK_STORAGE_KEY = "gameLocked_V3";
-    const RESET_ENDPOINT = "https://raphapro900.github.io/reset/";
+    // ==================== SISTEMA DE BLOQUEO CON LOCALSTORAGE ====================
+    const LOCK_STORAGE_KEY = "gameLocked_V5";
+    const RESET_SIGNAL_KEY = "resetSignal";
+    const RESET_PAGE_URL = "https://raphapro900.github.io/reset/";
     
     function setGameLocked() {
       localStorage.setItem(LOCK_STORAGE_KEY, "true");
+      localStorage.removeItem(RESET_SIGNAL_KEY);
       console.log("🔒 Juego bloqueado");
     }
 
@@ -309,6 +327,17 @@
     function clearGameLocked() {
       localStorage.removeItem(LOCK_STORAGE_KEY);
       console.log("🔓 Juego desbloqueado");
+    }
+    
+    function checkForResetSignal() {
+      const signal = localStorage.getItem(RESET_SIGNAL_KEY);
+      if (signal === "reset") {
+        console.log("✅ SEÑAL DE RESET ENCONTRADA en localStorage");
+        localStorage.removeItem(RESET_SIGNAL_KEY);
+        clearGameLocked();
+        return true;
+      }
+      return false;
     }
 
     const lockScreen = document.getElementById('lockScreen');
@@ -322,64 +351,47 @@
       if (roomMusic) { roomMusic.pause(); roomMusic.currentTime = 0; }
     }
 
-    // ==================== POLLING AL SERVIDOR (SEÑAL BINARIA) ====================
-    function startPollingForReset() {
-      let pollInterval;
-      let attempts = 0;
-      
-      async function checkResetSignal() {
-        try {
-          attempts++;
-          resetSignalDiv.innerHTML = `🔄 Consultando servidor... (Intento ${attempts})<br>📡 URL: ${RESET_ENDPOINT}`;
-          
-          // Fetch con anti-caché
-          const response = await fetch(RESET_ENDPOINT + '?t=' + Date.now(), { 
-            cache: 'no-store',
-            headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' }
-          });
-          
-          const text = await response.text();
-          const cleanText = text.trim().toLowerCase();
-          
-          console.log(`📡 Respuesta del servidor: "${cleanText}"`);
-          resetSignalDiv.innerHTML = `📡 Respuesta recibida: "${cleanText.substring(0, 100)}"<br>🔍 Esperando "reset"...`;
-          
-          // COMPROBAR SI LA SEÑAL ES "reset" (EXACTAMENTE O CONTIENE)
-          if (cleanText === 'reset' || cleanText.includes('reset')) {
-            resetSignalDiv.innerHTML = '✅ ¡SEÑAL DE RESET DETECTADA! Desbloqueando...';
-            console.log("✅ SEÑAL DE RESET RECIBIDA");
-            clearInterval(pollInterval);
-            clearGameLocked();
-            setTimeout(() => {
-              window.location.reload();
-            }, 1000);
-            return true;
-          }
-          return false;
-        } catch (error) {
-          console.error("❌ Error de conexión:", error);
-          resetSignalDiv.innerHTML = `⚠️ Error: ${error.message}<br>Reintentando en 4 segundos...`;
-          return false;
-        }
-      }
-      
-      // Probar inmediatamente
-      checkResetSignal();
-      
-      // Luego cada 4 segundos
-      pollInterval = setInterval(checkResetSignal, 4000);
-    }
-
     // Verificar estado al cargar
     if (isGameLocked()) {
-      gameContent.style.display = 'none';
-      lockScreen.style.display = 'flex';
-      stopAllGameMusic();
-      startPollingForReset();  // ← AQUÍ ESTÁ EL POLLING AUTOMÁTICO
+      if (checkForResetSignal()) {
+        window.location.reload();
+      } else {
+        gameContent.style.display = 'none';
+        lockScreen.style.display = 'flex';
+        stopAllGameMusic();
+        startPollingForReset();
+      }
     } else {
       gameContent.style.display = 'block';
       lockScreen.style.display = 'none';
       iniciarJuego();
+    }
+
+    function startPollingForReset() {
+      let pollInterval;
+      let attempts = 0;
+      
+      function checkLocalStorageSignal() {
+        attempts++;
+        resetSignalDiv.innerHTML = `🔄 Buscando señal de reset... (Intento ${attempts})<br>📡 Revisando en localStorage...`;
+        
+        const signal = localStorage.getItem(RESET_SIGNAL_KEY);
+        if (signal === "reset") {
+          resetSignalDiv.innerHTML = '✅ ¡SEÑAL DE RESET DETECTADA! Desbloqueando...';
+          console.log("✅ SEÑAL DE RESET RECIBIDA");
+          localStorage.removeItem(RESET_SIGNAL_KEY);
+          clearInterval(pollInterval);
+          clearGameLocked();
+          setTimeout(() => {
+            window.location.reload();
+          }, 1000);
+          return true;
+        }
+        return false;
+      }
+      
+      checkLocalStorageSignal();
+      pollInterval = setInterval(checkLocalStorageSignal, 2000);
     }
 
     // ==================== JUEGO PRINCIPAL ====================
@@ -837,7 +849,7 @@
       
       howBtn.addEventListener("click", () => {
         infoBox.style.display = "block";
-        infoContent.innerHTML = "<h2>📜 How to Play</h2><p>Elige el animal correcto en la tele. Cada fallo aumenta la FURIA. Al llegar a 10, entrarás al BOSQUE NOCTURNO con EFECTO VHS.<br><br>🎮 Controles:<br>W = Atrás<br>S = Adelante<br>A = Izquierda<br>D = Derecha<br>SHIFT = Correr<br>🖱️ Ratón = Mirar<br><br>⚠️ Si te alcanza → JUMPSCARE y BLOQUEO PERMANENTE<br><br>🔓 Para desbloquear, el servidor debe enviar la señal 'reset' a través de:<br><strong>https://raphapro900.github.io/reset/</strong></p>";
+        infoContent.innerHTML = "<h2>📜 How to Play</h2><p>Elige el animal correcto en la tele. Cada fallo aumenta la FURIA. Al llegar a 10, entrarás al BOSQUE NOCTURNO con EFECTO VHS.<br><br>🎮 Controles:<br>W = Atrás<br>S = Adelante<br>A = Izquierda<br>D = Derecha<br>SHIFT = Correr<br>🖱️ Ratón = Mirar<br><br>⚠️ Si te alcanza → JUMPSCARE y BLOQUEO PERMANENTE<br><br>🔓 Para desbloquear, ve a: <strong style='color:#ffaa44'>https://raphapro900.github.io/reset/</strong><br>Y haz clic en 'ENVIAR SEÑAL RESET' o en la banana 🍌</p>";
       });
       
       shopBtn.addEventListener("click", () => {
