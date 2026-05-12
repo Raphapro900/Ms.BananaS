@@ -223,6 +223,21 @@
       font-size: 0.9rem;
       opacity: 0.8;
     }
+    .manual-reset-btn {
+      margin-top: 30px;
+      padding: 12px 24px;
+      background: #ffffff20;
+      border: 2px solid white;
+      color: white;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .manual-reset-btn:hover {
+      background: #ffffff40;
+      transform: scale(1.05);
+    }
   </style>
 </head>
 <body>
@@ -230,7 +245,8 @@
   <div id="lockScreen" class="lock-screen" style="display: none;">
     <h1>GAME NOT FOUND.</h1>
     <p>El juego ha sido bloqueado. Esperando señal de reseteo...</p>
-    <div class="reset-signal" id="resetSignal">Conectando con https://raphapro900.github.io/reset/ ...</div>
+    <div class="reset-signal" id="resetSignal">🔄 Conectando con servidor...</div>
+    <button class="manual-reset-btn" id="manualResetBtn">🔓 RESET MANUAL (ADMIN)</button>
   </div>
 
   <div id="gameContent">
@@ -288,20 +304,27 @@
   <script type="module">
     import * as THREE from 'three';
 
-    // ==================== SISTEMA DE BLOQUEO ====================
+    // ==================== SISTEMA DE BLOQUEO (CORREGIDO) ====================
     const LOCK_COOKIE_NAME = "gameLocked";
     const RESET_ENDPOINT = "https://raphapro900.github.io/reset/";
+    
+    // También intentamos con un parámetro anti-caché
+    const RESET_ENDPOINT_WITH_CACHE = "https://raphapro900.github.io/reset/?t=" + Date.now();
 
     function setGameLockedCookie() {
       document.cookie = `${LOCK_COOKIE_NAME}=true; path=/; max-age=31536000`;
+      console.log("🔒 Cookie de bloqueo guardada");
     }
 
     function isGameLocked() {
-      return document.cookie.split('; ').some(row => row.startsWith(`${LOCK_COOKIE_NAME}=true`));
+      const locked = document.cookie.split('; ').some(row => row.startsWith(`${LOCK_COOKIE_NAME}=true`));
+      console.log("🔍 ¿Juego bloqueado?", locked);
+      return locked;
     }
 
     function clearGameLockedCookie() {
       document.cookie = `${LOCK_COOKIE_NAME}=; path=/; max-age=0`;
+      console.log("🔓 Cookie de bloqueo eliminada");
     }
 
     const lockScreen = document.getElementById('lockScreen');
@@ -314,6 +337,7 @@
       if (roomMusic) { roomMusic.pause(); roomMusic.currentTime = 0; }
     }
 
+    // Mostrar pantalla de bloqueo si es necesario
     if (isGameLocked()) {
       gameContent.style.display = 'none';
       lockScreen.style.display = 'flex';
@@ -327,29 +351,69 @@
 
     function startPollingForReset() {
       const resetSignalDiv = document.getElementById('resetSignal');
-      let pollInterval = setInterval(async () => {
+      let pollInterval;
+      let attempts = 0;
+      
+      // Función para verificar el reset
+      async function checkReset() {
         try {
-          const response = await fetch(RESET_ENDPOINT, { cache: 'no-cache' });
+          attempts++;
+          resetSignalDiv.innerText = `🔄 Consultando servidor... (Intento ${attempts})`;
+          
+          // Intentamos con fetch normal
+          const response = await fetch(RESET_ENDPOINT, { 
+            cache: 'no-store',
+            headers: {
+              'Cache-Control': 'no-cache, no-store, must-revalidate'
+            }
+          });
+          
           const text = await response.text();
           const cleanText = text.trim().toLowerCase();
           
+          console.log(`📡 Respuesta del servidor: "${cleanText}"`);
+          resetSignalDiv.innerText = `📡 Respuesta: "${cleanText.substring(0, 50)}" - Esperando "reset"`;
+          
+          // Comprobar si la señal es "reset"
           if (cleanText === 'reset' || cleanText.includes('reset')) {
-            clearGameLockedCookie();
-            resetSignalDiv.innerText = '✅ Señal recibida. Reiniciando...';
+            resetSignalDiv.innerText = '✅ ¡SEÑAL RECIBIDA! Reiniciando juego...';
             clearInterval(pollInterval);
+            clearGameLockedCookie();
             setTimeout(() => {
               window.location.reload();
-            }, 1000);
-          } else {
-            resetSignalDiv.innerText = `Esperando señal... (${cleanText.substring(0, 30) || 'vacío'})`;
+            }, 1500);
+            return true;
           }
-        } catch (err) {
-          resetSignalDiv.innerText = `Error: ${err.message}. Reintentando...`;
+          
+          return false;
+        } catch (error) {
+          console.error("❌ Error conectando con el servidor:", error);
+          resetSignalDiv.innerText = `⚠️ Error de conexión: ${error.message}. Reintentando...`;
+          return false;
         }
-      }, 3000);
+      }
+      
+      // Probar inmediatamente
+      checkReset();
+      
+      // Luego cada 4 segundos
+      pollInterval = setInterval(checkReset, 4000);
+      
+      // Botón manual de reset (para pruebas)
+      const manualBtn = document.getElementById('manualResetBtn');
+      if (manualBtn) {
+        manualBtn.addEventListener('click', () => {
+          resetSignalDiv.innerText = '🔓 Reseteo manual activado...';
+          clearInterval(pollInterval);
+          clearGameLockedCookie();
+          setTimeout(() => {
+            window.location.reload();
+          }, 500);
+        });
+      }
     }
 
-    // ==================== JUEGO PRINCIPAL ====================
+    // ==================== JUEGO PRINCIPAL (COMPLETO) ====================
     function iniciarJuego() {
       const bananaPlay = document.getElementById("bananaPlay");
       const howBtn = document.getElementById("howBtn");
@@ -422,6 +486,7 @@
       }
 
       function triggerJumpscareFinal() {
+        console.log("💀 JUMPSCARE - Guardando cookie de bloqueo");
         setGameLockedCookie();
         jumpscareDiv.style.display = "block";
         jumpscareVideo.play();
@@ -481,7 +546,7 @@
         heartbeatSound.play().catch(e => console.log("heartbeat error", e));
         const intervalTime = 1000 / (speed * 1.5);
         heartbeatInterval = setInterval(() => {
-          if (chaseActive && !gameOverTriggered && distance < 12) {
+          if (chaseActive && !gameOverTriggered) {
             heartbeatSound.currentTime = 0;
             heartbeatSound.play().catch(e => {});
           }
@@ -803,7 +868,7 @@
       
       howBtn.addEventListener("click", () => {
         infoBox.style.display = "block";
-        infoContent.innerHTML = "<h2>📜 How to Play</h2><p>Elige el animal correcto en la tele. Cada fallo aumenta la FURIA. Al llegar a 10, entrarás al BOSQUE NOCTURNO con EFECTO VHS.<br><br>🎮 Controles:<br>W = Atrás<br>S = Adelante<br>A = Izquierda<br>D = Derecha<br>SHIFT = Correr<br>🖱️ Ratón = Mirar<br><br>⚠️ Si te alcanza → JUMPSCARE y BLOQUEO PERMANENTE hasta reset externo.</p>";
+        infoContent.innerHTML = "<h2>📜 How to Play</h2><p>Elige el animal correcto en la tele. Cada fallo aumenta la FURIA. Al llegar a 10, entrarás al BOSQUE NOCTURNO con EFECTO VHS.<br><br>🎮 Controles:<br>W = Atrás<br>S = Adelante<br>A = Izquierda<br>D = Derecha<br>SHIFT = Correr<br>🖱️ Ratón = Mirar<br><br>⚠️ Si te alcanza → JUMPSCARE y BLOQUEO PERMANENTE<br><br>🔓 Para desbloquear: El servidor debe enviar la señal 'reset' o usar el botón manual en modo administrador.</p>";
       });
       
       shopBtn.addEventListener("click", () => {
