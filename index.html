@@ -42,19 +42,17 @@
     .lock-screen h1 { font-size: 4rem; margin-bottom: 1rem; letter-spacing: 2px; }
     .lock-screen p { font-size: 1.5rem; max-width: 80%; line-height: 1.4; }
     .reset-signal { margin-top: 2rem; font-size: 0.9rem; opacity: 0.8; background: rgba(0,0,0,0.5); padding: 10px 20px; border-radius: 8px; max-width: 80%; word-break: break-all; font-family: monospace; }
-    .reset-link { margin-top: 20px; color: #ffaa44; font-size: 0.9rem; }
-    .reset-link a { color: #ffaa44; text-decoration: none; border-bottom: 1px solid #ffaa44; }
-    .reset-link a:hover { color: #ffdd88; }
-    .binary-code { font-family: monospace; font-size: 0.8rem; color: #88ff88; background: #00000080; padding: 5px; border-radius: 5px; display: inline-block; margin-top: 10px; word-break: break-all; }
+    .binary-code { font-family: monospace; font-size: 0.75rem; color: #88ff88; background: #00000080; padding: 8px; border-radius: 5px; display: inline-block; margin-top: 10px; word-break: break-all; cursor: pointer; transition: all 0.2s; }
+    .binary-code:hover { background: #00aa44; color: black; transform: scale(1.02); }
+    .controls-mystery { font-family: monospace; color: #ffaa44; letter-spacing: 2px; }
   </style>
 </head>
 <body>
 
   <div id="lockScreen" class="lock-screen" style="display: none;">
     <h1>GAME NOT FOUND.</h1>
-    <p>Juego bloqueado. Esperando señal de reseteo...</p>
-    <div class="reset-signal" id="resetSignal">🔄 Buscando señal en localStorage...</div>
-    <div class="reset-link">🔗 <a href="https://raphapro900.github.io/reset/" target="_blank">Ir al panel de reset</a></div>
+    <p>Juego bloqueado. Esperando señal...</p>
+    <div class="reset-signal" id="resetSignal">🔄 Buscando señal...</div>
   </div>
 
   <div id="gameContent">
@@ -95,7 +93,7 @@
       <canvas id="threeCanvas" style="width:100%;height:100%;display:block;"></canvas>
       <div class="vhs-overlay"></div>
       <div class="vhs-noise"></div>
-      <div class="chaseUI">🍌 ¡TE PERSIGUE!</div>
+      <div class="chaseUI">🍌 ¡TE PERSIGUE! | Controles: ? ? ? ?</div>
       <audio id="chaseMusic" src="chase.mp3" loop preload="auto"></audio>
       <audio id="heartbeatSound" src="latido de corazon.mp3" preload="auto"></audio>
     </div>
@@ -112,16 +110,17 @@
   <script type="module">
     import * as THREE from 'three';
 
-    // ==================== CÓDIGO BINARIO ====================
+    // ==================== CÓDIGO BINARIO CLICKEABLE ====================
     const binaryCode = "01101000 01110100 01110100 01110000 01110011 00111010 00101111 00101111 01110010 01100001 01110000 01101000 01100001 01110000 01110010 01101111 00111001 00110000 00110000 00101110 01100111 01101001 01110100 01101000 01110101 01100010 00101110 01101001 01101111 00101111 01110010 01100101 01110011 01100101 01110100 00101111";
-    // Traducción del binario: https://raphapro900.github.io/reset/
+    const resetUrl = "https://raphapro900.github.io/reset/";
     
     function binaryToString(binary) {
       return binary.split(' ').map(b => String.fromCharCode(parseInt(b, 2))).join('');
     }
     
-    const resetUrlFromBinary = binaryToString(binaryCode);
-    console.log("URL desde binario:", resetUrlFromBinary);
+    function openResetPage() {
+      window.open(resetUrl, '_blank');
+    }
 
     // ==================== SISTEMA DE BLOQUEO ====================
     const LOCK_STORAGE_KEY = "gameLocked_V5";
@@ -149,10 +148,10 @@
       let pollInterval, attempts = 0;
       function checkLocalStorageSignal() {
         attempts++;
-        if (resetSignalDiv) resetSignalDiv.innerHTML = `🔄 Buscando señal... (Intento ${attempts})<br>📡 Revisando localStorage...`;
+        if (resetSignalDiv) resetSignalDiv.innerHTML = `🔄 Buscando señal... (Intento ${attempts})<br>📡 Revisando...`;
         const signal = localStorage.getItem(RESET_SIGNAL_KEY);
         if (signal === "reset") {
-          if (resetSignalDiv) resetSignalDiv.innerHTML = '✅ ¡SEÑAL DE RESET DETECTADA! Desbloqueando...';
+          if (resetSignalDiv) resetSignalDiv.innerHTML = '✅ ¡SEÑAL DETECTADA! Desbloqueando...';
           localStorage.removeItem(RESET_SIGNAL_KEY);
           clearInterval(pollInterval);
           clearGameLocked();
@@ -163,6 +162,14 @@
       }
       checkLocalStorageSignal();
       pollInterval = setInterval(checkLocalStorageSignal, 2000);
+    }
+
+    // ==================== FUNCIÓN PARA VERIFICAR AUDIOS ====================
+    function verificarAudio(elemento, nombre) {
+      if (!elemento) { console.warn(`⚠️ Elemento de audio ${nombre} no encontrado`); return; }
+      elemento.addEventListener('canplaythrough', () => { console.log(`✅ Audio cargado: ${nombre}`); });
+      elemento.addEventListener('error', (e) => { console.warn(`⚠️ No se pudo cargar ${nombre}:`, e); });
+      elemento.load();
     }
 
     // ==================== JUEGO PRINCIPAL ====================
@@ -187,6 +194,13 @@
       const chaseContainer = document.getElementById("chaseContainer");
       const chaseMusic = document.getElementById("chaseMusic");
       const heartbeatSound = document.getElementById("heartbeatSound");
+
+      // Verificar audios
+      verificarAudio(menuMusic, "menuMusic (bananamenu.mp3)");
+      verificarAudio(roomMusic, "roomMusic (Room Theme.mp3)");
+      verificarAudio(chaseMusic, "chaseMusic (chase.mp3)");
+      verificarAudio(heartbeatSound, "heartbeatSound (latido de corazon.mp3)");
+      verificarAudio(dialogueAudio, "dialogueAudio");
 
       const animals = [
         { name: "Seal", file: "Seal.webp" },
@@ -257,7 +271,7 @@
         };
       }
 
-      // ==================== PERSECUCIÓN 3D CON ÁRBOLES tree_ps1.png ====================
+      // ==================== PERSECUCIÓN 3D ====================
       let chaseActive = false;
       let chaseAnimationId = null;
       let scene, camera, renderer;
@@ -352,7 +366,6 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.shadowMap.enabled = true;
         
-        // Suelo
         const groundMat = new THREE.MeshStandardMaterial({ color: 0x1a3a1a, roughness: 0.9 });
         const ground = new THREE.Mesh(new THREE.PlaneGeometry(140, 140), groundMat);
         ground.rotation.x = -Math.PI / 2;
@@ -360,7 +373,6 @@
         ground.receiveShadow = true;
         scene.add(ground);
         
-        // Árboles con textura tree_ps1.png
         const treePositions = [];
         for (let i = 0; i < 200; i++) {
           let angle = Math.random() * Math.PI * 2;
@@ -374,7 +386,6 @@
         }
         treePositions.forEach(pos => scene.add(createTreeSprite(pos.x, pos.z)));
         
-        // Luciérnagas
         const fireflyMat = new THREE.PointsMaterial({ color: 0xffaa66, size: 0.07 });
         const fireflyCount = 400;
         const fireflyPositions = [];
@@ -384,7 +395,6 @@
         const fireflies = new THREE.Points(fireflyGeo, fireflyMat);
         scene.add(fireflies);
         
-        // Luces
         const ambientLight = new THREE.AmbientLight(0x1a1a2e);
         scene.add(ambientLight);
         const moonLight = new THREE.DirectionalLight(0xccaa88, 0.7);
@@ -395,16 +405,14 @@
         fillLight.position.set(-4, 5, -6);
         scene.add(fillLight);
         
-        // Banana monstruo - ANCHO REAL (escala 1:1)
         const textureLoader = new THREE.TextureLoader();
         const banana2Texture = textureLoader.load("https://raw.githubusercontent.com/Raphapro900/Ms.BananaS/refs/heads/main/banana2.png");
         const spriteMaterial = new THREE.SpriteMaterial({ map: banana2Texture, transparent: true });
         bananaMonster = new THREE.Sprite(spriteMaterial);
-        bananaMonster.scale.set(1.2, 1.2, 1); // Ancho real, tamaño proporcionado
+        bananaMonster.scale.set(1.2, 1.2, 1);
         bananaMonster.position.set(monsterPos.x, 1.0, monsterPos.z);
         scene.add(bananaMonster);
         
-        // Controles de ratón
         chaseContainer.addEventListener('click', () => chaseContainer.requestPointerLock());
         document.addEventListener('pointerlockchange', lockChange);
         function lockChange() {
@@ -422,7 +430,6 @@
           camera.rotation.x = pitch;
         }
         
-        // Controles WASD: W = atrás, S = adelante
         window.addEventListener('keydown', (e) => {
           const key = e.key.toLowerCase();
           if (key === 'w') keys.w = true;
@@ -504,7 +511,6 @@
           }
           bananaMonster.position.set(monsterPos.x, 1.0, monsterPos.z);
           
-          // Escala dinámica manteniendo proporción
           const scaleVal = Math.min(1.8, Math.max(1.2, 1.2 + (3.0 / (distToPlayer + 1.0))));
           bananaMonster.scale.set(scaleVal, scaleVal, 1);
           
@@ -577,16 +583,11 @@
               setTimeout(() => {
                 gameScreen.style.display = "none";
                 roomMusic.pause();
-                menuMusic.currentTime = 0;
-                menuMusic.play().catch(e => console.log("menuMusic error:", e));
+                if (menuMusic) { menuMusic.currentTime = 0; menuMusic.play().catch(e => console.log("menuMusic error:", e)); }
                 startScreen.style.display = "flex";
                 gameActive = true;
                 rage = 0; correctCount = 0; day++;
-                if (day > 5) {
-                  day = 1;
-                  showDialogue("🎉 ¡FELICIDADES! Completaste los 5 días. ¡Has ganado!", null);
-                  setTimeout(() => {}, 5000);
-                }
+                if (day > 5) { day = 1; }
                 rageText.innerText = "💢 Furia: 0";
                 dayText.innerText = "🌙 Día " + day + " — Animales: 0/" + dayTargets[day];
                 nextAnimal();
@@ -598,7 +599,7 @@
             buttons.forEach(b => { if (b.innerText === currentAnimal.name) b.style.backgroundColor = "#aa6644"; });
             rage++;
             rageText.innerText = "💢 Furia: " + rage;
-            showDialogue("❌ ¡Fallaste! El animal era " + currentAnimal.name, "f1.mp3");
+            showDialogue("❌ ¡Fallaste! Era " + currentAnimal.name, "f1.mp3");
             
             if (rage >= 10) { onRageReachedTen(); } 
             else { setTimeout(nextAnimal, 2000); }
@@ -617,35 +618,37 @@
       bananaPlay.addEventListener("click", () => {
         startScreen.style.display = "none";
         gameScreen.style.display = "block";
-        menuMusic.pause();
-        roomMusic.currentTime = 0;
-        roomMusic.play().catch(e => console.log("roomMusic error:", e));
+        if (menuMusic) menuMusic.pause();
+        if (roomMusic) { roomMusic.currentTime = 0; roomMusic.play().catch(e => console.log("roomMusic error:", e)); }
         resetGameScreenState();
-        showDialogue("🍌 ¡Bienvenido! Elige el animal correcto en la televisión. Completa 5 días sin fallar 10 veces.", "Primer dia.mp3");
+        showDialogue("🍌 ¡Bienvenido! Elige el animal correcto. Completa 5 días.", "Primer dia.mp3");
       });
       
       howBtn.addEventListener("click", () => {
         infoBox.style.display = "block";
         infoContent.innerHTML = `
           <h2>📜 How to Play</h2>
-          <p>Tienes 5 días para completar.</p>
-          <p>En cada día, debes elegir el animal correcto que aparece en la televisión.</p>
-          <p>Cada acierto suma 1 punto. Cada fallo suma 1 punto de FURIA.</p>
-          <p>Si llegas a 10 de FURIA... <strong style="color:#ff4444">algo malo ocurrirá...</strong></p>
+          <p>Tienes 5 días. Elige el animal correcto en la TV.</p>
+          <p>Cada fallo suma FURIA. Llega a 10 y algo malo ocurrirá...</p>
           <br>
-          <p><strong>🎮 Controles en el bosque:</strong><br>
-          W = Atrás | S = Adelante | A = Izquierda | D = Derecha<br>
-          SHIFT = Correr | 🖱️ Ratón = Mirar alrededor</p>
+          <p><strong>🎮 Controles misteriosos:</strong><br>
+          <span class="controls-mystery">? ? ? ?</span><br>
+          <span class="controls-mystery">???</span></p>
           <br>
-          <p><strong>🔓 CÓDIGO DE RESET:</strong></p>
-          <div class="binary-code">${binaryCode}</div>
-          <p style="margin-top: 10px; font-size: 0.8rem;">(Traduce el binario para encontrar la página de desbloqueo)</p>
+          <p><strong>🔓 Código de reseteo:</strong></p>
+          <div class="binary-code" id="binaryClick">${binaryCode}</div>
+          <p style="margin-top: 10px; font-size: 0.7rem;">(Descifra el código para encontrar la solución)</p>
         `;
+        
+        const binaryElement = document.getElementById('binaryClick');
+        if (binaryElement) {
+          binaryElement.addEventListener('click', openResetPage);
+        }
       });
       
       shopBtn.addEventListener("click", () => {
         infoBox.style.display = "block";
-        infoContent.innerHTML = "<h2>🛒 Tienda</h2><p>Próximamente: objetos especiales para reducir furia.</p>";
+        infoContent.innerHTML = "<h2>🛒 Tienda</h2><p>Próximamente...</p>";
       });
       
       exitBtn.addEventListener("click", () => window.close());
