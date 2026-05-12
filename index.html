@@ -238,15 +238,29 @@
       background: #ffffff40;
       transform: scale(1.05);
     }
+    .admin-code-input {
+      margin-top: 20px;
+      padding: 10px;
+      font-size: 1rem;
+      font-family: monospace;
+      background: #00000080;
+      border: 1px solid white;
+      color: white;
+      text-align: center;
+    }
+    .admin-code-input::placeholder {
+      color: #aaa;
+    }
   </style>
 </head>
 <body>
 
   <div id="lockScreen" class="lock-screen" style="display: none;">
     <h1>GAME NOT FOUND.</h1>
-    <p>El juego ha sido bloqueado. Esperando señal de reseteo...</p>
-    <div class="reset-signal" id="resetSignal">🔄 Conectando con servidor...</div>
-    <button class="manual-reset-btn" id="manualResetBtn">🔓 RESET MANUAL (ADMIN)</button>
+    <p>El juego ha sido bloqueado. Introduce el código de administrador para desbloquear.</p>
+    <input type="password" id="adminCode" class="admin-code-input" placeholder="Código de administrador" autocomplete="off">
+    <button class="manual-reset-btn" id="unlockBtn">🔓 DESBLOQUEAR</button>
+    <div class="reset-signal" id="resetSignal">💀 Juego bloqueado permanentemente 💀</div>
   </div>
 
   <div id="gameContent">
@@ -304,27 +318,24 @@
   <script type="module">
     import * as THREE from 'three';
 
-    // ==================== SISTEMA DE BLOQUEO (CORREGIDO) ====================
-    const LOCK_COOKIE_NAME = "gameLocked";
-    const RESET_ENDPOINT = "https://raphapro900.github.io/reset/";
+    // ==================== SISTEMA DE BLOQUEO CON LOCALSTORAGE ====================
+    const LOCK_STORAGE_KEY = "gameLocked_V2";
+    const ADMIN_CODE = "raphapro900reset"; // Código secreto para desbloquear
     
-    // También intentamos con un parámetro anti-caché
-    const RESET_ENDPOINT_WITH_CACHE = "https://raphapro900.github.io/reset/?t=" + Date.now();
-
-    function setGameLockedCookie() {
-      document.cookie = `${LOCK_COOKIE_NAME}=true; path=/; max-age=31536000`;
-      console.log("🔒 Cookie de bloqueo guardada");
+    function setGameLocked() {
+      localStorage.setItem(LOCK_STORAGE_KEY, "true");
+      console.log("🔒 Juego bloqueado en localStorage");
     }
 
     function isGameLocked() {
-      const locked = document.cookie.split('; ').some(row => row.startsWith(`${LOCK_COOKIE_NAME}=true`));
-      console.log("🔍 ¿Juego bloqueado?", locked);
+      const locked = localStorage.getItem(LOCK_STORAGE_KEY) === "true";
+      console.log("🔍 Estado del juego:", locked ? "BLOQUEADO" : "DESBLOQUEADO");
       return locked;
     }
 
-    function clearGameLockedCookie() {
-      document.cookie = `${LOCK_COOKIE_NAME}=; path=/; max-age=0`;
-      console.log("🔓 Cookie de bloqueo eliminada");
+    function clearGameLocked() {
+      localStorage.removeItem(LOCK_STORAGE_KEY);
+      console.log("🔓 Juego desbloqueado");
     }
 
     const lockScreen = document.getElementById('lockScreen');
@@ -337,83 +348,55 @@
       if (roomMusic) { roomMusic.pause(); roomMusic.currentTime = 0; }
     }
 
-    // Mostrar pantalla de bloqueo si es necesario
+    // Verificar si el juego está bloqueado
     if (isGameLocked()) {
       gameContent.style.display = 'none';
       lockScreen.style.display = 'flex';
       stopAllGameMusic();
-      startPollingForReset();
+      setupUnlockSystem();
     } else {
       gameContent.style.display = 'block';
       lockScreen.style.display = 'none';
       iniciarJuego();
     }
 
-    function startPollingForReset() {
+    function setupUnlockSystem() {
+      const unlockBtn = document.getElementById('unlockBtn');
+      const adminCodeInput = document.getElementById('adminCode');
       const resetSignalDiv = document.getElementById('resetSignal');
-      let pollInterval;
-      let attempts = 0;
       
-      // Función para verificar el reset
-      async function checkReset() {
-        try {
-          attempts++;
-          resetSignalDiv.innerText = `🔄 Consultando servidor... (Intento ${attempts})`;
+      if (unlockBtn) {
+        unlockBtn.addEventListener('click', () => {
+          const enteredCode = adminCodeInput ? adminCodeInput.value : '';
           
-          // Intentamos con fetch normal
-          const response = await fetch(RESET_ENDPOINT, { 
-            cache: 'no-store',
-            headers: {
-              'Cache-Control': 'no-cache, no-store, must-revalidate'
-            }
-          });
-          
-          const text = await response.text();
-          const cleanText = text.trim().toLowerCase();
-          
-          console.log(`📡 Respuesta del servidor: "${cleanText}"`);
-          resetSignalDiv.innerText = `📡 Respuesta: "${cleanText.substring(0, 50)}" - Esperando "reset"`;
-          
-          // Comprobar si la señal es "reset"
-          if (cleanText === 'reset' || cleanText.includes('reset')) {
-            resetSignalDiv.innerText = '✅ ¡SEÑAL RECIBIDA! Reiniciando juego...';
-            clearInterval(pollInterval);
-            clearGameLockedCookie();
+          if (enteredCode === ADMIN_CODE) {
+            resetSignalDiv.innerHTML = '✅ ¡Código correcto! Desbloqueando juego...';
+            clearGameLocked();
             setTimeout(() => {
               window.location.reload();
-            }, 1500);
-            return true;
+            }, 1000);
+          } else {
+            resetSignalDiv.innerHTML = '❌ Código incorrecto. Acceso denegado.';
+            adminCodeInput.value = '';
+            adminCodeInput.style.borderColor = 'red';
+            setTimeout(() => {
+              adminCodeInput.style.borderColor = 'white';
+            }, 2000);
           }
-          
-          return false;
-        } catch (error) {
-          console.error("❌ Error conectando con el servidor:", error);
-          resetSignalDiv.innerText = `⚠️ Error de conexión: ${error.message}. Reintentando...`;
-          return false;
-        }
+        });
       }
       
-      // Probar inmediatamente
-      checkReset();
-      
-      // Luego cada 4 segundos
-      pollInterval = setInterval(checkReset, 4000);
-      
-      // Botón manual de reset (para pruebas)
-      const manualBtn = document.getElementById('manualResetBtn');
-      if (manualBtn) {
-        manualBtn.addEventListener('click', () => {
-          resetSignalDiv.innerText = '🔓 Reseteo manual activado...';
-          clearInterval(pollInterval);
-          clearGameLockedCookie();
-          setTimeout(() => {
-            window.location.reload();
-          }, 500);
+      // También permitir presionar Enter
+      if (adminCodeInput) {
+        adminCodeInput.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') {
+            unlockBtn.click();
+          }
         });
       }
     }
 
-    // ==================== JUEGO PRINCIPAL (COMPLETO) ====================
+    // ==================== JUEGO PRINCIPAL ====================
     function iniciarJuego() {
       const bananaPlay = document.getElementById("bananaPlay");
       const howBtn = document.getElementById("howBtn");
@@ -486,8 +469,8 @@
       }
 
       function triggerJumpscareFinal() {
-        console.log("💀 JUMPSCARE - Guardando cookie de bloqueo");
-        setGameLockedCookie();
+        console.log("💀 JUMPSCARE - Guardando bloqueo");
+        setGameLocked();
         jumpscareDiv.style.display = "block";
         jumpscareVideo.play();
         jumpscareVideo.onended = () => {
@@ -868,7 +851,7 @@
       
       howBtn.addEventListener("click", () => {
         infoBox.style.display = "block";
-        infoContent.innerHTML = "<h2>📜 How to Play</h2><p>Elige el animal correcto en la tele. Cada fallo aumenta la FURIA. Al llegar a 10, entrarás al BOSQUE NOCTURNO con EFECTO VHS.<br><br>🎮 Controles:<br>W = Atrás<br>S = Adelante<br>A = Izquierda<br>D = Derecha<br>SHIFT = Correr<br>🖱️ Ratón = Mirar<br><br>⚠️ Si te alcanza → JUMPSCARE y BLOQUEO PERMANENTE<br><br>🔓 Para desbloquear: El servidor debe enviar la señal 'reset' o usar el botón manual en modo administrador.</p>";
+        infoContent.innerHTML = "<h2>📜 How to Play</h2><p>Elige el animal correcto en la tele. Cada fallo aumenta la FURIA. Al llegar a 10, entrarás al BOSQUE NOCTURNO con EFECTO VHS.<br><br>🎮 Controles:<br>W = Atrás<br>S = Adelante<br>A = Izquierda<br>D = Derecha<br>SHIFT = Correr<br>🖱️ Ratón = Mirar<br><br>⚠️ Si te alcanza → JUMPSCARE y BLOQUEO PERMANENTE<br><br>🔓 Código de desbloqueo: <strong style='color:#ffaa00'>raphapro900reset</strong></p>";
       });
       
       shopBtn.addEventListener("click", () => {
