@@ -4,7 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>Ms. BananaS - Persecución VHS</title>
+  <!-- Fuente VCR OSD Mono para pantalla de bloqueo -->
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
   <style>
+    /* Estilos generales del juego (se mantienen igual que en tu versión funcional) */
     body {
       margin: 0;
       padding: 0;
@@ -195,49 +198,93 @@
       z-index: 1004;
       pointer-events: none;
     }
+
+    /* Pantalla de bloqueo (Blue Screen) */
+    .lock-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #0000aa;
+      z-index: 10000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Share Tech Mono', 'VCR OSD Mono', monospace;
+      color: white;
+      text-align: center;
+    }
+    .lock-screen h1 {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      letter-spacing: 2px;
+    }
+    .lock-screen p {
+      font-size: 1.5rem;
+      max-width: 80%;
+      line-height: 1.4;
+    }
+    .reset-signal {
+      margin-top: 2rem;
+      font-size: 0.9rem;
+      opacity: 0.7;
+    }
   </style>
 </head>
 <body>
-  <div id="startScreen">
-    <h1 style="text-shadow: 0 0 10px #ff6600;">🍌 Ms. BananaS 🍌</h1>
-    <div class="menuPanel">
-      <img id="bananaPlay" src="banana.png" alt="Ms.BananaS">
-      <div>
-        <button class="menuBtn" id="howBtn">📖 How to Play</button><br>
-        <button class="menuBtn" id="shopBtn">🛒 Shop</button><br>
-        <button class="menuBtn" id="exitBtn">🚪 Exit</button>
+
+  <!-- Pantalla de bloqueo (oculta inicialmente) -->
+  <div id="lockScreen" class="lock-screen" style="display: none;">
+    <h1>GAME NOT FOUND.</h1>
+    <p>El juego ha sido bloqueado. Esperando señal de reseteo...</p>
+    <div class="reset-signal" id="resetSignal">Conectando con https://raphapro900.github.io/reset/ ...</div>
+  </div>
+
+  <!-- Contenido normal del juego (se ocultará si está bloqueado) -->
+  <div id="gameContent">
+    <div id="startScreen">
+      <h1 style="text-shadow: 0 0 10px #ff6600;">🍌 Ms. BananaS 🍌</h1>
+      <div class="menuPanel">
+        <img id="bananaPlay" src="banana.png" alt="Ms.BananaS">
+        <div>
+          <button class="menuBtn" id="howBtn">📖 How to Play</button><br>
+          <button class="menuBtn" id="shopBtn">🛒 Shop</button><br>
+          <button class="menuBtn" id="exitBtn">🚪 Exit</button>
+        </div>
       </div>
+      <audio id="menuMusic" src="bananamenu.mp3" autoplay loop></audio>
+      <footer>CC0 Raphapro900 - V1.0</footer>
+      <div id="infoBox"><span id="closeBtn">✖</span><div id="infoContent"></div></div>
     </div>
-    <audio id="menuMusic" src="bananamenu.mp3" autoplay loop></audio>
-    <footer>CC0 Raphapro900 - V1.0</footer>
-    <div id="infoBox"><span id="closeBtn">✖</span><div id="infoContent"></div></div>
-  </div>
 
-  <div id="gameScreen">
-    <audio id="roomMusic" src="Room Theme.mp3" loop></audio>
-    <img id="bananaGame" src="banana.png" alt="Ms. BananaS">
-    <div id="tv"><img id="animal" src="Seal.webp" alt="Animal"></div>
-    <div class="options">
-      <button>Seal</button><button>Dog</button><button>Cat</button>
-      <button>Duck</button><button>Eagle</button><button>Snake</button>
+    <div id="gameScreen">
+      <audio id="roomMusic" src="Room Theme.mp3" loop></audio>
+      <img id="bananaGame" src="banana.png" alt="Ms. BananaS">
+      <div id="tv"><img id="animal" src="Seal.webp" alt="Animal"></div>
+      <div class="options">
+        <button>Seal</button><button>Dog</button><button>Cat</button>
+        <button>Duck</button><button>Eagle</button><button>Snake</button>
+      </div>
+      <div id="dialogueBox"></div>
+      <audio id="dialogueAudio" preload="auto"></audio>
+      <div id="rageText">💢 Furia: 0</div>
+      <div id="dayText">🌙 Día 1 — Animales: 0/15</div>
     </div>
-    <div id="dialogueBox"></div>
-    <audio id="dialogueAudio" preload="auto"></audio>
-    <div id="rageText">💢 Furia: 0</div>
-    <div id="dayText">🌙 Día 1 — Animales: 0/15</div>
-  </div>
 
-  <div id="jumpscare">
-    <video id="jumpscareVideo" src="jumpscare.mp4"></video>
-  </div>
+    <div id="jumpscare">
+      <video id="jumpscareVideo" src="jumpscare.mp4"></video>
+    </div>
 
-  <div id="chaseContainer">
-    <canvas id="threeCanvas" style="width:100%;height:100%;display:block;"></canvas>
-    <div class="vhs-overlay"></div>
-    <div class="vhs-noise"></div>
-    <div class="chaseUI">🍌 ¡TE PERSIGUE!</div>
-    <audio id="chaseMusic" src="chase.mp3" loop preload="auto"></audio>
-    <audio id="heartbeatSound" src="latido de corazon.mp3" preload="auto"></audio>
+    <div id="chaseContainer">
+      <canvas id="threeCanvas" style="width:100%;height:100%;display:block;"></canvas>
+      <div class="vhs-overlay"></div>
+      <div class="vhs-noise"></div>
+      <div class="chaseUI">🍌 ¡TE PERSIGUE!</div>
+      <audio id="chaseMusic" src="chase.mp3" loop preload="auto"></audio>
+      <audio id="heartbeatSound" src="latido de corazon.mp3" preload="auto"></audio>
+    </div>
   </div>
 
   <script type="importmap">
@@ -251,553 +298,544 @@
   <script type="module">
     import * as THREE from 'three';
 
-    // ==================== JUEGO DE ADIVINANZAS ====================
-    const bananaPlay = document.getElementById("bananaPlay");
-    const howBtn = document.getElementById("howBtn");
-    const shopBtn = document.getElementById("shopBtn");
-    const exitBtn = document.getElementById("exitBtn");
-    const infoBox = document.getElementById("infoBox");
-    const infoContent = document.getElementById("infoContent");
-    const closeBtn = document.getElementById("closeBtn");
-    const startScreen = document.getElementById("startScreen");
-    const gameScreen = document.getElementById("gameScreen");
-    const menuMusic = document.getElementById("menuMusic");
-    const roomMusic = document.getElementById("roomMusic");
-    const animalImg = document.getElementById("animal");
-    const dialogueBox = document.getElementById("dialogueBox");
-    const dialogueAudio = document.getElementById("dialogueAudio");
-    const rageText = document.getElementById("rageText");
-    const dayText = document.getElementById("dayText");
-    const jumpscareDiv = document.getElementById("jumpscare");
-    const jumpscareVideo = document.getElementById("jumpscareVideo");
-    const buttons = document.querySelectorAll(".options button");
-    const chaseContainer = document.getElementById("chaseContainer");
-    const chaseMusic = document.getElementById("chaseMusic");
-    const heartbeatSound = document.getElementById("heartbeatSound");
+    // ==================== SISTEMA DE BLOQUEO POR COOKIE ====================
+    const LOCK_COOKIE_NAME = "gameLocked";
+    const RESET_ENDPOINT = "https://raphapro900.github.io/reset/";
 
-    const animals = [
-      { name: "Seal", file: "Seal.webp", correctSound: "c1.mp3", wrongSound: "f1.mp3" },
-      { name: "Dog", file: "Dog.jfif", correctSound: "c1.mp3", wrongSound: "f1.mp3" },
-      { name: "Cat", file: "Cat.jpj", correctSound: "c1.mp3", wrongSound: "f1.mp3" },
-      { name: "Duck", file: "Duck.avif", correctSound: "c1.mp3", wrongSound: "f1.mp3" },
-      { name: "Eagle", file: "Aguila.webp", correctSound: "c1.mp3", wrongSound: "f1.mp3" },
-      { name: "Snake", file: "Snake.jfif", correctSound: "c1.mp3", wrongSound: "f1.mp3" }
-    ];
-    let currentAnimal = animals[0];
-    let rage = 0;
-    let day = 1;
-    let correctCount = 0;
-    const dayTargets = { 1: 15, 2: 22, 3: 31, 4: 39, 5: 46 };
-    let gameActive = true;
-    let currentTimeout = null;
-
-    function playSound(audioElement, src, volume = 1.0) {
-      if (!audioElement) return;
-      audioElement.volume = volume;
-      audioElement.src = src;
-      audioElement.currentTime = 0;
-      audioElement.play().catch(e => console.log("Error reproduciendo audio:", e));
+    function setGameLockedCookie() {
+      document.cookie = `${LOCK_COOKIE_NAME}=true; path=/; max-age=31536000`; // 1 año
     }
 
-    function showDialogue(text, audioSrc) {
-      if (!gameActive) return;
-      dialogueBox.innerText = text;
-      dialogueBox.style.display = "block";
+    function isGameLocked() {
+      return document.cookie.split('; ').some(row => row.startsWith(`${LOCK_COOKIE_NAME}=true`));
+    }
+
+    function clearGameLockedCookie() {
+      document.cookie = `${LOCK_COOKIE_NAME}=; path=/; max-age=0`;
+    }
+
+    // Mostrar pantalla azul si está bloqueado
+    const lockScreen = document.getElementById('lockScreen');
+    const gameContent = document.getElementById('gameContent');
+
+    if (isGameLocked()) {
+      // Bloquear: ocultar juego y mostrar pantalla azul
+      gameContent.style.display = 'none';
+      lockScreen.style.display = 'flex';
+      startPollingForReset();
+    } else {
+      gameContent.style.display = 'block';
+      lockScreen.style.display = 'none';
+      iniciarJuego(); // Se ejecuta después de declarar todo
+    }
+
+    function startPollingForReset() {
+      const resetSignalDiv = document.getElementById('resetSignal');
+      let pollInterval = setInterval(async () => {
+        try {
+          const response = await fetch(RESET_ENDPOINT, { cache: 'no-cache' });
+          const text = await response.text();
+          // Si el endpoint devuelve "reset" (sin importar mayúsculas/minúsculas o espacios), borrar cookie y recargar
+          if (text.trim().toLowerCase() === 'reset') {
+            clearGameLockedCookie();
+            resetSignalDiv.innerText = '✅ Señal de reseteo recibida. Reiniciando...';
+            clearInterval(pollInterval);
+            setTimeout(() => {
+              window.location.reload();
+            }, 1500);
+          } else {
+            resetSignalDiv.innerText = `Esperando señal... Última respuesta: "${text.trim().substring(0, 30)}"`;
+          }
+        } catch (err) {
+          resetSignalDiv.innerText = `Error conectando: ${err.message}. Reintentando...`;
+        }
+      }, 3000);
+    }
+
+    // ==================== RESTO DEL JUEGO (sin cambios en lógica, solo añadir cookie al perder) ====================
+    // Para no duplicar código, declaramos todo dentro de una función que se llama si NO está bloqueado.
+    function iniciarJuego() {
+      // Aquí va TODO el código original de tu juego, pero con una sola modificación:
+      // En triggerJumpscareFinal() se debe llamar a setGameLockedCookie() ANTES de redirigir.
       
-      if (audioSrc) {
-        playSound(dialogueAudio, audioSrc, 0.8);
-        dialogueAudio.onended = () => {
-          if (gameActive) dialogueBox.style.display = "none";
-        };
-      } else {
-        setTimeout(() => {
-          if (gameActive) dialogueBox.style.display = "none";
-        }, 2000);
+      // Recuperar elementos del DOM
+      const bananaPlay = document.getElementById("bananaPlay");
+      const howBtn = document.getElementById("howBtn");
+      const shopBtn = document.getElementById("shopBtn");
+      const exitBtn = document.getElementById("exitBtn");
+      const infoBox = document.getElementById("infoBox");
+      const infoContent = document.getElementById("infoContent");
+      const closeBtn = document.getElementById("closeBtn");
+      const startScreen = document.getElementById("startScreen");
+      const gameScreen = document.getElementById("gameScreen");
+      const menuMusic = document.getElementById("menuMusic");
+      const roomMusic = document.getElementById("roomMusic");
+      const animalImg = document.getElementById("animal");
+      const dialogueBox = document.getElementById("dialogueBox");
+      const dialogueAudio = document.getElementById("dialogueAudio");
+      const rageText = document.getElementById("rageText");
+      const dayText = document.getElementById("dayText");
+      const jumpscareDiv = document.getElementById("jumpscare");
+      const jumpscareVideo = document.getElementById("jumpscareVideo");
+      const buttons = document.querySelectorAll(".options button");
+      const chaseContainer = document.getElementById("chaseContainer");
+      const chaseMusic = document.getElementById("chaseMusic");
+      const heartbeatSound = document.getElementById("heartbeatSound");
+
+      const animals = [
+        { name: "Seal", file: "Seal.webp", correctSound: "c1.mp3", wrongSound: "f1.mp3" },
+        { name: "Dog", file: "Dog.jfif", correctSound: "c1.mp3", wrongSound: "f1.mp3" },
+        { name: "Cat", file: "Cat.jpj", correctSound: "c1.mp3", wrongSound: "f1.mp3" },
+        { name: "Duck", file: "Duck.avif", correctSound: "c1.mp3", wrongSound: "f1.mp3" },
+        { name: "Eagle", file: "Aguila.webp", correctSound: "c1.mp3", wrongSound: "f1.mp3" },
+        { name: "Snake", file: "Snake.jfif", correctSound: "c1.mp3", wrongSound: "f1.mp3" }
+      ];
+      let currentAnimal = animals[0];
+      let rage = 0;
+      let day = 1;
+      let correctCount = 0;
+      const dayTargets = { 1: 15, 2: 22, 3: 31, 4: 39, 5: 46 };
+      let gameActive = true;
+      let currentTimeout = null;
+
+      function playSound(audioElement, src, volume = 1.0) {
+        if (!audioElement) return;
+        audioElement.volume = volume;
+        audioElement.src = src;
+        audioElement.currentTime = 0;
+        audioElement.play().catch(e => console.log("Error reproduciendo audio:", e));
       }
-    }
 
-    function nextAnimal() {
-      if (!gameActive) return;
-      if (currentTimeout) clearTimeout(currentTimeout);
-      currentAnimal = animals[Math.floor(Math.random() * animals.length)];
-      animalImg.src = currentAnimal.file;
-      animalImg.alt = currentAnimal.name;
-      buttons.forEach(btn => btn.style.backgroundColor = "#1a0a00");
-    }
+      function showDialogue(text, audioSrc) {
+        if (!gameActive) return;
+        dialogueBox.innerText = text;
+        dialogueBox.style.display = "block";
+        if (audioSrc) {
+          playSound(dialogueAudio, audioSrc, 0.8);
+          dialogueAudio.onended = () => {
+            if (gameActive) dialogueBox.style.display = "none";
+          };
+        } else {
+          setTimeout(() => {
+            if (gameActive) dialogueBox.style.display = "none";
+          }, 2000);
+        }
+      }
 
-    function triggerJumpscareFinal() {
-      jumpscareDiv.style.display = "block";
-      jumpscareVideo.play();
-      jumpscareVideo.onended = () => {
-        window.location.href = "https://raw.githubusercontent.com/Raphapro900/Ms.BananaS/refs/heads/main/You%20know%20nothing%2C%20IDIOT.png";
-      };
-    }
+      function nextAnimal() {
+        if (!gameActive) return;
+        if (currentTimeout) clearTimeout(currentTimeout);
+        currentAnimal = animals[Math.floor(Math.random() * animals.length)];
+        animalImg.src = currentAnimal.file;
+        animalImg.alt = currentAnimal.name;
+        buttons.forEach(btn => btn.style.backgroundColor = "#1a0a00");
+      }
 
-    // ==================== PERSECUCIÓN 3D ====================
-    let chaseActive = false;
-    let chaseAnimationId = null;
-    let scene, camera, renderer;
-    let bananaMonster;
-    let monsterPos = { x: 28, z: 22 };
-    let playerPos = { x: 0, z: 0 };
-    let yaw = 0, pitch = 0;
-    let keys = { w: false, s: false, a: false, d: false, shift: false };
-    let baseMonsterSpeed = 3.0;
-    let currentMonsterSpeed = 3.0;
-    let playerSpeed = 5.2;
-    let runningMult = 1.0;
-    let gameOverTriggered = false;
-    let shakeTimeout = null;
-    let chaseStartTime = 0;
-    let heartbeatInterval = null;
-    
-    const treeTextureUrl = "https://raw.githubusercontent.com/Raphapro900/Ms.BananaS/refs/heads/main/tree_ps1.png";
-    
-    function createTreeSprite(x, z) {
-      const textureLoader = new THREE.TextureLoader();
-      const treeTexture = textureLoader.load(treeTextureUrl);
-      const material = new THREE.SpriteMaterial({ map: treeTexture, transparent: true });
-      const sprite = new THREE.Sprite(material);
-      sprite.scale.set(1.8, 2.2, 1);
-      sprite.position.set(x, 1.1, z);
-      return sprite;
-    }
-    
-    function updateHeartbeat(distance) {
-      if (!heartbeatSound) return;
+      // MODIFICACIÓN IMPORTANTE: al perder, guardar cookie ANTES de redirigir
+      function triggerJumpscareFinal() {
+        // Guardar cookie de bloqueo
+        setGameLockedCookie();
+        
+        jumpscareDiv.style.display = "block";
+        jumpscareVideo.play();
+        jumpscareVideo.onended = () => {
+          window.location.href = "https://raw.githubusercontent.com/Raphapro900/Ms.BananaS/refs/heads/main/You%20know%20nothing%2C%20IDIOT.png";
+        };
+      }
+
+      // ==================== PERSECUCIÓN 3D ====================
+      let chaseActive = false;
+      let chaseAnimationId = null;
+      let scene, camera, renderer;
+      let bananaMonster;
+      let monsterPos = { x: 28, z: 22 };
+      let playerPos = { x: 0, z: 0 };
+      let yaw = 0, pitch = 0;
+      let keys = { w: false, s: false, a: false, d: false, shift: false };
+      let baseMonsterSpeed = 3.0;
+      let currentMonsterSpeed = 3.0;
+      let playerSpeed = 5.2;
+      let runningMult = 1.0;
+      let gameOverTriggered = false;
+      let shakeTimeout = null;
+      let chaseStartTime = 0;
+      let heartbeatInterval = null;
       
-      let speed = 0;
-      if (distance < 3) {
-        speed = 2.2;
-      } else if (distance < 5) {
-        speed = 1.6;
-      } else if (distance < 8) {
-        speed = 1.1;
-      } else if (distance < 12) {
-        speed = 0.7;
-      } else {
-        if (heartbeatInterval) {
-          clearInterval(heartbeatInterval);
+      const treeTextureUrl = "https://raw.githubusercontent.com/Raphapro900/Ms.BananaS/refs/heads/main/tree_ps1.png";
+      
+      function createTreeSprite(x, z) {
+        const textureLoader = new THREE.TextureLoader();
+        const treeTexture = textureLoader.load(treeTextureUrl);
+        const material = new THREE.SpriteMaterial({ map: treeTexture, transparent: true });
+        const sprite = new THREE.Sprite(material);
+        sprite.scale.set(1.8, 2.2, 1);
+        sprite.position.set(x, 1.1, z);
+        return sprite;
+      }
+      
+      function updateHeartbeat(distance) {
+        if (!heartbeatSound) return;
+        let speed = 0;
+        if (distance < 3) speed = 2.2;
+        else if (distance < 5) speed = 1.6;
+        else if (distance < 8) speed = 1.1;
+        else if (distance < 12) speed = 0.7;
+        else {
+          if (heartbeatInterval) clearInterval(heartbeatInterval);
           heartbeatInterval = null;
           heartbeatSound.pause();
           heartbeatSound.currentTime = 0;
-        }
-        return;
-      }
-      
-      if (heartbeatInterval) clearInterval(heartbeatInterval);
-      
-      heartbeatSound.playbackRate = speed;
-      heartbeatSound.volume = Math.min(0.8, 0.3 + (12 - distance) / 20);
-      heartbeatSound.loop = true;
-      heartbeatSound.play().catch(e => console.log("heartbeat error", e));
-      
-      const intervalTime = 1000 / (speed * 1.5);
-      heartbeatInterval = setInterval(() => {
-        if (chaseActive && !gameOverTriggered && distance < 12) {
-          heartbeatSound.currentTime = 0;
-          heartbeatSound.play().catch(e => {});
-        }
-      }, intervalTime);
-    }
-    
-    function stopHeartbeat() {
-      if (heartbeatInterval) {
-        clearInterval(heartbeatInterval);
-        heartbeatInterval = null;
-      }
-      if (heartbeatSound) {
-        heartbeatSound.pause();
-        heartbeatSound.currentTime = 0;
-      }
-    }
-
-    function applyShake(intensity) {
-      if (!chaseActive || gameOverTriggered) return;
-      const strength = Math.min(intensity, 12);
-      const canvas = renderer.domElement;
-      const xShake = (Math.random() - 0.5) * strength;
-      const yShake = (Math.random() - 0.5) * strength;
-      canvas.style.transform = `translate(${xShake}px, ${yShake}px)`;
-      
-      if (shakeTimeout) clearTimeout(shakeTimeout);
-      shakeTimeout = setTimeout(() => {
-        if (canvas && chaseActive && !gameOverTriggered) {
-          canvas.style.transform = "translate(0px, 0px)";
-        }
-      }, 80);
-    }
-
-    function updateForestColor(distance) {
-      if (!scene) return;
-      let r = 0.03, g = 0.11, b = 0.23;
-      if (distance < 5) {
-        const intensity = Math.min(1, (5 - distance) / 3);
-        r = 0.25 + intensity * 0.4;
-        g = 0.05 + intensity * 0.08;
-        b = 0.05;
-      } else if (distance < 10) {
-        const intensity = (10 - distance) / 5;
-        r = 0.12 + intensity * 0.15;
-        g = 0.08 + intensity * 0.04;
-        b = 0.1;
-      } else {
-        r = 0.03;
-        g = 0.11;
-        b = 0.23;
-      }
-      scene.background = new THREE.Color(r, g, b);
-      if (scene.fog) scene.fog.color = new THREE.Color(r, g, b);
-    }
-    
-    function updateChaseAudio(distance) {
-      if (!chaseMusic) return;
-      if (distance < 8) {
-        chaseMusic.playbackRate = 1.2;
-        chaseMusic.volume = 0.9;
-      } else if (distance < 15) {
-        chaseMusic.playbackRate = 1.0;
-        chaseMusic.volume = 0.7;
-      } else {
-        chaseMusic.playbackRate = 0.7;
-        chaseMusic.volume = 0.5;
-      }
-    }
-
-    function initChaseGame() {
-      scene = new THREE.Scene();
-      scene.background = new THREE.Color(0x030b17);
-      scene.fog = new THREE.FogExp2(0x030b17, 0.03);
-      
-      camera = new THREE.PerspectiveCamera(85, window.innerWidth / window.innerHeight, 0.05, 200);
-      camera.position.set(0, 1.68, 0);
-      
-      renderer = new THREE.WebGLRenderer({ canvas: document.getElementById("threeCanvas"), antialias: true });
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      renderer.shadowMap.enabled = true;
-      
-      // Suelo
-      const groundMat = new THREE.MeshStandardMaterial({ color: 0x1a3a1a, roughness: 0.9 });
-      const ground = new THREE.Mesh(new THREE.PlaneGeometry(140, 140), groundMat);
-      ground.rotation.x = -Math.PI / 2;
-      ground.position.y = -0.1;
-      ground.receiveShadow = true;
-      scene.add(ground);
-      
-      // Árboles con textura tree_ps1.png
-      const treePositions = [];
-      for (let i = 0; i < 180; i++) {
-        let angle = Math.random() * Math.PI * 2;
-        let radius = 25 + Math.random() * 52;
-        let x = Math.cos(angle) * radius;
-        let z = Math.sin(angle) * radius;
-        treePositions.push({ x, z });
-      }
-      for (let i = 0; i < 80; i++) {
-        let x = (Math.random() - 0.5) * 110;
-        let z = (Math.random() - 0.5) * 110;
-        if (Math.abs(x) > 8 || Math.abs(z) > 8) {
-          treePositions.push({ x, z });
-        }
-      }
-      
-      treePositions.forEach(pos => {
-        const tree = createTreeSprite(pos.x, pos.z);
-        scene.add(tree);
-      });
-      
-      // Luciérnagas
-      const fireflyMat = new THREE.PointsMaterial({ color: 0xffaa66, size: 0.07 });
-      const fireflyCount = 400;
-      const fireflyPositions = [];
-      for (let i = 0; i < fireflyCount; i++) {
-        fireflyPositions.push((Math.random() - 0.5) * 120, Math.random() * 3.5, (Math.random() - 0.5) * 120);
-      }
-      const fireflyGeo = new THREE.BufferGeometry();
-      fireflyGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(fireflyPositions), 3));
-      const fireflies = new THREE.Points(fireflyGeo, fireflyMat);
-      scene.add(fireflies);
-      
-      // Iluminación nocturna
-      const ambientLight = new THREE.AmbientLight(0x1a1a2e);
-      scene.add(ambientLight);
-      const moonLight = new THREE.DirectionalLight(0xccaa88, 0.7);
-      moonLight.position.set(12, 24, -14);
-      moonLight.castShadow = true;
-      scene.add(moonLight);
-      const fillLight = new THREE.PointLight(0x664422, 0.35);
-      fillLight.position.set(-4, 5, -6);
-      scene.add(fillLight);
-      
-      // BANANA2.JPG - MÁS ALTA
-      const textureLoader = new THREE.TextureLoader();
-      const banana2Texture = textureLoader.load("https://raw.githubusercontent.com/Raphapro900/Ms.BananaS/refs/heads/main/banana2.png");
-      const spriteMaterial = new THREE.SpriteMaterial({ map: banana2Texture, transparent: true, rotation: 0 });
-      bananaMonster = new THREE.Sprite(spriteMaterial);
-      bananaMonster.scale.set(1.8, 2.8, 1);
-      bananaMonster.position.set(monsterPos.x, 1.0, monsterPos.z);
-      scene.add(bananaMonster);
-      
-      // Controles de ratón
-      chaseContainer.addEventListener('click', () => {
-        chaseContainer.requestPointerLock();
-      });
-      
-      document.addEventListener('pointerlockchange', lockChange);
-      function lockChange() {
-        if (document.pointerLockElement === chaseContainer) {
-          document.addEventListener('mousemove', onMouseMove);
-        } else {
-          document.removeEventListener('mousemove', onMouseMove);
-        }
-      }
-      
-      function onMouseMove(e) {
-        if (!chaseActive || gameOverTriggered) return;
-        const sens = 0.0022;
-        yaw -= e.movementX * sens;
-        pitch -= e.movementY * sens;
-        pitch = Math.max(-Math.PI / 2.2, Math.min(Math.PI / 2.2, pitch));
-        camera.rotation.order = 'YXZ';
-        camera.rotation.y = yaw;
-        camera.rotation.x = pitch;
-      }
-      
-      // CONTROLES: W = atrás, S = adelante
-      window.addEventListener('keydown', (e) => {
-        const key = e.key.toLowerCase();
-        if (key === 'w') keys.w = true;
-        if (key === 's') keys.s = true;
-        if (key === 'a') keys.a = true;
-        if (key === 'd') keys.d = true;
-        if (key === 'shift') { keys.shift = true; runningMult = 1.85; }
-        e.preventDefault();
-      });
-      window.addEventListener('keyup', (e) => {
-        const key = e.key.toLowerCase();
-        if (key === 'w') keys.w = false;
-        if (key === 's') keys.s = false;
-        if (key === 'a') keys.a = false;
-        if (key === 'd') keys.d = false;
-        if (key === 'shift') { keys.shift = false; runningMult = 1.0; }
-      });
-      
-      let lastTimestamp = performance.now();
-      chaseStartTime = performance.now() / 1000;
-      
-      function updateChase() {
-        if (!chaseActive) return;
-        const now = performance.now();
-        let delta = Math.min(0.033, (now - lastTimestamp) / 1000);
-        lastTimestamp = now;
-        if (delta <= 0) delta = 0.016;
-        
-        const elapsedSeconds = (performance.now() / 1000) - chaseStartTime;
-        currentMonsterSpeed = baseMonsterSpeed + Math.floor(elapsedSeconds) * 0.4;
-        currentMonsterSpeed = Math.min(currentMonsterSpeed, 7.8);
-        
-        const currentPlayerSpeed = playerSpeed * runningMult;
-        let moveX = 0, moveZ = 0;
-        
-        if (keys.w) moveZ = 1;
-        if (keys.s) moveZ = -1;
-        if (keys.a) moveX = -1;
-        if (keys.d) moveX = 1;
-        
-        if (moveX !== 0 || moveZ !== 0) {
-          const len = Math.hypot(moveX, moveZ);
-          moveX /= len;
-          moveZ /= len;
-          const forward = new THREE.Vector3(-Math.sin(yaw), 0, -Math.cos(yaw));
-          const right = new THREE.Vector3(Math.cos(yaw), 0, -Math.sin(yaw));
-          playerPos.x += (forward.x * moveZ + right.x * moveX) * currentPlayerSpeed * delta;
-          playerPos.z += (forward.z * moveZ + right.z * moveX) * currentPlayerSpeed * delta;
-        }
-        
-        playerPos.x = Math.min(Math.max(playerPos.x, -60), 60);
-        playerPos.z = Math.min(Math.max(playerPos.z, -60), 60);
-        camera.position.x = playerPos.x;
-        camera.position.z = playerPos.z;
-        
-        const dx = playerPos.x - monsterPos.x;
-        const dz = playerPos.z - monsterPos.z;
-        let distToPlayer = Math.hypot(dx, dz);
-        
-        updateChaseAudio(distToPlayer);
-        updateHeartbeat(distToPlayer);
-        updateForestColor(distToPlayer);
-        
-        if (distToPlayer < 6.5) {
-          let intensity = 0;
-          if (distToPlayer < 2.0) intensity = 12;
-          else if (distToPlayer < 3.5) intensity = 8;
-          else if (distToPlayer < 5.0) intensity = 5;
-          else if (distToPlayer < 6.5) intensity = 3;
-          if (intensity > 0) applyShake(intensity);
-        }
-        
-        let finalMonsterSpeed = currentMonsterSpeed;
-        if (distToPlayer < 4) finalMonsterSpeed += 1.3;
-        else if (distToPlayer < 8) finalMonsterSpeed += 0.7;
-        
-        if (distToPlayer > 0.7) {
-          const moveDirX = dx / distToPlayer;
-          const moveDirZ = dz / distToPlayer;
-          monsterPos.x += moveDirX * finalMonsterSpeed * delta;
-          monsterPos.z += moveDirZ * finalMonsterSpeed * delta;
-        }
-        
-        bananaMonster.position.set(monsterPos.x, 1.0, monsterPos.z);
-        
-        const scaleX = Math.min(2.2, Math.max(1.6, 1.6 + (3.5 / (distToPlayer + 1.0))));
-        const scaleY = Math.min(3.5, Math.max(2.6, 2.6 + (5.0 / (distToPlayer + 1.0))));
-        bananaMonster.scale.set(scaleX, scaleY, 1);
-        
-        if (distToPlayer <= 1.3 && !gameOverTriggered) {
-          gameOverTriggered = true;
-          chaseActive = false;
-          if (chaseAnimationId) cancelAnimationFrame(chaseAnimationId);
-          stopHeartbeat();
-          chaseMusic.pause();
-          chaseContainer.style.display = "none";
-          triggerJumpscareFinal();
           return;
         }
-        
-        fireflies.rotation.y += 0.003;
-        renderer.render(scene, camera);
-        chaseAnimationId = requestAnimationFrame(updateChase);
+        if (heartbeatInterval) clearInterval(heartbeatInterval);
+        heartbeatSound.playbackRate = speed;
+        heartbeatSound.volume = Math.min(0.8, 0.3 + (12 - distance) / 20);
+        heartbeatSound.loop = true;
+        heartbeatSound.play().catch(e => console.log("heartbeat error", e));
+        const intervalTime = 1000 / (speed * 1.5);
+        heartbeatInterval = setInterval(() => {
+          if (chaseActive && !gameOverTriggered && distance < 12) {
+            heartbeatSound.currentTime = 0;
+            heartbeatSound.play().catch(e => {});
+          }
+        }, intervalTime);
       }
       
-      playerPos = { x: 0, z: 0 };
-      monsterPos = { x: 38, z: 32 };
-      yaw = 0;
-      pitch = 0;
-      camera.rotation.y = 0;
-      camera.rotation.x = 0;
-      camera.position.set(0, 1.68, 0);
-      gameOverTriggered = false;
-      runningMult = 1;
-      lastTimestamp = performance.now();
-      chaseStartTime = performance.now() / 1000;
-      currentMonsterSpeed = baseMonsterSpeed;
-      updateChase();
-    }
-    
-    function startChaseMinigame() {
-      if (chaseActive) return;
-      
-      const glitchDiv = document.createElement('div');
-      glitchDiv.className = 'glitch-transition';
-      document.body.appendChild(glitchDiv);
-      
-      setTimeout(() => {
-        glitchDiv.remove();
-        
-        chaseActive = true;
-        chaseContainer.style.display = "flex";
-        
-        chaseMusic.currentTime = 0;
-        chaseMusic.loop = true;
-        chaseMusic.volume = 0.7;
-        chaseMusic.play().catch(e => console.log("audio error", e));
-        
-        initChaseGame();
-      }, 800);
-    }
-    
-    function onRageReachedTen() {
-      if (!gameActive) return;
-      gameActive = false;
-      roomMusic.pause();
-      gameScreen.style.display = "none";
-      startChaseMinigame();
-    }
-    
-    // ==================== EVENTOS DE LOS BOTONES ====================
-    buttons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        if (!gameActive) return;
-        if (btn.innerText === currentAnimal.name) {
-          btn.style.backgroundColor = "#2a6a2a";
-          correctCount++;
-          dayText.innerText = "🌙 Día " + day + " — Animales: " + correctCount + "/" + dayTargets[day];
-          showDialogue("✅ ¡Correcto!", currentAnimal.correctSound);
-          
-          if (correctCount >= dayTargets[day]) {
-            showDialogue("✨ ¡Completaste el día!", "c2.mp3");
-            setTimeout(() => {
-              gameScreen.style.display = "none";
-              roomMusic.pause();
-              menuMusic.currentTime = 0;
-              menuMusic.play();
-              startScreen.style.display = "flex";
-              gameActive = true;
-              rage = 0;
-              correctCount = 0;
-              day = 1;
-              rageText.innerText = "💢 Furia: 0";
-              dayText.innerText = "🌙 Día 1 — Animales: 0/15";
-              nextAnimal();
-            }, 4000);
-          }
-          setTimeout(nextAnimal, 2000);
-        } else {
-          btn.style.backgroundColor = "#882222";
-          buttons.forEach(b => {
-            if (b.innerText === currentAnimal.name) b.style.backgroundColor = "#aa6644";
-          });
-          rage++;
-          rageText.innerText = "💢 Furia: " + rage;
-          showDialogue("❌ ¡Fallaste!", currentAnimal.wrongSound);
-          if (rage >= 10) {
-            onRageReachedTen();
-          } else {
-            setTimeout(nextAnimal, 2000);
-          }
+      function stopHeartbeat() {
+        if (heartbeatInterval) clearInterval(heartbeatInterval);
+        heartbeatInterval = null;
+        if (heartbeatSound) {
+          heartbeatSound.pause();
+          heartbeatSound.currentTime = 0;
         }
+      }
+
+      function applyShake(intensity) {
+        if (!chaseActive || gameOverTriggered) return;
+        const strength = Math.min(intensity, 12);
+        const canvas = renderer.domElement;
+        const xShake = (Math.random() - 0.5) * strength;
+        const yShake = (Math.random() - 0.5) * strength;
+        canvas.style.transform = `translate(${xShake}px, ${yShake}px)`;
+        if (shakeTimeout) clearTimeout(shakeTimeout);
+        shakeTimeout = setTimeout(() => {
+          if (canvas && chaseActive && !gameOverTriggered) canvas.style.transform = "translate(0px, 0px)";
+        }, 80);
+      }
+
+      function updateForestColor(distance) {
+        if (!scene) return;
+        let r = 0.03, g = 0.11, b = 0.23;
+        if (distance < 5) {
+          const intensity = Math.min(1, (5 - distance) / 3);
+          r = 0.25 + intensity * 0.4;
+          g = 0.05 + intensity * 0.08;
+          b = 0.05;
+        } else if (distance < 10) {
+          const intensity = (10 - distance) / 5;
+          r = 0.12 + intensity * 0.15;
+          g = 0.08 + intensity * 0.04;
+          b = 0.1;
+        }
+        scene.background = new THREE.Color(r, g, b);
+        if (scene.fog) scene.fog.color = new THREE.Color(r, g, b);
+      }
+      
+      function updateChaseAudio(distance) {
+        if (!chaseMusic) return;
+        if (distance < 8) { chaseMusic.playbackRate = 1.2; chaseMusic.volume = 0.9; }
+        else if (distance < 15) { chaseMusic.playbackRate = 1.0; chaseMusic.volume = 0.7; }
+        else { chaseMusic.playbackRate = 0.7; chaseMusic.volume = 0.5; }
+      }
+
+      function initChaseGame() {
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x030b17);
+        scene.fog = new THREE.FogExp2(0x030b17, 0.03);
+        camera = new THREE.PerspectiveCamera(85, window.innerWidth / window.innerHeight, 0.05, 200);
+        camera.position.set(0, 1.68, 0);
+        renderer = new THREE.WebGLRenderer({ canvas: document.getElementById("threeCanvas"), antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        
+        // Suelo
+        const groundMat = new THREE.MeshStandardMaterial({ color: 0x1a3a1a, roughness: 0.9 });
+        const ground = new THREE.Mesh(new THREE.PlaneGeometry(140, 140), groundMat);
+        ground.rotation.x = -Math.PI / 2;
+        ground.position.y = -0.1;
+        ground.receiveShadow = true;
+        scene.add(ground);
+        
+        // Árboles sprite
+        const treePositions = [];
+        for (let i = 0; i < 180; i++) {
+          let angle = Math.random() * Math.PI * 2;
+          let radius = 25 + Math.random() * 52;
+          treePositions.push({ x: Math.cos(angle) * radius, z: Math.sin(angle) * radius });
+        }
+        for (let i = 0; i < 80; i++) {
+          let x = (Math.random() - 0.5) * 110;
+          let z = (Math.random() - 0.5) * 110;
+          if (Math.abs(x) > 8 || Math.abs(z) > 8) treePositions.push({ x, z });
+        }
+        treePositions.forEach(pos => scene.add(createTreeSprite(pos.x, pos.z)));
+        
+        // Luciérnagas
+        const fireflyMat = new THREE.PointsMaterial({ color: 0xffaa66, size: 0.07 });
+        const fireflyCount = 400;
+        const fireflyPositions = [];
+        for (let i = 0; i < fireflyCount; i++) fireflyPositions.push((Math.random() - 0.5) * 120, Math.random() * 3.5, (Math.random() - 0.5) * 120);
+        const fireflyGeo = new THREE.BufferGeometry();
+        fireflyGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(fireflyPositions), 3));
+        const fireflies = new THREE.Points(fireflyGeo, fireflyMat);
+        scene.add(fireflies);
+        
+        // Luces
+        const ambientLight = new THREE.AmbientLight(0x1a1a2e);
+        scene.add(ambientLight);
+        const moonLight = new THREE.DirectionalLight(0xccaa88, 0.7);
+        moonLight.position.set(12, 24, -14);
+        moonLight.castShadow = true;
+        scene.add(moonLight);
+        const fillLight = new THREE.PointLight(0x664422, 0.35);
+        fillLight.position.set(-4, 5, -6);
+        scene.add(fillLight);
+        
+        // Banana2.png más alta
+        const textureLoader = new THREE.TextureLoader();
+        const banana2Texture = textureLoader.load("https://raw.githubusercontent.com/Raphapro900/Ms.BananaS/refs/heads/main/banana2.png");
+        const spriteMaterial = new THREE.SpriteMaterial({ map: banana2Texture, transparent: true });
+        bananaMonster = new THREE.Sprite(spriteMaterial);
+        bananaMonster.scale.set(1.8, 2.8, 1);
+        bananaMonster.position.set(monsterPos.x, 1.0, monsterPos.z);
+        scene.add(bananaMonster);
+        
+        // Controles de ratón y teclado (igual que antes)
+        chaseContainer.addEventListener('click', () => chaseContainer.requestPointerLock());
+        document.addEventListener('pointerlockchange', lockChange);
+        function lockChange() {
+          if (document.pointerLockElement === chaseContainer) document.addEventListener('mousemove', onMouseMove);
+          else document.removeEventListener('mousemove', onMouseMove);
+        }
+        function onMouseMove(e) {
+          if (!chaseActive || gameOverTriggered) return;
+          const sens = 0.0022;
+          yaw -= e.movementX * sens;
+          pitch -= e.movementY * sens;
+          pitch = Math.max(-Math.PI / 2.2, Math.min(Math.PI / 2.2, pitch));
+          camera.rotation.order = 'YXZ';
+          camera.rotation.y = yaw;
+          camera.rotation.x = pitch;
+        }
+        
+        window.addEventListener('keydown', (e) => {
+          const key = e.key.toLowerCase();
+          if (key === 'w') keys.w = true;
+          if (key === 's') keys.s = true;
+          if (key === 'a') keys.a = true;
+          if (key === 'd') keys.d = true;
+          if (key === 'shift') { keys.shift = true; runningMult = 1.85; }
+          e.preventDefault();
+        });
+        window.addEventListener('keyup', (e) => {
+          const key = e.key.toLowerCase();
+          if (key === 'w') keys.w = false;
+          if (key === 's') keys.s = false;
+          if (key === 'a') keys.a = false;
+          if (key === 'd') keys.d = false;
+          if (key === 'shift') { keys.shift = false; runningMult = 1.0; }
+        });
+        
+        let lastTimestamp = performance.now();
+        chaseStartTime = performance.now() / 1000;
+        
+        function updateChase() {
+          if (!chaseActive) return;
+          const now = performance.now();
+          let delta = Math.min(0.033, (now - lastTimestamp) / 1000);
+          lastTimestamp = now;
+          if (delta <= 0) delta = 0.016;
+          
+          const elapsedSeconds = (performance.now() / 1000) - chaseStartTime;
+          currentMonsterSpeed = baseMonsterSpeed + Math.floor(elapsedSeconds) * 0.4;
+          currentMonsterSpeed = Math.min(currentMonsterSpeed, 7.8);
+          
+          const currentPlayerSpeed = playerSpeed * runningMult;
+          let moveX = 0, moveZ = 0;
+          if (keys.w) moveZ = 1;
+          if (keys.s) moveZ = -1;
+          if (keys.a) moveX = -1;
+          if (keys.d) moveX = 1;
+          
+          if (moveX !== 0 || moveZ !== 0) {
+            const len = Math.hypot(moveX, moveZ);
+            moveX /= len; moveZ /= len;
+            const forward = new THREE.Vector3(-Math.sin(yaw), 0, -Math.cos(yaw));
+            const right = new THREE.Vector3(Math.cos(yaw), 0, -Math.sin(yaw));
+            playerPos.x += (forward.x * moveZ + right.x * moveX) * currentPlayerSpeed * delta;
+            playerPos.z += (forward.z * moveZ + right.z * moveX) * currentPlayerSpeed * delta;
+          }
+          playerPos.x = Math.min(Math.max(playerPos.x, -60), 60);
+          playerPos.z = Math.min(Math.max(playerPos.z, -60), 60);
+          camera.position.x = playerPos.x;
+          camera.position.z = playerPos.z;
+          
+          const dx = playerPos.x - monsterPos.x;
+          const dz = playerPos.z - monsterPos.z;
+          let distToPlayer = Math.hypot(dx, dz);
+          
+          updateChaseAudio(distToPlayer);
+          updateHeartbeat(distToPlayer);
+          updateForestColor(distToPlayer);
+          
+          if (distToPlayer < 6.5) {
+            let intensity = 0;
+            if (distToPlayer < 2.0) intensity = 12;
+            else if (distToPlayer < 3.5) intensity = 8;
+            else if (distToPlayer < 5.0) intensity = 5;
+            else if (distToPlayer < 6.5) intensity = 3;
+            if (intensity > 0) applyShake(intensity);
+          }
+          
+          let finalMonsterSpeed = currentMonsterSpeed;
+          if (distToPlayer < 4) finalMonsterSpeed += 1.3;
+          else if (distToPlayer < 8) finalMonsterSpeed += 0.7;
+          if (distToPlayer > 0.7) {
+            const moveDirX = dx / distToPlayer;
+            const moveDirZ = dz / distToPlayer;
+            monsterPos.x += moveDirX * finalMonsterSpeed * delta;
+            monsterPos.z += moveDirZ * finalMonsterSpeed * delta;
+          }
+          bananaMonster.position.set(monsterPos.x, 1.0, monsterPos.z);
+          const scaleX = Math.min(2.2, Math.max(1.6, 1.6 + (3.5 / (distToPlayer + 1.0))));
+          const scaleY = Math.min(3.5, Math.max(2.6, 2.6 + (5.0 / (distToPlayer + 1.0))));
+          bananaMonster.scale.set(scaleX, scaleY, 1);
+          
+          if (distToPlayer <= 1.3 && !gameOverTriggered) {
+            gameOverTriggered = true;
+            chaseActive = false;
+            if (chaseAnimationId) cancelAnimationFrame(chaseAnimationId);
+            stopHeartbeat();
+            chaseMusic.pause();
+            chaseContainer.style.display = "none";
+            triggerJumpscareFinal();  // Aquí se guarda la cookie
+            return;
+          }
+          fireflies.rotation.y += 0.003;
+          renderer.render(scene, camera);
+          chaseAnimationId = requestAnimationFrame(updateChase);
+        }
+        
+        playerPos = { x: 0, z: 0 };
+        monsterPos = { x: 38, z: 32 };
+        yaw = 0; pitch = 0;
+        camera.rotation.y = 0; camera.rotation.x = 0;
+        camera.position.set(0, 1.68, 0);
+        gameOverTriggered = false;
+        runningMult = 1;
+        lastTimestamp = performance.now();
+        chaseStartTime = performance.now() / 1000;
+        currentMonsterSpeed = baseMonsterSpeed;
+        updateChase();
+      }
+      
+      function startChaseMinigame() {
+        if (chaseActive) return;
+        const glitchDiv = document.createElement('div');
+        glitchDiv.className = 'glitch-transition';
+        document.body.appendChild(glitchDiv);
+        setTimeout(() => {
+          glitchDiv.remove();
+          chaseActive = true;
+          chaseContainer.style.display = "flex";
+          chaseMusic.currentTime = 0;
+          chaseMusic.loop = true;
+          chaseMusic.volume = 0.7;
+          chaseMusic.play().catch(e => console.log("audio error", e));
+          initChaseGame();
+        }, 800);
+      }
+      
+      function onRageReachedTen() {
+        if (!gameActive) return;
+        gameActive = false;
+        roomMusic.pause();
+        gameScreen.style.display = "none";
+        startChaseMinigame();
+      }
+      
+      // Eventos de los botones de animales
+      buttons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (!gameActive) return;
+          if (btn.innerText === currentAnimal.name) {
+            btn.style.backgroundColor = "#2a6a2a";
+            correctCount++;
+            dayText.innerText = "🌙 Día " + day + " — Animales: " + correctCount + "/" + dayTargets[day];
+            showDialogue("✅ ¡Correcto!", currentAnimal.correctSound);
+            if (correctCount >= dayTargets[day]) {
+              showDialogue("✨ ¡Completaste el día!", "c2.mp3");
+              setTimeout(() => {
+                gameScreen.style.display = "none";
+                roomMusic.pause();
+                menuMusic.currentTime = 0;
+                menuMusic.play();
+                startScreen.style.display = "flex";
+                gameActive = true;
+                rage = 0; correctCount = 0; day = 1;
+                rageText.innerText = "💢 Furia: 0";
+                dayText.innerText = "🌙 Día 1 — Animales: 0/15";
+                nextAnimal();
+              }, 4000);
+            }
+            setTimeout(nextAnimal, 2000);
+          } else {
+            btn.style.backgroundColor = "#882222";
+            buttons.forEach(b => {
+              if (b.innerText === currentAnimal.name) b.style.backgroundColor = "#aa6644";
+            });
+            rage++;
+            rageText.innerText = "💢 Furia: " + rage;
+            showDialogue("❌ ¡Fallaste!", currentAnimal.wrongSound);
+            if (rage >= 10) onRageReachedTen();
+            else setTimeout(nextAnimal, 2000);
+          }
+        });
       });
-    });
-    
-    function resetGameScreenState() {
-      gameActive = true;
-      rage = 0;
-      correctCount = 0;
-      day = 1;
-      rageText.innerText = "💢 Furia: 0";
-      dayText.innerText = "🌙 Día 1 — Animales: 0/15";
+      
+      function resetGameScreenState() {
+        gameActive = true;
+        rage = 0; correctCount = 0; day = 1;
+        rageText.innerText = "💢 Furia: 0";
+        dayText.innerText = "🌙 Día 1 — Animales: 0/15";
+        nextAnimal();
+      }
+      
+      bananaPlay.addEventListener("click", () => {
+        startScreen.style.display = "none";
+        gameScreen.style.display = "block";
+        menuMusic.pause();
+        roomMusic.currentTime = 0;
+        roomMusic.play();
+        resetGameScreenState();
+        showDialogue("🍌 Bienvenido... No falles...", "Primer dia.mp3");
+      });
+      
+      howBtn.addEventListener("click", () => {
+        infoBox.style.display = "block";
+        infoContent.innerHTML = "<h2>📜 How to Play</h2><p>Elige el animal correcto en la tele. Cada fallo aumenta la FURIA. Al llegar a 10, entrarás al BOSQUE NOCTURNO con EFECTO VHS.<br><br>🎮 Controles:<br>W = Atrás<br>S = Adelante<br>A = Izquierda<br>D = Derecha<br>SHIFT = Correr<br>🖱️ Ratón = Mirar<br><br>⚠️ Características:<br>• Banana2.png se hace más grande al acercarse<br>• El bosque se vuelve ROJO cuando está cerca<br>• Latido del corazón más rápido<br>• Velocidad de Banana aumenta cada segundo<br><br>Si te alcanza → JUMPSCARE</p>";
+      });
+      
+      shopBtn.addEventListener("click", () => {
+        infoBox.style.display = "block";
+        infoContent.innerHTML = "<h2>🛒 Tienda</h2><p>Próximamente: objetos especiales.</p>";
+      });
+      
+      exitBtn.addEventListener("click", () => window.close());
+      closeBtn.addEventListener("click", () => infoBox.style.display = "none");
+      
       nextAnimal();
     }
-    
-    bananaPlay.addEventListener("click", () => {
-      startScreen.style.display = "none";
-      gameScreen.style.display = "block";
-      menuMusic.pause();
-      roomMusic.currentTime = 0;
-      roomMusic.play();
-      resetGameScreenState();
-      showDialogue("🍌 Bienvenido... No falles...", "Primer dia.mp3");
-    });
-    
-    howBtn.addEventListener("click", () => {
-      infoBox.style.display = "block";
-      infoContent.innerHTML = "<h2>📜 How to Play</h2><p>Elige el animal correcto en la tele. Cada fallo aumenta la FURIA. Al llegar a 10, entrarás al BOSQUE NOCTURNO con EFECTO VHS.<br><br>🎮 Controles:<br>W = Atrás<br>S = Adelante<br>A = Izquierda<br>D = Derecha<br>SHIFT = Correr<br>🖱️ Ratón = Mirar<br><br>⚠️ Características:<br>• Banana2.png se hace más grande al acercarse<br>• El bosque se vuelve ROJO cuando está cerca<br>• Latido del corazón más rápido según distancia<br>• La velocidad de Banana2.png aumenta CADA SEGUNDO<br><br>Si te alcanza → JUMPSCARE.</p>";
-    });
-    
-    shopBtn.addEventListener("click", () => {
-      infoBox.style.display = "block";
-      infoContent.innerHTML = "<h2>🛒 Tienda</h2><p>Próximamente: objetos especiales.</p>";
-    });
-    
-    exitBtn.addEventListener("click", () => {
-      window.close();
-    });
-    
-    closeBtn.addEventListener("click", () => {
-      infoBox.style.display = "none";
-    });
-    
-    nextAnimal();
   </script>
 </body>
 </html>
