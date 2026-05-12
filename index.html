@@ -6,6 +6,11 @@
   <title>Ms. BananaS - Persecución VHS</title>
   <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
   <style>
+    * {
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    
     body {
       margin: 0;
       padding: 0;
@@ -15,6 +20,7 @@
       text-align: center;
       overflow: hidden;
     }
+    
     #startScreen {
       height: 100vh;
       display: flex;
@@ -27,11 +33,12 @@
       position: relative;
       z-index: 10;
     }
+    
     @keyframes gradientBG {
-      0% { background-position: 0% 50%; }
+      0%, 100% { background-position: 0% 50%; }
       50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
     }
+    
     .menuPanel {
       background: rgba(0,0,0,0.7);
       padding: 30px;
@@ -45,6 +52,7 @@
       justify-content: center;
       flex-wrap: wrap;
     }
+    
     .menuBtn {
       font-size: 1.3em;
       padding: 15px 25px;
@@ -57,7 +65,9 @@
       border-radius: 8px;
       font-family: monospace;
     }
+    
     .menuBtn:hover { transform: scale(1.1); box-shadow: 0 0 15px #FF6600; background: #331100; }
+    
     #bananaPlay {
       width: 180px;
       cursor: pointer;
@@ -66,13 +76,16 @@
       margin: 20px;
       filter: drop-shadow(0 0 10px #ffaa00);
     }
+    
     #bananaPlay:hover { transform: scale(1.1) rotate(-5deg); filter: drop-shadow(0 0 20px #ffcc00); }
+    
     @keyframes float {
-      0% { transform: translateY(0); }
+      0%, 100% { transform: translateY(0); }
       50% { transform: translateY(-15px); }
-      100% { transform: translateY(0); }
     }
+    
     footer { margin-top: 20px; font-size: .9em; color: #884400; }
+    
     #infoBox {
       display: none;
       position: absolute;
@@ -87,7 +100,9 @@
       border-radius: 10px;
       z-index: 20;
     }
+    
     #closeBtn { position: absolute; top: 5px; right: 10px; cursor: pointer; font-size: 1.2em; color: #FF6600; }
+    
     #gameScreen {
       display: none;
       width: 100%;
@@ -95,17 +110,105 @@
       background: url('Room.png') center/cover no-repeat;
       position: relative;
     }
-    #bananaGame { position: absolute; left: 10%; top: 50%; transform: translateY(-50%); width: 300px; animation: float 3s ease-in-out infinite; }
-    #tv { position: absolute; left: 55%; top: 50%; transform: translate(-50%,-50%); width: 480px; height: 270px; background: black; border: 4px solid #333; box-shadow: 0 0 20px #000; border-radius: 10px; }
+    
+    #bananaGame { 
+      position: absolute; 
+      left: 10%; 
+      top: 50%; 
+      transform: translateY(-50%); 
+      width: 300px; 
+      animation: float 3s ease-in-out infinite; 
+      pointer-events: none;
+    }
+    
+    #tv { 
+      position: absolute; 
+      left: 55%; 
+      top: 50%; 
+      transform: translate(-50%,-50%); 
+      width: 480px; 
+      height: 270px; 
+      background: black; 
+      border: 4px solid #333; 
+      box-shadow: 0 0 20px #000; 
+      border-radius: 10px; 
+    }
+    
     #animal { width: 100%; height: 100%; object-fit: contain; }
-    .options { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
-    .options button { font-size: 1.2em; padding: 10px 20px; background: #1a0a00; color: #FF9900; border: 2px solid #FF6600; cursor: pointer; font-family: monospace; transition: 0.1s; }
-    #dialogueBox { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); width: 70%; padding: 15px; background: rgba(0,0,0,.85); color: #FFD700; font-size: 1.2em; border: 2px solid #FF6600; border-radius: 10px; display: none; z-index: 15; }
-    #rageText { position: absolute; top: 80px; left: 50%; transform: translateX(-50%); font-size: 1.5em; color: #ff4444; background: rgba(0,0,0,0.7); padding: 5px 15px; border-radius: 20px; font-weight: bold; font-family: monospace; }
-    #dayText { position: absolute; top: 140px; left: 50%; transform: translateX(-50%); font-size: 1.2em; color: #FFAA44; background: rgba(0,0,0,0.7); padding: 5px 15px; border-radius: 20px; font-family: monospace; }
+    
+    .options { 
+      position: absolute; 
+      bottom: 40px; 
+      left: 50%; 
+      transform: translateX(-50%); 
+      display: flex; 
+      gap: 20px; 
+      flex-wrap: wrap; 
+      justify-content: center; 
+      z-index: 5;
+    }
+    
+    .options button { 
+      font-size: 1.2em; 
+      padding: 10px 20px; 
+      background: #1a0a00; 
+      color: #FF9900; 
+      border: 2px solid #FF6600; 
+      cursor: pointer; 
+      font-family: monospace; 
+      transition: 0.1s; 
+    }
+    
+    #dialogueBox { 
+      position: absolute; 
+      top: 20px; 
+      left: 50%; 
+      transform: translateX(-50%); 
+      width: 70%; 
+      padding: 15px; 
+      background: rgba(0,0,0,.9); 
+      color: #FFD700; 
+      font-size: 1.3em; 
+      border: 2px solid #FF6600; 
+      border-radius: 10px; 
+      display: none; 
+      z-index: 15; 
+      font-weight: bold;
+      text-shadow: 0 0 5px #ff6600;
+    }
+    
+    #rageText { 
+      position: absolute; 
+      top: 80px; 
+      left: 50%; 
+      transform: translateX(-50%); 
+      font-size: 1.5em; 
+      color: #ff4444; 
+      background: rgba(0,0,0,0.7); 
+      padding: 5px 15px; 
+      border-radius: 20px; 
+      font-weight: bold; 
+      font-family: monospace; 
+      z-index: 5;
+    }
+    
+    #dayText { 
+      position: absolute; 
+      top: 140px; 
+      left: 50%; 
+      transform: translateX(-50%); 
+      font-size: 1.2em; 
+      color: #FFAA44; 
+      background: rgba(0,0,0,0.7); 
+      padding: 5px 15px; 
+      border-radius: 20px; 
+      font-family: monospace; 
+      z-index: 5;
+    }
+    
     #jumpscare { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 9999; }
     #jumpscare video { width: 100%; height: 100%; object-fit: cover; }
-
+    
     #chaseContainer {
       display: none;
       position: fixed;
@@ -117,7 +220,6 @@
       background: #000;
       cursor: grab;
     }
-    #chaseContainer:active { cursor: grabbing; }
     
     .vhs-overlay {
       position: absolute;
@@ -150,8 +252,8 @@
     }
     
     @keyframes vhsFlicker {
-      0% { opacity: 0.2; }
-      100% { opacity: 0.35; }
+      0%, 100% { opacity: 0.2; }
+      50% { opacity: 0.35; }
     }
     
     .glitch-transition {
@@ -189,7 +291,7 @@
       z-index: 1004;
       pointer-events: none;
     }
-
+    
     /* Pantalla de bloqueo */
     .lock-screen {
       position: fixed;
@@ -207,16 +309,19 @@
       color: white;
       text-align: center;
     }
+    
     .lock-screen h1 {
       font-size: 4rem;
       margin-bottom: 1rem;
       letter-spacing: 2px;
     }
+    
     .lock-screen p {
       font-size: 1.5rem;
       max-width: 80%;
       line-height: 1.4;
     }
+    
     .reset-signal {
       margin-top: 2rem;
       font-size: 0.9rem;
@@ -228,16 +333,19 @@
       word-break: break-all;
       font-family: monospace;
     }
+    
     .reset-link {
       margin-top: 20px;
       color: #ffaa44;
       font-size: 0.9rem;
     }
+    
     .reset-link a {
       color: #ffaa44;
       text-decoration: none;
       border-bottom: 1px solid #ffaa44;
     }
+    
     .reset-link a:hover {
       color: #ffdd88;
     }
@@ -312,7 +420,6 @@
     // ==================== SISTEMA DE BLOQUEO CON LOCALSTORAGE ====================
     const LOCK_STORAGE_KEY = "gameLocked_V5";
     const RESET_SIGNAL_KEY = "resetSignal";
-    const RESET_PAGE_URL = "https://raphapro900.github.io/reset/";
     
     function setGameLocked() {
       localStorage.setItem(LOCK_STORAGE_KEY, "true");
@@ -332,7 +439,7 @@
     function checkForResetSignal() {
       const signal = localStorage.getItem(RESET_SIGNAL_KEY);
       if (signal === "reset") {
-        console.log("✅ SEÑAL DE RESET ENCONTRADA en localStorage");
+        console.log("✅ SEÑAL DE RESET ENCONTRADA");
         localStorage.removeItem(RESET_SIGNAL_KEY);
         clearGameLocked();
         return true;
@@ -373,11 +480,15 @@
       
       function checkLocalStorageSignal() {
         attempts++;
-        resetSignalDiv.innerHTML = `🔄 Buscando señal de reset... (Intento ${attempts})<br>📡 Revisando en localStorage...`;
+        if (resetSignalDiv) {
+          resetSignalDiv.innerHTML = `🔄 Buscando señal... (Intento ${attempts})<br>📡 Revisando localStorage...`;
+        }
         
         const signal = localStorage.getItem(RESET_SIGNAL_KEY);
         if (signal === "reset") {
-          resetSignalDiv.innerHTML = '✅ ¡SEÑAL DE RESET DETECTADA! Desbloqueando...';
+          if (resetSignalDiv) {
+            resetSignalDiv.innerHTML = '✅ ¡SEÑAL DE RESET DETECTADA! Desbloqueando...';
+          }
           console.log("✅ SEÑAL DE RESET RECIBIDA");
           localStorage.removeItem(RESET_SIGNAL_KEY);
           clearInterval(pollInterval);
@@ -418,13 +529,14 @@
       const heartbeatSound = document.getElementById("heartbeatSound");
 
       const animals = [
-        { name: "Seal", file: "Seal.webp", correctSound: "c1.mp3", wrongSound: "f1.mp3" },
-        { name: "Dog", file: "Dog.jfif", correctSound: "c1.mp3", wrongSound: "f1.mp3" },
-        { name: "Cat", file: "Cat.jpj", correctSound: "c1.mp3", wrongSound: "f1.mp3" },
-        { name: "Duck", file: "Duck.avif", correctSound: "c1.mp3", wrongSound: "f1.mp3" },
-        { name: "Eagle", file: "Aguila.webp", correctSound: "c1.mp3", wrongSound: "f1.mp3" },
-        { name: "Snake", file: "Snake.jfif", correctSound: "c1.mp3", wrongSound: "f1.mp3" }
+        { name: "Seal", file: "Seal.webp" },
+        { name: "Dog", file: "Dog.jfif" },
+        { name: "Cat", file: "Cat.jpj" },
+        { name: "Duck", file: "Duck.avif" },
+        { name: "Eagle", file: "Aguila.webp" },
+        { name: "Snake", file: "Snake.jfif" }
       ];
+      
       let currentAnimal = animals[0];
       let rage = 0;
       let day = 1;
@@ -432,8 +544,9 @@
       const dayTargets = { 1: 15, 2: 22, 3: 31, 4: 39, 5: 46 };
       let gameActive = true;
       let currentTimeout = null;
+      let dialogueTimeout = null;
 
-      function playSound(audioElement, src, volume = 1.0) {
+      function playSound(audioElement, src, volume = 0.8) {
         if (!audioElement) return;
         audioElement.volume = volume;
         audioElement.src = src;
@@ -443,15 +556,24 @@
 
       function showDialogue(text, audioSrc) {
         if (!gameActive) return;
+        
+        // Limpiar timeout anterior
+        if (dialogueTimeout) clearTimeout(dialogueTimeout);
+        
         dialogueBox.innerText = text;
         dialogueBox.style.display = "block";
+        
         if (audioSrc) {
           playSound(dialogueAudio, audioSrc, 0.8);
           dialogueAudio.onended = () => {
-            if (gameActive) dialogueBox.style.display = "none";
+            if (gameActive) {
+              dialogueTimeout = setTimeout(() => {
+                dialogueBox.style.display = "none";
+              }, 500);
+            }
           };
         } else {
-          setTimeout(() => {
+          dialogueTimeout = setTimeout(() => {
             if (gameActive) dialogueBox.style.display = "none";
           }, 2000);
         }
@@ -791,16 +913,19 @@
         startChaseMinigame();
       }
       
+      // ==================== EVENTOS DE LOS BOTONES ====================
       buttons.forEach(btn => {
         btn.addEventListener('click', () => {
           if (!gameActive) return;
+          
           if (btn.innerText === currentAnimal.name) {
             btn.style.backgroundColor = "#2a6a2a";
             correctCount++;
             dayText.innerText = "🌙 Día " + day + " — Animales: " + correctCount + "/" + dayTargets[day];
-            showDialogue("✅ ¡Correcto!", currentAnimal.correctSound);
+            showDialogue("✅ ¡Correcto!", "c1.mp3");
+            
             if (correctCount >= dayTargets[day]) {
-              showDialogue("✨ ¡Completaste el día!", "c2.mp3");
+              showDialogue("✨ ¡Completaste el día " + day + "!", "c2.mp3");
               setTimeout(() => {
                 gameScreen.style.display = "none";
                 roomMusic.pause();
@@ -808,7 +933,9 @@
                 menuMusic.play();
                 startScreen.style.display = "flex";
                 gameActive = true;
-                rage = 0; correctCount = 0; day = 1;
+                rage = 0;
+                correctCount = 0;
+                day = 1;
                 rageText.innerText = "💢 Furia: 0";
                 dayText.innerText = "🌙 Día 1 — Animales: 0/15";
                 nextAnimal();
@@ -822,16 +949,22 @@
             });
             rage++;
             rageText.innerText = "💢 Furia: " + rage;
-            showDialogue("❌ ¡Fallaste!", currentAnimal.wrongSound);
-            if (rage >= 10) onRageReachedTen();
-            else setTimeout(nextAnimal, 2000);
+            showDialogue("❌ ¡Fallaste!", "f1.mp3");
+            
+            if (rage >= 10) {
+              onRageReachedTen();
+            } else {
+              setTimeout(nextAnimal, 2000);
+            }
           }
         });
       });
       
       function resetGameScreenState() {
         gameActive = true;
-        rage = 0; correctCount = 0; day = 1;
+        rage = 0;
+        correctCount = 0;
+        day = 1;
         rageText.innerText = "💢 Furia: 0";
         dayText.innerText = "🌙 Día 1 — Animales: 0/15";
         nextAnimal();
@@ -844,12 +977,12 @@
         roomMusic.currentTime = 0;
         roomMusic.play();
         resetGameScreenState();
-        showDialogue("🍌 Bienvenido... No falles...", "Primer dia.mp3");
+        showDialogue("🍌 Bienvenido al primer día!", "Primer dia.mp3");
       });
       
       howBtn.addEventListener("click", () => {
         infoBox.style.display = "block";
-        infoContent.innerHTML = "<h2>📜 How to Play</h2><p>Elige el animal correcto en la tele. Cada fallo aumenta la FURIA. Al llegar a 10, entrarás al BOSQUE NOCTURNO con EFECTO VHS.<br><br>🎮 Controles:<br>W = Atrás<br>S = Adelante<br>A = Izquierda<br>D = Derecha<br>SHIFT = Correr<br>🖱️ Ratón = Mirar<br><br>⚠️ Si te alcanza → JUMPSCARE y BLOQUEO PERMANENTE<br><br>🔓 Para desbloquear, ve a: <strong style='color:#ffaa44'>https://raphapro900.github.io/reset/</strong><br>Y haz clic en 'ENVIAR SEÑAL RESET' o en la banana 🍌</p>";
+        infoContent.innerHTML = "<h2>📜 How to Play</h2><p>Elige el animal correcto en la tele. Cada fallo aumenta la FURIA. Al llegar a 10, entrarás al BOSQUE NOCTURNO con EFECTO VHS.<br><br>🎮 Controles:<br>W = Atrás<br>S = Adelante<br>A = Izquierda<br>D = Derecha<br>SHIFT = Correr<br>🖱️ Ratón = Mirar<br><br>⚠️ Si te alcanza → JUMPSCARE y BLOQUEO PERMANENTE<br><br>🔓 Para desbloquear, ve a: <strong style='color:#ffaa44'>https://raphapro900.github.io/reset/</strong></p>";
       });
       
       shopBtn.addEventListener("click", () => {
@@ -857,9 +990,15 @@
         infoContent.innerHTML = "<h2>🛒 Tienda</h2><p>Próximamente: objetos especiales.</p>";
       });
       
-      exitBtn.addEventListener("click", () => window.close());
-      closeBtn.addEventListener("click", () => infoBox.style.display = "none");
+      exitBtn.addEventListener("click", () => {
+        window.close();
+      });
       
+      closeBtn.addEventListener("click", () => {
+        infoBox.style.display = "none";
+      });
+      
+      // Inicializar
       nextAnimal();
     }
   </script>
