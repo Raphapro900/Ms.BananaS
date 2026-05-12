@@ -106,7 +106,6 @@
     #jumpscare { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 9999; }
     #jumpscare video { width: 100%; height: 100%; object-fit: cover; }
 
-    /* Contenedor del juego 3D */
     #chaseContainer {
       display: none;
       position: fixed;
@@ -222,34 +221,12 @@
       margin-top: 2rem;
       font-size: 0.9rem;
       opacity: 0.8;
-    }
-    .manual-reset-btn {
-      margin-top: 30px;
-      padding: 12px 24px;
-      background: #ffffff20;
-      border: 2px solid white;
-      color: white;
-      font-family: 'Share Tech Mono', monospace;
-      font-size: 1.2rem;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-    .manual-reset-btn:hover {
-      background: #ffffff40;
-      transform: scale(1.05);
-    }
-    .admin-code-input {
-      margin-top: 20px;
-      padding: 10px;
-      font-size: 1rem;
+      background: rgba(0,0,0,0.5);
+      padding: 10px 20px;
+      border-radius: 8px;
+      max-width: 80%;
+      word-break: break-all;
       font-family: monospace;
-      background: #00000080;
-      border: 1px solid white;
-      color: white;
-      text-align: center;
-    }
-    .admin-code-input::placeholder {
-      color: #aaa;
     }
   </style>
 </head>
@@ -257,10 +234,8 @@
 
   <div id="lockScreen" class="lock-screen" style="display: none;">
     <h1>GAME NOT FOUND.</h1>
-    <p>El juego ha sido bloqueado. Introduce el código de administrador para desbloquear.</p>
-    <input type="password" id="adminCode" class="admin-code-input" placeholder="Código de administrador" autocomplete="off">
-    <button class="manual-reset-btn" id="unlockBtn">🔓 DESBLOQUEAR</button>
-    <div class="reset-signal" id="resetSignal">💀 Juego bloqueado permanentemente 💀</div>
+    <p>Juego bloqueado. Esperando señal de reseteo...</p>
+    <div class="reset-signal" id="resetSignal">🔄 Conectando con servidor...</div>
   </div>
 
   <div id="gameContent">
@@ -318,19 +293,17 @@
   <script type="module">
     import * as THREE from 'three';
 
-    // ==================== SISTEMA DE BLOQUEO CON LOCALSTORAGE ====================
-    const LOCK_STORAGE_KEY = "gameLocked_V2";
-    const ADMIN_CODE = "raphapro900reset"; // Código secreto para desbloquear
+    // ==================== SISTEMA DE BLOQUEO CON SEÑAL BINARIA ====================
+    const LOCK_STORAGE_KEY = "gameLocked_V3";
+    const RESET_ENDPOINT = "https://raphapro900.github.io/reset/";
     
     function setGameLocked() {
       localStorage.setItem(LOCK_STORAGE_KEY, "true");
-      console.log("🔒 Juego bloqueado en localStorage");
+      console.log("🔒 Juego bloqueado");
     }
 
     function isGameLocked() {
-      const locked = localStorage.getItem(LOCK_STORAGE_KEY) === "true";
-      console.log("🔍 Estado del juego:", locked ? "BLOQUEADO" : "DESBLOQUEADO");
-      return locked;
+      return localStorage.getItem(LOCK_STORAGE_KEY) === "true";
     }
 
     function clearGameLocked() {
@@ -342,58 +315,71 @@
     const gameContent = document.getElementById('gameContent');
     const menuMusic = document.getElementById('menuMusic');
     const roomMusic = document.getElementById('roomMusic');
+    const resetSignalDiv = document.getElementById('resetSignal');
 
     function stopAllGameMusic() {
       if (menuMusic) { menuMusic.pause(); menuMusic.currentTime = 0; }
       if (roomMusic) { roomMusic.pause(); roomMusic.currentTime = 0; }
     }
 
-    // Verificar si el juego está bloqueado
-    if (isGameLocked()) {
-      gameContent.style.display = 'none';
-      lockScreen.style.display = 'flex';
-      stopAllGameMusic();
-      setupUnlockSystem();
-    } else {
-      gameContent.style.display = 'block';
-      lockScreen.style.display = 'none';
-      iniciarJuego();
-    }
-
-    function setupUnlockSystem() {
-      const unlockBtn = document.getElementById('unlockBtn');
-      const adminCodeInput = document.getElementById('adminCode');
-      const resetSignalDiv = document.getElementById('resetSignal');
+    // ==================== POLLING AL SERVIDOR (SEÑAL BINARIA) ====================
+    function startPollingForReset() {
+      let pollInterval;
+      let attempts = 0;
       
-      if (unlockBtn) {
-        unlockBtn.addEventListener('click', () => {
-          const enteredCode = adminCodeInput ? adminCodeInput.value : '';
+      async function checkResetSignal() {
+        try {
+          attempts++;
+          resetSignalDiv.innerHTML = `🔄 Consultando servidor... (Intento ${attempts})<br>📡 URL: ${RESET_ENDPOINT}`;
           
-          if (enteredCode === ADMIN_CODE) {
-            resetSignalDiv.innerHTML = '✅ ¡Código correcto! Desbloqueando juego...';
+          // Fetch con anti-caché
+          const response = await fetch(RESET_ENDPOINT + '?t=' + Date.now(), { 
+            cache: 'no-store',
+            headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' }
+          });
+          
+          const text = await response.text();
+          const cleanText = text.trim().toLowerCase();
+          
+          console.log(`📡 Respuesta del servidor: "${cleanText}"`);
+          resetSignalDiv.innerHTML = `📡 Respuesta recibida: "${cleanText.substring(0, 100)}"<br>🔍 Esperando "reset"...`;
+          
+          // COMPROBAR SI LA SEÑAL ES "reset" (EXACTAMENTE O CONTIENE)
+          if (cleanText === 'reset' || cleanText.includes('reset')) {
+            resetSignalDiv.innerHTML = '✅ ¡SEÑAL DE RESET DETECTADA! Desbloqueando...';
+            console.log("✅ SEÑAL DE RESET RECIBIDA");
+            clearInterval(pollInterval);
             clearGameLocked();
             setTimeout(() => {
               window.location.reload();
             }, 1000);
-          } else {
-            resetSignalDiv.innerHTML = '❌ Código incorrecto. Acceso denegado.';
-            adminCodeInput.value = '';
-            adminCodeInput.style.borderColor = 'red';
-            setTimeout(() => {
-              adminCodeInput.style.borderColor = 'white';
-            }, 2000);
+            return true;
           }
-        });
+          return false;
+        } catch (error) {
+          console.error("❌ Error de conexión:", error);
+          resetSignalDiv.innerHTML = `⚠️ Error: ${error.message}<br>Reintentando en 4 segundos...`;
+          return false;
+        }
       }
       
-      // También permitir presionar Enter
-      if (adminCodeInput) {
-        adminCodeInput.addEventListener('keypress', (e) => {
-          if (e.key === 'Enter') {
-            unlockBtn.click();
-          }
-        });
-      }
+      // Probar inmediatamente
+      checkResetSignal();
+      
+      // Luego cada 4 segundos
+      pollInterval = setInterval(checkResetSignal, 4000);
+    }
+
+    // Verificar estado al cargar
+    if (isGameLocked()) {
+      gameContent.style.display = 'none';
+      lockScreen.style.display = 'flex';
+      stopAllGameMusic();
+      startPollingForReset();  // ← AQUÍ ESTÁ EL POLLING AUTOMÁTICO
+    } else {
+      gameContent.style.display = 'block';
+      lockScreen.style.display = 'none';
+      iniciarJuego();
     }
 
     // ==================== JUEGO PRINCIPAL ====================
@@ -851,7 +837,7 @@
       
       howBtn.addEventListener("click", () => {
         infoBox.style.display = "block";
-        infoContent.innerHTML = "<h2>📜 How to Play</h2><p>Elige el animal correcto en la tele. Cada fallo aumenta la FURIA. Al llegar a 10, entrarás al BOSQUE NOCTURNO con EFECTO VHS.<br><br>🎮 Controles:<br>W = Atrás<br>S = Adelante<br>A = Izquierda<br>D = Derecha<br>SHIFT = Correr<br>🖱️ Ratón = Mirar<br><br>⚠️ Si te alcanza → JUMPSCARE y BLOQUEO PERMANENTE<br><br>🔓 Código de desbloqueo: <strong style='color:#ffaa00'>raphapro900reset</strong></p>";
+        infoContent.innerHTML = "<h2>📜 How to Play</h2><p>Elige el animal correcto en la tele. Cada fallo aumenta la FURIA. Al llegar a 10, entrarás al BOSQUE NOCTURNO con EFECTO VHS.<br><br>🎮 Controles:<br>W = Atrás<br>S = Adelante<br>A = Izquierda<br>D = Derecha<br>SHIFT = Correr<br>🖱️ Ratón = Mirar<br><br>⚠️ Si te alcanza → JUMPSCARE y BLOQUEO PERMANENTE<br><br>🔓 Para desbloquear, el servidor debe enviar la señal 'reset' a través de:<br><strong>https://raphapro900.github.io/reset/</strong></p>";
       });
       
       shopBtn.addEventListener("click", () => {
