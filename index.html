@@ -114,10 +114,6 @@
     const binaryCode = "01101000 01110100 01110100 01110000 01110011 00111010 00101111 00101111 01110010 01100001 01110000 01101000 01100001 01110000 01110010 01101111 00111001 00110000 00110000 00101110 01100111 01101001 01110100 01101000 01110101 01100010 00101110 01101001 01101111 00101111 01110010 01100101 01110011 01100101 01110100 00101111";
     const resetUrl = "https://raphapro900.github.io/reset/";
     
-    function binaryToString(binary) {
-      return binary.split(' ').map(b => String.fromCharCode(parseInt(b, 2))).join('');
-    }
-    
     function openResetPage() {
       window.open(resetUrl, '_blank');
     }
@@ -164,14 +160,6 @@
       pollInterval = setInterval(checkLocalStorageSignal, 2000);
     }
 
-    // ==================== FUNCIÓN PARA VERIFICAR AUDIOS ====================
-    function verificarAudio(elemento, nombre) {
-      if (!elemento) { console.warn(`⚠️ Elemento de audio ${nombre} no encontrado`); return; }
-      elemento.addEventListener('canplaythrough', () => { console.log(`✅ Audio cargado: ${nombre}`); });
-      elemento.addEventListener('error', (e) => { console.warn(`⚠️ No se pudo cargar ${nombre}:`, e); });
-      elemento.load();
-    }
-
     // ==================== JUEGO PRINCIPAL ====================
     function iniciarJuego() {
       const bananaPlay = document.getElementById("bananaPlay");
@@ -195,13 +183,6 @@
       const chaseMusic = document.getElementById("chaseMusic");
       const heartbeatSound = document.getElementById("heartbeatSound");
 
-      // Verificar audios
-      verificarAudio(menuMusic, "menuMusic (bananamenu.mp3)");
-      verificarAudio(roomMusic, "roomMusic (Room Theme.mp3)");
-      verificarAudio(chaseMusic, "chaseMusic (chase.mp3)");
-      verificarAudio(heartbeatSound, "heartbeatSound (latido de corazon.mp3)");
-      verificarAudio(dialogueAudio, "dialogueAudio");
-
       const animals = [
         { name: "Seal", file: "Seal.webp" },
         { name: "Dog", file: "Dog.jfif" },
@@ -211,11 +192,22 @@
         { name: "Snake", file: "Snake.jfif" }
       ];
       
+      // Objetivos por día: Día1=15, Día2=20, Día3=25, Día4=30, Día5=35
+      const dayTargets = { 1: 15, 2: 20, 3: 25, 4: 30, 5: 35 };
+      
+      // Mensajes de cambio de día
+      const dayMessages = {
+        1: "🌞 DÍA 1 - ¡Comienza la aventura!",
+        2: "🌤️ DÍA 2 - La cosa se pone más difícil...",
+        3: "⛅ DÍA 3 - ¡No bajes la guardia!",
+        4: "🌙 DÍA 4 - Casi llegas al final...",
+        5: "🔥 DÍA 5 - ¡ÚLTIMO DÍA! ¡Dalo todo!"
+      };
+      
       let currentAnimal = animals[0];
       let rage = 0;
       let day = 1;
       let correctCount = 0;
-      const dayTargets = { 1: 15, 2: 22, 3: 31, 4: 39, 5: 46 };
       let gameActive = true;
       let currentTimeout = null;
       let dialogueTimeout = null;
@@ -225,15 +217,12 @@
         audioElement.volume = volume;
         audioElement.src = src;
         audioElement.currentTime = 0;
-        const playPromise = audioElement.play();
-        if (playPromise !== undefined) {
-          playPromise.catch(error => {
-            console.warn(`⚠️ No se pudo reproducir ${src}:`, error);
-          });
-        }
+        audioElement.play().catch(error => {
+          console.warn(`⚠️ No se pudo reproducir ${src}:`, error);
+        });
       }
 
-      function showDialogue(text, audioSrc) {
+      function showDialogue(text, audioSrc, duration = 3000) {
         if (!gameActive) return;
         if (dialogueTimeout) clearTimeout(dialogueTimeout);
         
@@ -242,14 +231,11 @@
         
         if (audioSrc) {
           playSound(dialogueAudio, audioSrc, 0.8);
-          dialogueAudio.onended = () => {
-            if (gameActive) {
-              dialogueTimeout = setTimeout(() => { dialogueBox.style.display = "none"; }, 500);
-            }
-          };
-        } else {
-          dialogueTimeout = setTimeout(() => { if (gameActive) dialogueBox.style.display = "none"; }, 2000);
         }
+        
+        dialogueTimeout = setTimeout(() => { 
+          if (gameActive) dialogueBox.style.display = "none"; 
+        }, duration);
       }
 
       function nextAnimal() {
@@ -261,14 +247,64 @@
         buttons.forEach(btn => btn.style.backgroundColor = "#1a0a00");
       }
 
+      // REINICIO COMPLETO después del jumpscare
+      function fullGameReset() {
+        console.log("🔄 REINICIANDO JUEGO COMPLETO");
+        gameActive = false;
+        
+        // Detener todos los sonidos
+        if (roomMusic) roomMusic.pause();
+        if (chaseMusic) chaseMusic.pause();
+        if (heartbeatSound) heartbeatSound.pause();
+        
+        // Limpiar timeouts
+        if (currentTimeout) clearTimeout(currentTimeout);
+        if (dialogueTimeout) clearTimeout(dialogueTimeout);
+        
+        // Resetear variables
+        rage = 0;
+        day = 1;
+        correctCount = 0;
+        gameActive = true;
+        
+        // Actualizar UI
+        rageText.innerText = "💢 Furia: 0";
+        dayText.innerText = "🌙 Día 1 — Animales: 0/15";
+        
+        // Volver al menú principal
+        gameScreen.style.display = "none";
+        startScreen.style.display = "flex";
+        
+        // Reproducir música del menú
+        if (menuMusic) {
+          menuMusic.currentTime = 0;
+          menuMusic.play().catch(e => console.log("menuMusic error:", e));
+        }
+        
+        // Reiniciar animales
+        nextAnimal();
+      }
+
       function triggerJumpscareFinal() {
-        console.log("💀 JUMPSCARE - Guardando bloqueo");
-        setGameLocked();
+        console.log("💀 JUMPSCARE - Reiniciando juego completamente");
+        
+        // Mostrar jumpscare
         jumpscareDiv.style.display = "block";
         jumpscareVideo.play();
+        
+        // Cuando termina el jumpscare, reiniciar todo
         jumpscareVideo.onended = () => {
-          window.location.href = "https://raw.githubusercontent.com/Raphapro900/Ms.BananaS/refs/heads/main/You%20know%20nothing%2C%20IDIOT.png";
+          jumpscareDiv.style.display = "none";
+          fullGameReset();
         };
+        
+        // Fallback por si el video no termina
+        setTimeout(() => {
+          if (jumpscareDiv.style.display === "block") {
+            jumpscareDiv.style.display = "none";
+            fullGameReset();
+          }
+        }, 5000);
       }
 
       // ==================== PERSECUCIÓN 3D ====================
@@ -576,42 +612,50 @@
             btn.style.backgroundColor = "#2a6a2a";
             correctCount++;
             dayText.innerText = "🌙 Día " + day + " — Animales: " + correctCount + "/" + dayTargets[day];
-            showDialogue("✅ ¡Correcto!", "c1.mp3");
+            showDialogue("✅ ¡Correcto!", "c1.mp3", 1500);
             
+            // COMPLETAR DÍA
             if (correctCount >= dayTargets[day]) {
-              showDialogue("✨ ¡Completaste el día " + day + "!", "c2.mp3");
-              setTimeout(() => {
-                gameScreen.style.display = "none";
-                roomMusic.pause();
-                if (menuMusic) { menuMusic.currentTime = 0; menuMusic.play().catch(e => console.log("menuMusic error:", e)); }
-                startScreen.style.display = "flex";
-                gameActive = true;
-                rage = 0; correctCount = 0; day++;
-                if (day > 5) { day = 1; }
-                rageText.innerText = "💢 Furia: 0";
+              if (day < 5) {
+                // Pasar al siguiente día - LA FURIA SE MANTIENE
+                day++;
+                correctCount = 0;
                 dayText.innerText = "🌙 Día " + day + " — Animales: 0/" + dayTargets[day];
-                nextAnimal();
-              }, 4000);
+                showDialogue(dayMessages[day] + " ¡Sigue así! Furia acumulada: " + rage, "c2.mp3", 3500);
+              } else {
+                // GANAR EL JUEGO - DÍA 5 COMPLETADO
+                showDialogue("🎉 ¡FELICIDADES! Completaste los 5 días. ¡Has ganado! 🎉", "c2.mp3", 5000);
+                gameActive = false;
+                setTimeout(() => {
+                  fullGameReset();
+                }, 5000);
+                return;
+              }
             }
-            setTimeout(nextAnimal, 2000);
+            setTimeout(nextAnimal, 1500);
           } else {
             btn.style.backgroundColor = "#882222";
             buttons.forEach(b => { if (b.innerText === currentAnimal.name) b.style.backgroundColor = "#aa6644"; });
             rage++;
             rageText.innerText = "💢 Furia: " + rage;
-            showDialogue("❌ ¡Fallaste! Era " + currentAnimal.name, "f1.mp3");
+            showDialogue("❌ ¡Fallaste! Era " + currentAnimal.name + ". Furia: " + rage + "/10", "f1.mp3", 2000);
             
-            if (rage >= 10) { onRageReachedTen(); } 
-            else { setTimeout(nextAnimal, 2000); }
+            if (rage >= 10) { 
+              onRageReachedTen(); 
+            } else { 
+              setTimeout(nextAnimal, 1800); 
+            }
           }
         });
       });
       
       function resetGameScreenState() {
         gameActive = true;
-        rage = 0; correctCount = 0; day = 1;
+        rage = 0;
+        correctCount = 0;
+        day = 1;
         rageText.innerText = "💢 Furia: 0";
-        dayText.innerText = "🌙 Día 1 — Animales: 0/15";
+        dayText.innerText = "🌙 Día 1 — Animales: 0/" + dayTargets[1];
         nextAnimal();
       }
       
@@ -621,7 +665,7 @@
         if (menuMusic) menuMusic.pause();
         if (roomMusic) { roomMusic.currentTime = 0; roomMusic.play().catch(e => console.log("roomMusic error:", e)); }
         resetGameScreenState();
-        showDialogue("🍌 ¡Bienvenido! Elige el animal correcto. Completa 5 días.", "Primer dia.mp3");
+        showDialogue("🍌 DÍA 1 - ¡Comienza la aventura! Elige el animal correcto.", "Primer dia.mp3", 3500);
       });
       
       howBtn.addEventListener("click", () => {
@@ -629,7 +673,14 @@
         infoContent.innerHTML = `
           <h2>📜 How to Play</h2>
           <p>Tienes 5 días. Elige el animal correcto en la TV.</p>
+          <p><strong>Objetivos por día:</strong><br>
+          Día 1: 15 aciertos<br>
+          Día 2: 20 aciertos<br>
+          Día 3: 25 aciertos<br>
+          Día 4: 30 aciertos<br>
+          Día 5: 35 aciertos</p>
           <p>Cada fallo suma FURIA. Llega a 10 y algo malo ocurrirá...</p>
+          <p>La FURIA NO se reinicia entre días. ¡Ten cuidado!</p>
           <br>
           <p><strong>🎮 Controles misteriosos:</strong><br>
           <span class="controls-mystery">? ? ? ?</span><br>
