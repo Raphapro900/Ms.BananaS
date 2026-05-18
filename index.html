@@ -130,9 +130,9 @@
     
     #bananaGame { 
       position: absolute; 
-      left: 10%; 
+      left: 50%; 
       top: 50%; 
-      transform: translateY(-50%); 
+      transform: translate(-50%, -50%); 
       width: 300px; 
       animation: float 3s ease-in-out infinite; 
       pointer-events: none; 
@@ -388,7 +388,6 @@
       letter-spacing: 2px; 
     }
     
-    /* Asegurar que todo use Indie Flower */
     button, .menuBtn, .options button, #dialogueBox, #rageText, #dayText, .chaseUI, footer, .reset-signal {
       font-family: 'Indie Flower', cursive !important;
     }
@@ -417,7 +416,7 @@
           <button class="menuBtn" id="exitBtn">🚪 Exit</button>
         </div>
       </div>
-      <audio id="menuMusic" src="bananamenu.mp3" loop></audio>
+      <audio id="menuMusic" src="bananamenu.mp3" loop autoplay></audio>
       <footer>CC0 Raphapro900 - V1.0</footer>
       <div id="infoBox"><span id="closeBtn">✖</span><div id="infoContent"></div></div>
     </div>
@@ -472,8 +471,35 @@
     // ==================== SISTEMA DE BLOQUEO ====================
     const LOCK_STORAGE_KEY = "gameLocked_V5";
     const RESET_SIGNAL_KEY = "resetSignal";
+    const DAY_PROGRESS_KEY = "gameDayProgress";
+    const RAGE_PROGRESS_KEY = "gameRageProgress";
     
-    function setGameLocked() { localStorage.setItem(LOCK_STORAGE_KEY, "true"); localStorage.removeItem(RESET_SIGNAL_KEY); console.log("🔒 Juego bloqueado"); }
+    function saveProgress(day, rage) {
+      localStorage.setItem(DAY_PROGRESS_KEY, day);
+      localStorage.setItem(RAGE_PROGRESS_KEY, rage);
+    }
+    
+    function loadProgress() {
+      const savedDay = localStorage.getItem(DAY_PROGRESS_KEY);
+      const savedRage = localStorage.getItem(RAGE_PROGRESS_KEY);
+      return {
+        day: savedDay ? parseInt(savedDay) : 1,
+        rage: savedRage ? parseInt(savedRage) : 0
+      };
+    }
+    
+    function clearProgress() {
+      localStorage.removeItem(DAY_PROGRESS_KEY);
+      localStorage.removeItem(RAGE_PROGRESS_KEY);
+    }
+    
+    function setGameLocked() { 
+      localStorage.setItem(LOCK_STORAGE_KEY, "true"); 
+      localStorage.removeItem(RESET_SIGNAL_KEY); 
+      clearProgress();
+      console.log("🔒 Juego bloqueado"); 
+    }
+    
     function isGameLocked() { return localStorage.getItem(LOCK_STORAGE_KEY) === "true"; }
     function clearGameLocked() { localStorage.removeItem(LOCK_STORAGE_KEY); console.log("🔓 Juego desbloqueado"); }
     function checkForResetSignal() { const signal = localStorage.getItem(RESET_SIGNAL_KEY); if (signal === "reset") { localStorage.removeItem(RESET_SIGNAL_KEY); clearGameLocked(); return true; } return false; }
@@ -484,12 +510,27 @@
     const roomMusic = document.getElementById('roomMusic');
     const resetSignalDiv = document.getElementById('resetSignal');
 
-    function stopAllGameMusic() { if (menuMusic) { menuMusic.pause(); menuMusic.currentTime = 0; } if (roomMusic) { roomMusic.pause(); roomMusic.currentTime = 0; } }
+    function stopAllGameMusic() { 
+      if (menuMusic) { menuMusic.pause(); menuMusic.currentTime = 0; } 
+      if (roomMusic) { roomMusic.pause(); roomMusic.currentTime = 0; } 
+    }
+    
+    function playMenuMusic() {
+      if (menuMusic) {
+        menuMusic.currentTime = 0;
+        menuMusic.play().catch(e => console.log("menuMusic error:", e));
+      }
+    }
 
     if (isGameLocked()) {
       if (checkForResetSignal()) { window.location.reload(); } 
       else { gameContent.style.display = 'none'; lockScreen.style.display = 'flex'; stopAllGameMusic(); startPollingForReset(); }
-    } else { gameContent.style.display = 'block'; lockScreen.style.display = 'none'; iniciarJuego(); }
+    } else { 
+      gameContent.style.display = 'block'; 
+      lockScreen.style.display = 'none'; 
+      playMenuMusic();
+      iniciarJuego(); 
+    }
 
     function startPollingForReset() {
       let pollInterval, attempts = 0;
@@ -546,9 +587,11 @@
       // Objetivos por día
       const dayTargets = { 1: 15, 2: 20, 3: 25, 4: 30, 5: 35 };
       
+      // Cargar progreso guardado
+      const savedProgress = loadProgress();
       let currentAnimal = animals[0];
-      let rage = 0;
-      let day = 1;
+      let rage = savedProgress.rage;
+      let day = savedProgress.day;
       let correctCount = 0;
       let gameActive = true;
       let currentTimeout = null;
@@ -589,20 +632,25 @@
         buttons.forEach(btn => btn.style.backgroundColor = "#1a0a00");
       }
 
-      // Volver al menú principal
+      // Actualizar UI con el día y furia actual
+      function updateUI() {
+        rageText.innerText = "💢 Furia: " + rage;
+        dayText.innerText = "🌙 Día " + day + " — Animales: " + correctCount + "/" + dayTargets[day];
+      }
+
+      // Volver al menú principal guardando progreso
       function returnToMenu() {
+        saveProgress(day, rage);
         gameActive = false;
         gameScreen.style.display = "none";
         startScreen.style.display = "flex";
         if (roomMusic) roomMusic.pause();
-        if (menuMusic) {
-          menuMusic.currentTime = 0;
-          menuMusic.play().catch(e => console.log("menuMusic error:", e));
-        }
+        playMenuMusic();
       }
 
       function triggerJumpscareFinal() {
-        console.log("💀 JUMPSCARE - Guardando bloqueo");
+        console.log("💀 JUMPSCARE - Guardando bloqueo y reiniciando progreso");
+        clearProgress();
         setGameLocked();
         jumpscareDiv.style.display = "block";
         jumpscareVideo.play();
@@ -749,7 +797,6 @@
         const banana2Texture = textureLoader.load("https://raw.githubusercontent.com/Raphapro900/Ms.BananaS/refs/heads/main/banana2.png");
         const spriteMaterial = new THREE.SpriteMaterial({ map: banana2Texture, transparent: true });
         bananaMonster = new THREE.Sprite(spriteMaterial);
-        // ANCHO CORREGIDO: 1.0 horizontal, 1.6 vertical
         bananaMonster.scale.set(1.0, 1.6, 1);
         bananaMonster.position.set(monsterPos.x, 1.0, monsterPos.z);
         scene.add(bananaMonster);
@@ -917,12 +964,16 @@
           if (btn.innerText === currentAnimal.name) {
             btn.style.backgroundColor = "#2a6a2a";
             correctCount++;
-            dayText.innerText = "🌙 Día " + day + " — Animales: " + correctCount + "/" + dayTargets[day];
+            updateUI();
             showDialogue("✅ ¡Correcto!", "c1.mp3", 1500);
             
             if (correctCount >= dayTargets[day]) {
               if (day < 5) {
                 showDialogue(`✨ ¡Completaste el Día ${day}! ✨`, "c2.mp3", 2500);
+                day++;
+                correctCount = 0;
+                saveProgress(day, rage);
+                updateUI();
                 gameActive = false;
                 setTimeout(() => {
                   returnToMenu();
@@ -931,6 +982,7 @@
                 showDialogue("🎉 ¡FELICIDADES! Completaste los 5 días. ¡HAS GANADO! 🎉", "c2.mp3", 4000);
                 gameActive = false;
                 setTimeout(() => {
+                  clearProgress();
                   returnToMenu();
                 }, 4000);
               }
@@ -941,8 +993,9 @@
             btn.style.backgroundColor = "#882222";
             buttons.forEach(b => { if (b.innerText === currentAnimal.name) b.style.backgroundColor = "#aa6644"; });
             rage++;
-            rageText.innerText = "💢 Furia: " + rage;
+            updateUI();
             showDialogue("❌ ¡Fallaste! Era " + currentAnimal.name + ". Furia: " + rage + "/10", "f1.mp3", 2000);
+            saveProgress(day, rage);
             
             if (rage >= 10) { 
               onRageReachedTen(); 
@@ -955,13 +1008,14 @@
       
       function resetGameScreenState() {
         gameActive = true;
-        rage = 0;
         correctCount = 0;
-        day = 1;
-        rageText.innerText = "💢 Furia: 0";
-        dayText.innerText = "🌙 Día 1 — Animales: 0/" + dayTargets[1];
+        updateUI();
         nextAnimal();
       }
+      
+      // Inicializar UI con valores cargados
+      updateUI();
+      nextAnimal();
       
       bananaPlay.addEventListener("click", () => {
         startScreen.style.display = "none";
@@ -969,7 +1023,7 @@
         if (menuMusic) menuMusic.pause();
         if (roomMusic) { roomMusic.currentTime = 0; roomMusic.play().catch(e => console.log("roomMusic error:", e)); }
         resetGameScreenState();
-        showDialogue("🍌 DÍA 1 - ¡Comienza la aventura! Elige el animal correcto.", "Primer dia.mp3", 3500);
+        showDialogue(`🍌 DÍA ${day} - ¡Continúa la aventura! Elige el animal correcto.`, "Primer dia.mp3", 3500);
       });
       
       howBtn.addEventListener("click", () => {
@@ -985,7 +1039,7 @@
           Día 5: 35 aciertos</p>
           <p>Cada fallo suma FURIA. Llega a 10 y algo malo ocurrirá...</p>
           <p>La FURIA NO se reinicia entre días. ¡Ten cuidado!</p>
-          <p>Al completar un día, volverás al menú principal.</p>
+          <p>Al completar un día, volverás al menú principal y avanzarás al siguiente día.</p>
           <br>
           <p><strong>🎮 Controles misteriosos:</strong><br>
           <span class="controls-mystery">? ? ? ?</span><br>
@@ -1009,8 +1063,6 @@
       
       exitBtn.addEventListener("click", () => window.close());
       closeBtn.addEventListener("click", () => infoBox.style.display = "none");
-      
-      nextAnimal();
     }
   </script>
 </body>
