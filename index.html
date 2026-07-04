@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Ms. BananaS - NTSC VHS</title>
+  <title>Ms. BananaS</title>
   <link href="https://fonts.googleapis.com/css2?family=Indie+Flower&family=Share+Tech+Mono&display=swap" rel="stylesheet">
   <style>
     * { 
@@ -130,12 +130,13 @@
     
     #bananaGame { 
       position: absolute; 
-      left: 50%; 
+      left: 15%; 
       top: 50%; 
       transform: translate(-50%, -50%); 
-      width: 300px; 
+      width: 250px; 
       animation: float 3s ease-in-out infinite; 
       pointer-events: none; 
+      z-index: 2;
     }
     
     #tv { 
@@ -149,6 +150,7 @@
       border: 4px solid #333; 
       box-shadow: 0 0 20px #000; 
       border-radius: 10px; 
+      z-index: 1;
     }
     
     #animal { 
@@ -241,9 +243,6 @@
       object-fit: cover; 
     }
     
-    /* ============================================================ */
-    /* EFECTO VHS - SOLO PARA EL CONTENEDOR 3D (chaseContainer)    */
-    /* ============================================================ */
     #chaseContainer { 
       display: none; 
       position: fixed; 
@@ -256,129 +255,10 @@
       cursor: grab; 
     }
     
-    .vhs-container {
-      position: relative;
+    #chaseContainer canvas {
+      display: block;
       width: 100%;
       height: 100%;
-      overflow: hidden;
-    }
-    
-    .vhs-container canvas {
-      position: relative;
-      z-index: 1;
-    }
-    
-    /* Capas VHS - SOLO dentro del contenedor 3D */
-    .vhs-scanlines {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 10;
-      background: repeating-linear-gradient(
-        0deg,
-        rgba(0,0,0,0.25) 0px,
-        rgba(0,0,0,0.25) 2px,
-        transparent 2px,
-        transparent 5px
-      );
-      animation: scanlinesMove 0.15s infinite linear;
-    }
-    
-    @keyframes scanlinesMove {
-      0% { transform: translateY(0); }
-      100% { transform: translateY(5px); }
-    }
-    
-    .vhs-noise {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 11;
-      background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48ZmlsdGVyIGlkPSJub2lzZSI+PGZlVHVyYnVsZW5jZSB0eXBlPSJmcmFjdGFsTm9pc2UiIGJhc2VGcmVxdWVuY3k9IjAuNjUiIG51bU9jdGF2ZXM9IjMiIHN0aXRjaFRpbGVzPSJzdGl0Y2giLz48L2ZpbHRlcj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWx0ZXI9InVybCgjbm9pc2UpIiBvcGFjaXR5PSIwLjA3Ii8+PC9zdmc+');
-      background-size: 300px 300px;
-      opacity: 0.3;
-      animation: noiseFlicker 0.08s infinite;
-    }
-    
-    @keyframes noiseFlicker {
-      0% { opacity: 0.2; }
-      50% { opacity: 0.5; }
-      100% { opacity: 0.2; }
-    }
-    
-    .vhs-flicker {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 12;
-      background: rgba(0,0,0,0);
-      animation: flickerEffect 0.3s infinite;
-    }
-    
-    @keyframes flickerEffect {
-      0%, 90%, 100% { background: rgba(0,0,0,0); }
-      92% { background: rgba(0,0,0,0.5); }
-      94% { background: rgba(0,0,0,0.1); }
-      96% { background: rgba(255,255,255,0.2); }
-      98% { background: rgba(0,0,0,0.4); }
-    }
-    
-    .vhs-crt {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 13;
-      border-radius: 3%;
-      box-shadow: 
-        inset 0 0 50px rgba(0,0,0,0.7),
-        inset 0 0 100px rgba(0,0,0,0.3);
-    }
-    
-    .vhs-vignette {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 14;
-      background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.4) 100%);
-    }
-    
-    .vhs-tracking {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 15;
-      background: repeating-linear-gradient(
-        0deg,
-        transparent 0px,
-        transparent 80px,
-        rgba(0,0,0,0.08) 81px,
-        transparent 82px,
-        transparent 160px
-      );
-      animation: trackingMove 3s infinite linear;
-    }
-    
-    @keyframes trackingMove {
-      0% { transform: translateY(0); }
-      100% { transform: translateY(160px); }
     }
     
     .chaseUI { 
@@ -466,6 +346,73 @@
     h1, h2, h3 {
       font-family: 'Indie Flower', cursive !important;
     }
+    
+    .credits-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 9998;
+      background: black;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .credits-container video {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    
+    .glitch-video {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 9997;
+      background: black;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .glitch-video video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    /* Boss UI */
+    .boss-ui {
+      position: fixed;
+      top: 20%;
+      left: 50%;
+      transform: translateX(-50%);
+      color: #ff4444;
+      font-size: 2rem;
+      font-family: 'Indie Flower', cursive;
+      text-shadow: 0 0 20px #ff0000;
+      z-index: 1009;
+      pointer-events: none;
+      display: none;
+    }
+    
+    .boss-hp {
+      position: fixed;
+      top: 30%;
+      left: 50%;
+      transform: translateX(-50%);
+      color: #ffaa44;
+      font-size: 1.5rem;
+      font-family: 'Indie Flower', cursive;
+      text-shadow: 0 0 10px #ff6600;
+      z-index: 1009;
+      pointer-events: none;
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -476,9 +423,17 @@
     <div class="reset-signal" id="resetSignal">🔄 Buscando señal...</div>
   </div>
 
+  <div id="glitchVideo" class="glitch-video">
+    <video id="glitchVideoPlayer" src="glitch.mp4"></video>
+  </div>
+
+  <div id="creditsContainer" class="credits-container">
+    <video id="creditsVideo" src="Creditos Ms.BananaS.mp4"></video>
+  </div>
+
   <div id="gameContent">
     <div id="startScreen">
-      <h1 style="text-shadow: 0 0 10px #ff6600;">🍌 Ms. BananaS 🍌</h1>
+      <h1 style="text-shadow: 0 0 10px #ff6600;" id="mainTitle">🍌 Ms. BananaS 🍌</h1>
       <div class="menuPanel">
         <img id="bananaPlay" src="banana.png" alt="Ms.BananaS">
         <div>
@@ -510,22 +465,17 @@
       <video id="jumpscareVideo" src="jumpscare.mp4"></video>
     </div>
 
-    <div id="chaseContainer" class="vhs-container">
+    <div id="chaseContainer">
       <canvas id="threeCanvas" style="width:100%;height:100%;display:block;"></canvas>
-      
-      <!-- Capas VHS - SOLO AQUÍ -->
-      <div class="vhs-scanlines"></div>
-      <div class="vhs-noise"></div>
-      <div class="vhs-flicker"></div>
-      <div class="vhs-tracking"></div>
-      <div class="vhs-crt"></div>
-      <div class="vhs-vignette"></div>
-      
       <div class="chaseUI">🍌 ¡TE PERSIGUE! | Controles: ? ? ? ?</div>
       <audio id="chaseMusic" src="chase.mp3" loop preload="auto"></audio>
       <audio id="heartbeatSound" src="latido de corazon.mp3" preload="auto"></audio>
     </div>
   </div>
+
+  <!-- Boss UI -->
+  <div class="boss-ui" id="bossUI">💢 GOLPEA AL JEFE (CLIC DERECHO) 💢</div>
+  <div class="boss-hp" id="bossHP">❤️ 5/5</div>
 
   <script type="importmap">
     {
@@ -551,6 +501,8 @@
     const RESET_SIGNAL_KEY = "resetSignal";
     const DAY_PROGRESS_KEY = "gameDayProgress";
     const RAGE_PROGRESS_KEY = "gameRageProgress";
+    const COMPLETED_KEY = "gameCompleted";
+    const BOSS_DEFEATED_KEY = "bossDefeated";
     
     function saveProgress(day, rage) {
       localStorage.setItem(DAY_PROGRESS_KEY, day);
@@ -569,12 +521,30 @@
     function clearProgress() {
       localStorage.removeItem(DAY_PROGRESS_KEY);
       localStorage.removeItem(RAGE_PROGRESS_KEY);
+      localStorage.removeItem(COMPLETED_KEY);
+      localStorage.removeItem(BOSS_DEFEATED_KEY);
+    }
+    
+    function setGameCompleted() {
+      localStorage.setItem(COMPLETED_KEY, "true");
+      setGameLocked();
+    }
+    
+    function isGameCompleted() {
+      return localStorage.getItem(COMPLETED_KEY) === "true";
+    }
+    
+    function setBossDefeated() {
+      localStorage.setItem(BOSS_DEFEATED_KEY, "true");
+    }
+    
+    function isBossDefeated() {
+      return localStorage.getItem(BOSS_DEFEATED_KEY) === "true";
     }
     
     function setGameLocked() { 
       localStorage.setItem(LOCK_STORAGE_KEY, "true"); 
       localStorage.removeItem(RESET_SIGNAL_KEY); 
-      clearProgress();
       console.log("🔒 Juego bloqueado"); 
     }
     
@@ -584,6 +554,8 @@
     
     function clearGameLocked() { 
       localStorage.removeItem(LOCK_STORAGE_KEY); 
+      localStorage.removeItem(COMPLETED_KEY);
+      localStorage.removeItem(BOSS_DEFEATED_KEY);
       console.log("🔓 Juego desbloqueado"); 
     }
     
@@ -602,6 +574,13 @@
     const menuMusic = document.getElementById('menuMusic');
     const roomMusic = document.getElementById('roomMusic');
     const resetSignalDiv = document.getElementById('resetSignal');
+    const glitchVideo = document.getElementById('glitchVideo');
+    const glitchVideoPlayer = document.getElementById('glitchVideoPlayer');
+    const creditsContainer = document.getElementById('creditsContainer');
+    const creditsVideo = document.getElementById('creditsVideo');
+    const bananaPlayImg = document.getElementById('bananaPlay');
+    const mainTitle = document.getElementById('mainTitle');
+    const tvAnimal = document.getElementById('animal');
 
     function stopAllGameMusic() { 
       if (menuMusic) { menuMusic.pause(); menuMusic.currentTime = 0; } 
@@ -620,7 +599,11 @@
     // ============================================
     if (isGameLocked()) {
       if (checkForResetSignal()) { 
-        window.location.reload(); 
+        glitchVideo.style.display = 'flex';
+        glitchVideoPlayer.play();
+        glitchVideoPlayer.onended = () => {
+          window.location.reload();
+        };
       } else { 
         gameContent.style.display = 'none'; 
         lockScreen.style.display = 'flex'; 
@@ -631,6 +614,13 @@
       gameContent.style.display = 'block'; 
       lockScreen.style.display = 'none'; 
       playMenuMusic();
+      
+      if (isGameCompleted()) {
+        bananaPlayImg.src = 'ABananaDraw.png';
+        if (menuMusic) menuMusic.pause();
+        tvAnimal.src = 'Thanks.png';
+      }
+      
       iniciarJuego(); 
     }
 
@@ -645,13 +635,59 @@
           localStorage.removeItem(RESET_SIGNAL_KEY);
           clearInterval(pollInterval);
           clearGameLocked();
-          setTimeout(() => window.location.reload(), 1000);
+          glitchVideo.style.display = 'flex';
+          glitchVideoPlayer.play();
+          glitchVideoPlayer.onended = () => {
+            window.location.reload();
+          };
           return true;
         }
         return false;
       }
       checkLocalStorageSignal();
       pollInterval = setInterval(checkLocalStorageSignal, 2000);
+    }
+
+    function playGlitchTransition(callback) {
+      glitchVideo.style.display = 'flex';
+      glitchVideoPlayer.currentTime = 0;
+      glitchVideoPlayer.play();
+      glitchVideoPlayer.onended = () => {
+        glitchVideo.style.display = 'none';
+        if (callback) callback();
+      };
+      setTimeout(() => {
+        if (glitchVideo.style.display === 'flex') {
+          glitchVideo.style.display = 'none';
+          if (callback) callback();
+        }
+      }, 3000);
+    }
+
+    function showCredits() {
+      creditsContainer.style.display = 'flex';
+      creditsVideo.currentTime = 0;
+      creditsVideo.play();
+      creditsVideo.onended = () => {
+        creditsContainer.style.display = 'none';
+        goToCreditsMenu();
+      };
+      setTimeout(() => {
+        if (creditsContainer.style.display === 'flex') {
+          creditsContainer.style.display = 'none';
+          goToCreditsMenu();
+        }
+      }, 8000);
+    }
+
+    function goToCreditsMenu() {
+      bananaPlayImg.src = 'ABananaDraw.png';
+      mainTitle.textContent = '🍌 Ms. BananaS 🍌';
+      tvAnimal.src = 'Thanks.png';
+      if (menuMusic) menuMusic.pause();
+      document.getElementById('startScreen').style.display = 'flex';
+      document.getElementById('gameScreen').style.display = 'none';
+      setGameCompleted();
     }
 
     // ==================== JUEGO PRINCIPAL ====================
@@ -680,13 +716,20 @@
       const animals = [
         { name: "Seal", file: "Seal.webp" },
         { name: "Dog", file: "Dog.jfif" },
-        { name: "Cat", file: "Cat.jpj" },
+        { name: "Cat", file: "Cat.png" },
         { name: "Duck", file: "Duck.avif" },
         { name: "Eagle", file: "Aguila.webp" },
         { name: "Snake", file: "Snake.jfif" }
       ];
       
       const dayTargets = { 1: 15, 2: 20, 3: 25, 4: 30, 5: 35 };
+      
+      const correctSounds = ['c1.wav', 'c2.wav', 'c3.wav', 'c4.wav'];
+      const wrongSounds = ['f1.wav', 'f2.wav', 'f3.wav', 'f4.wav'];
+      
+      function getRandomSound(soundArray) {
+        return soundArray[Math.floor(Math.random() * soundArray.length)];
+      }
       
       const savedProgress = loadProgress();
       let currentAnimal = animals[0];
@@ -696,6 +739,12 @@
       let gameActive = true;
       let currentTimeout = null;
       let dialogueTimeout = null;
+      let bossFightActive = false;
+      let failCount = 0;
+      let bossTriggered = false;
+
+      const bossUI = document.getElementById('bossUI');
+      const bossHPDisplay = document.getElementById('bossHP');
 
       function playSound(audioElement, src, volume = 0.8) {
         if (!audioElement) return;
@@ -755,6 +804,162 @@
         jumpscareVideo.onended = () => {
           window.location.href = "https://raw.githubusercontent.com/Raphapro900/Ms.BananaS/refs/heads/main/You%20know%20nothing%2C%20IDIOT.png";
         };
+      }
+
+      // ==================== BOSSFIGHT 3D ====================
+      function startBossFight() {
+        bossFightActive = true;
+        bossTriggered = true;
+        gameActive = false;
+        roomMusic.pause();
+        gameScreen.style.display = "none";
+        
+        bossUI.style.display = 'block';
+        bossHPDisplay.style.display = 'block';
+        bossHPDisplay.textContent = '❤️ 5/5';
+        
+        showDialogue("⚔️ ¡UN JEFE APARECE! ¡DEFIENDETE!", null, 3000);
+        
+        setTimeout(() => {
+          playGlitchTransition(() => {
+            chaseContainer.style.display = "flex";
+            chaseMusic.currentTime = 0;
+            chaseMusic.loop = true;
+            chaseMusic.volume = 0.7;
+            chaseMusic.play().catch(e => console.log("chaseMusic error:", e));
+            initBossFight3D();
+          });
+        }, 3000);
+      }
+      
+      function initBossFight3D() {
+        const bossScene = new THREE.Scene();
+        bossScene.background = new THREE.Color(0x1a0505);
+        bossScene.fog = new THREE.FogExp2(0x1a0505, 0.02);
+        
+        const bossCamera = new THREE.PerspectiveCamera(85, window.innerWidth / window.innerHeight, 0.05, 200);
+        bossCamera.position.set(0, 1.68, 0);
+        
+        const bossRenderer = new THREE.WebGLRenderer({ canvas: document.getElementById("threeCanvas"), antialias: true });
+        bossRenderer.setSize(window.innerWidth, window.innerHeight);
+        bossRenderer.shadowMap.enabled = true;
+        
+        const groundMat = new THREE.MeshStandardMaterial({ color: 0x2a1a1a, roughness: 0.9 });
+        const ground = new THREE.Mesh(new THREE.PlaneGeometry(80, 80), groundMat);
+        ground.rotation.x = -Math.PI / 2;
+        ground.position.y = -0.1;
+        ground.receiveShadow = true;
+        bossScene.add(ground);
+        
+        const barrierMat = new THREE.MeshStandardMaterial({ color: 0xff3333, emissive: 0x441111 });
+        for (let i = 0; i < 4; i++) {
+          const barrier = new THREE.Mesh(new THREE.BoxGeometry(0.5, 3, 15), barrierMat);
+          barrier.position.set(i < 2 ? (i === 0 ? -15 : 15) : 0, 1.5, i >= 2 ? (i === 2 ? -15 : 15) : 0);
+          bossScene.add(barrier);
+        }
+        
+        const textureLoader = new THREE.TextureLoader();
+        const bossTexture = textureLoader.load("https://raw.githubusercontent.com/Raphapro900/Ms.BananaS/refs/heads/main/banana2.png");
+        const bossMat = new THREE.SpriteMaterial({ map: bossTexture, transparent: true, color: 0xff2200 });
+        const boss = new THREE.Sprite(bossMat);
+        boss.scale.set(2.5, 4.0, 1);
+        boss.position.set(0, 2.0, -8);
+        bossScene.add(boss);
+        
+        const redLight = new THREE.PointLight(0xff0000, 1.5, 30);
+        redLight.position.set(0, 5, -5);
+        bossScene.add(redLight);
+        const ambientLight = new THREE.AmbientLight(0x442222);
+        bossScene.add(ambientLight);
+        
+        let bossHP = 5;
+        let bossHits = 0;
+        
+        function handleBossHit(e) {
+          e.preventDefault();
+          if (bossFightActive && bossHits < bossHP) {
+            bossHits++;
+            bossHPDisplay.textContent = `❤️ ${bossHP - bossHits}/${bossHP}`;
+            
+            boss.scale.set(3.0, 4.5, 1);
+            setTimeout(() => {
+              boss.scale.set(2.5, 4.0, 1);
+            }, 200);
+            
+            const hitSound = new Audio('c' + (Math.floor(Math.random() * 4) + 1) + '.wav');
+            hitSound.volume = 0.6;
+            hitSound.play().catch(e => {});
+            
+            if (bossHits >= bossHP) {
+              bossFightActive = false;
+              bossUI.textContent = "🎉 ¡JEFE DERROTADO! 🎉";
+              bossHPDisplay.textContent = "💀 ¡VENCISTE AL JEFE! 💀";
+              
+              setBossDefeated();
+              
+              const thanksSound = new Audio('Thanks.wav');
+              thanksSound.volume = 0.8;
+              thanksSound.play().catch(e => {});
+              
+              setTimeout(() => {
+                bossUI.style.display = 'none';
+                bossHPDisplay.style.display = 'none';
+                bossUI.textContent = "💢 GOLPEA AL JEFE (CLIC DERECHO) 💢";
+                chaseContainer.style.display = "none";
+                chaseMusic.pause();
+                completeGameAfterBoss();
+              }, 2000);
+            }
+          }
+        }
+        
+        document.addEventListener('contextmenu', handleBossHit);
+        
+        let bossTime = 0;
+        function animateBoss() {
+          if (bossFightActive || bossHits < bossHP) {
+            bossTime += 0.02;
+            boss.position.x = Math.sin(bossTime) * 3;
+            boss.position.z = -8 + Math.cos(bossTime * 0.7) * 1;
+            requestAnimationFrame(animateBoss);
+          } else if (bossFightActive) {
+            bossTime += 0.02;
+            boss.position.x = Math.sin(bossTime) * 3;
+            boss.position.z = -8 + Math.cos(bossTime * 0.7) * 1;
+            requestAnimationFrame(animateBoss);
+          }
+          bossRenderer.render(bossScene, bossCamera);
+        }
+        animateBoss();
+        
+        window.cleanupBoss = function() {
+          document.removeEventListener('contextmenu', handleBossHit);
+        };
+      }
+      
+      function completeGameAfterBoss() {
+        if (window.cleanupBoss) window.cleanupBoss();
+        showCredits();
+      }
+
+      // ==================== COMPLETAR JUEGO (DÍA 5) ====================
+      function completeGame() {
+        gameActive = false;
+        const thanksAudio = new Audio('Thanks.wav');
+        thanksAudio.volume = 0.8;
+        thanksAudio.play().catch(e => console.log("Thanks.wav error:", e));
+        
+        showDialogue("🎉 ¡GRACIAS POR JUGAR! 🎉", null, 4000);
+        
+        thanksAudio.onended = () => {
+          showCredits();
+        };
+        
+        setTimeout(() => {
+          if (gameActive === false) {
+            showCredits();
+          }
+        }, 6000);
       }
 
       // ==================== PERSECUCIÓN 3D ====================
@@ -1031,11 +1236,7 @@
       
       function startChaseMinigame() {
         if (chaseActive) return;
-        const glitchDiv = document.createElement('div');
-        glitchDiv.className = 'glitch-transition';
-        document.body.appendChild(glitchDiv);
-        setTimeout(() => {
-          glitchDiv.remove();
+        playGlitchTransition(() => {
           chaseActive = true;
           chaseContainer.style.display = "flex";
           chaseMusic.currentTime = 0;
@@ -1043,7 +1244,7 @@
           chaseMusic.volume = 0.7;
           chaseMusic.play().catch(e => console.log("chaseMusic error:", e));
           initChaseGame();
-        }, 800);
+        });
       }
       
       function onRageReachedTen() {
@@ -1058,16 +1259,19 @@
       buttons.forEach(btn => {
         btn.addEventListener('click', () => {
           if (!gameActive) return;
+          if (bossTriggered) return;
           
           if (btn.innerText === currentAnimal.name) {
             btn.style.backgroundColor = "#2a6a2a";
             correctCount++;
+            failCount = 0;
             updateUI();
-            showDialogue("✅ ¡Correcto!", "c1.mp3", 1500);
+            const sound = getRandomSound(correctSounds);
+            showDialogue("✅ ¡Correcto!", sound, 1500);
             
             if (correctCount >= dayTargets[day]) {
               if (day < 5) {
-                showDialogue(`✨ ¡Completaste el Día ${day}! ✨`, "c2.mp3", 2500);
+                showDialogue(`✨ ¡Completaste el Día ${day}! ✨`, "c2.wav", 2500);
                 day++;
                 correctCount = 0;
                 saveProgress(day, rage);
@@ -1077,12 +1281,8 @@
                   returnToMenu();
                 }, 2500);
               } else {
-                showDialogue("🎉 ¡FELICIDADES! Completaste los 5 días. ¡HAS GANADO! 🎉", "c2.mp3", 4000);
-                gameActive = false;
-                setTimeout(() => {
-                  clearProgress();
-                  returnToMenu();
-                }, 4000);
+                completeGame();
+                return;
               }
               return;
             }
@@ -1091,9 +1291,16 @@
             btn.style.backgroundColor = "#882222";
             buttons.forEach(b => { if (b.innerText === currentAnimal.name) b.style.backgroundColor = "#aa6644"; });
             rage++;
+            failCount++;
             updateUI();
-            showDialogue("❌ ¡Fallaste! Era " + currentAnimal.name + ". Furia: " + rage + "/10", "f1.mp3", 2000);
+            const sound = getRandomSound(wrongSounds);
+            showDialogue("❌ ¡Fallaste! Era " + currentAnimal.name + ". Furia: " + rage + "/10", sound, 2000);
             saveProgress(day, rage);
+            
+            if (failCount >= 3 && rage < 10 && !bossTriggered) {
+              startBossFight();
+              return;
+            }
             
             if (rage >= 10) { 
               onRageReachedTen(); 
@@ -1107,6 +1314,8 @@
       function resetGameScreenState() {
         gameActive = true;
         correctCount = 0;
+        bossTriggered = false;
+        failCount = 0;
         updateUI();
         nextAnimal();
       }
@@ -1115,10 +1324,16 @@
       nextAnimal();
       
       // ============================================
-      // EVENTO PRINCIPAL - BOTÓN JUGAR (CORREGIDO)
+      // EVENTO PRINCIPAL - BOTÓN JUGAR
       // ============================================
       bananaPlay.addEventListener("click", function iniciarPartida(e) {
         e.preventDefault();
+        
+        if (isGameCompleted()) {
+          tvAnimal.src = 'Thanks.png';
+          return;
+        }
+        
         startScreen.style.display = "none";
         gameScreen.style.display = "block";
         if (menuMusic) menuMusic.pause();
@@ -1127,7 +1342,12 @@
           roomMusic.play().catch(err => console.log("roomMusic error:", err)); 
         }
         resetGameScreenState();
-        showDialogue(`🍌 DÍA ${day} - ¡Continúa la aventura! Elige el animal correcto.`, "Primer dia.mp3", 3500);
+        
+        let welcomeSound = "Primer dia.wav";
+        if (day >= 2 && day <= 5) {
+          welcomeSound = "Dias.wav";
+        }
+        showDialogue(`🍌 DÍA ${day} - ¡Continúa la aventura! Elige el animal correcto.`, welcomeSound, 3500);
       });
       
       // ============================================
@@ -1145,6 +1365,7 @@
           Día 4: 30 aciertos<br>
           Día 5: 35 aciertos</p>
           <p>Cada fallo suma FURIA. Llega a 10 y algo malo ocurrirá...</p>
+          <p>Si fallas 3 veces seguidas (sin llegar a 10), ¡aparece un JEFE!</p>
           <p>La FURIA NO se reinicia entre días. ¡Ten cuidado!</p>
           <p>Al completar un día, volverás al menú principal y avanzarás al siguiente día.</p>
           <br>
