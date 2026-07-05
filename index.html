@@ -169,6 +169,12 @@
       animation: float 3s ease-in-out infinite; 
       pointer-events: none; 
       z-index: 2;
+      display: block;
+    }
+    
+    /* Ocultar Ms. BananaS en el modo final feliz */
+    #gameScreen.final-mode #bananaGame {
+      display: none !important;
     }
     
     #tv { 
@@ -183,9 +189,49 @@
       box-shadow: 0 0 20px #000; 
       border-radius: 10px; 
       z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
     }
     
-    #animal { width: 100%; height: 100%; object-fit: contain; }
+    #animal { 
+      width: 100%; 
+      height: 100%; 
+      object-fit: contain; 
+    }
+    
+    /* Mensaje en la TV para el final feliz */
+    #tv-message {
+      display: none;
+      color: #00ff88;
+      font-family: 'Indie Flower', cursive !important;
+      font-size: 1.2rem;
+      padding: 20px;
+      text-align: center;
+      line-height: 1.6;
+      text-shadow: 0 0 10px #00ff88;
+      background: rgba(0,0,0,0.8);
+      width: 100%;
+      height: 100%;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+    
+    #tv-message .signature {
+      margin-top: 15px;
+      color: #ffaa44;
+      font-size: 1rem;
+    }
+    
+    #gameScreen.final-mode #tv-message {
+      display: flex;
+    }
+    
+    #gameScreen.final-mode #animal {
+      display: none;
+    }
     
     .options { 
       position: absolute; 
@@ -543,10 +589,20 @@
       <div id="infoBox"><span id="closeBtn">✖</span><div id="infoContent"></div></div>
     </div>
 
+    <!-- GAME SCREEN con elementos para el final feliz -->
     <div id="gameScreen">
       <audio id="roomMusic" src="Room Theme.mp3" loop></audio>
       <img id="bananaGame" src="banana.png" alt="Ms. BananaS">
-      <div id="tv"><img id="animal" src="Seal.webp" alt="Animal"></div>
+      <div id="tv">
+        <img id="animal" src="Seal.webp" alt="Animal">
+        <div id="tv-message">
+          <div>Hello Player,</div>
+          <div>if you're reading this, it means you obviously came back.</div>
+          <div>I left you a delicious burger on the table.</div>
+          <div style="margin-top: 10px;">Enjoy!</div>
+          <div class="signature">- Ms. BananaS 🍌</div>
+        </div>
+      </div>
       <div class="options">
         <button>Seal</button><button>Dog</button><button>Cat</button>
         <button>Duck</button><button>Eagle</button><button>Snake</button>
@@ -601,7 +657,8 @@
     const BOSS_DEFEATED_KEY = "bossDefeated";
     const WAITING_MODE_KEY = "waitingMode";
     const GLITCH_RED_KEY = "glitchRedMode";
-    const TOTAL_ERRORS_KEY = "totalErrors"; // Para contar errores totales
+    const TOTAL_ERRORS_KEY = "totalErrors";
+    const FINAL_MODE_KEY = "finalMode"; // Nuevo: para el final feliz sin Game Not Found
     
     function saveProgress(day, rage, totalErrors) {
       localStorage.setItem(DAY_PROGRESS_KEY, day);
@@ -628,6 +685,17 @@
       localStorage.removeItem(WAITING_MODE_KEY);
       localStorage.removeItem(GLITCH_RED_KEY);
       localStorage.removeItem(TOTAL_ERRORS_KEY);
+      localStorage.removeItem(FINAL_MODE_KEY);
+    }
+    
+    function setFinalMode() {
+      localStorage.setItem(FINAL_MODE_KEY, "true");
+      localStorage.setItem(COMPLETED_KEY, "true");
+      console.log("🎮 Final feliz activado - Modo mensaje en TV");
+    }
+    
+    function isFinalMode() {
+      return localStorage.getItem(FINAL_MODE_KEY) === "true";
     }
     
     function setGameCompleted() {
@@ -676,6 +744,7 @@
       localStorage.removeItem(BOSS_DEFEATED_KEY);
       localStorage.removeItem(WAITING_MODE_KEY);
       localStorage.removeItem(GLITCH_RED_KEY);
+      localStorage.removeItem(FINAL_MODE_KEY);
       clearProgress();
       console.log("🔓 Juego desbloqueado - Todo reiniciado"); 
     }
@@ -706,6 +775,9 @@
     const bananaPlayImg = document.getElementById('bananaPlay');
     const mainTitle = document.getElementById('mainTitle');
     const tvAnimal = document.getElementById('animal');
+    const tvMessage = document.getElementById('tv-message');
+    const gameScreen = document.getElementById('gameScreen');
+    const bananaGameImg = document.getElementById('bananaGame');
     const resetNotification = document.getElementById('resetNotification');
 
     function stopAllGameMusic() { 
@@ -743,6 +815,32 @@
       stopAllGameMusic();
       startGlitchRedPolling();
     }
+    else if (isFinalMode()) {
+      // MODO FINAL FELIZ - No hay Game Not Found
+      gameContent.style.display = 'block';
+      lockScreen.style.display = 'none';
+      waitingScreen.style.display = 'none';
+      glitchRedScreen.style.display = 'none';
+      stopAllGameMusic();
+      
+      // Configurar el modo final en la habitación
+      bananaPlayImg.src = 'ABananaDraw.png';
+      if (menuMusic) menuMusic.pause();
+      
+      // Ocultar Ms. BananaS en la habitación
+      gameScreen.classList.add('final-mode');
+      
+      // Mostrar el mensaje en la TV
+      tvMessage.style.display = 'flex';
+      tvAnimal.style.display = 'none';
+      
+      // Mostrar el menú directamente
+      document.getElementById('startScreen').style.display = 'flex';
+      document.getElementById('gameScreen').style.display = 'none';
+      
+      // El botón Jugar llevará a la habitación con el mensaje
+      iniciarJuegoFinalMode();
+    }
     else if (isWaitingMode()) {
       gameContent.style.display = 'none';
       waitingScreen.style.display = 'flex';
@@ -778,6 +876,36 @@
       }
       
       iniciarJuego(); 
+    }
+
+    // ==================== FUNCIÓN PARA EL MODO FINAL ====================
+    function iniciarJuegoFinalMode() {
+      // Cuando el jugador hace clic en Jugar, va a la habitación con el mensaje
+      const bananaPlay = document.getElementById("bananaPlay");
+      
+      bananaPlay.addEventListener("click", function iniciarPartidaFinal(e) {
+        e.preventDefault();
+        
+        // Ocultar menú y mostrar habitación en modo final
+        document.getElementById('startScreen').style.display = 'none';
+        document.getElementById('gameScreen').style.display = 'block';
+        gameScreen.classList.add('final-mode');
+        
+        // Asegurar que el mensaje se muestre
+        tvMessage.style.display = 'flex';
+        tvAnimal.style.display = 'none';
+        
+        // Ocultar Ms. BananaS
+        bananaGameImg.style.display = 'none';
+        
+        // No mostrar opciones de animales
+        document.querySelector('.options').style.display = 'none';
+        document.getElementById('rageText').style.display = 'none';
+        document.getElementById('dayText').style.display = 'none';
+        
+        // No reproducir música de la habitación
+        if (roomMusic) roomMusic.pause();
+      });
     }
 
     // ==================== POLLING ====================
@@ -868,14 +996,13 @@
       }, 3000);
     }
 
-    // ==================== FUNCIÓN DE CRÉDITOS ====================
+    // ==================== FUNCIÓN DE CRÉDITOS CON ESPERA DE 20 SEGUNDOS ====================
     function showCredits() {
       const dialogueBox = document.getElementById('dialogueBox');
       
       dialogueBox.innerText = "🎉 ¡GRACIAS POR JUGAR! 🎉";
       dialogueBox.style.display = "block";
       
-      // Reproducir Thanks.wav
       const thanksAudio = new Audio('Thanks.wav');
       thanksAudio.volume = 0.9;
       
@@ -885,7 +1012,8 @@
       
       thanksAudio.play().catch(e => console.log("Thanks.wav error:", e));
       
-      thanksAudio.onended = () => {
+      // ⏱️ ESPERAR 20 SEGUNDOS ANTES DE MOSTRAR CRÉDITOS ⏱️
+      setTimeout(() => {
         dialogueBox.style.display = "none";
         creditsContainer.style.display = 'flex';
         creditsVideo.currentTime = 0;
@@ -893,60 +1021,44 @@
         
         creditsVideo.onended = () => {
           creditsContainer.style.display = 'none';
-          goToWaitingScreen();
+          goToFinalMode();
         };
         
         setTimeout(() => {
           if (creditsContainer.style.display === 'flex') {
             creditsContainer.style.display = 'none';
-            goToWaitingScreen();
+            goToFinalMode();
           }
         }, 10000);
-      };
-      
-      setTimeout(() => {
-        if (thanksAudio) {
-          dialogueBox.style.display = "none";
-          creditsContainer.style.display = 'flex';
-          creditsVideo.currentTime = 0;
-          creditsVideo.play();
-          creditsVideo.onended = () => {
-            creditsContainer.style.display = 'none';
-            goToWaitingScreen();
-          };
-        }
-      }, 5000);
+      }, 20000);
     }
 
-    // ==================== IR A PANTALLA DE ESPERA ====================
-    function goToWaitingScreen() {
+    // ==================== IR AL MODO FINAL FELIZ ====================
+    function goToFinalMode() {
+      // Guardar estado de final feliz
+      setFinalMode();
+      
+      // Ocultar todo el juego
       document.getElementById('startScreen').style.display = 'none';
       document.getElementById('gameScreen').style.display = 'none';
-      document.getElementById('gameContent').style.display = 'none';
+      document.getElementById('gameContent').style.display = 'block';
       lockScreen.style.display = 'none';
       glitchRedScreen.style.display = 'none';
-      
-      waitingScreen.style.display = 'flex';
-      setGameCompleted();
-      startWaitingPolling();
-    }
-
-    // ==================== ACTIVAR PANTALLA ROJA GLITCHEADA ====================
-    function activateGlitchRedScreen() {
-      setGlitchRedMode();
-      setGameLocked();
-      
-      document.getElementById('startScreen').style.display = 'none';
-      document.getElementById('gameScreen').style.display = 'none';
-      document.getElementById('gameContent').style.display = 'none';
-      lockScreen.style.display = 'none';
       waitingScreen.style.display = 'none';
       creditsContainer.style.display = 'none';
-      chaseContainer.style.display = 'none';
       
-      glitchRedScreen.style.display = 'flex';
+      // Mostrar menú con ABananaDraw.png
+      document.getElementById('startScreen').style.display = 'flex';
       
-      startGlitchRedPolling();
+      // Cambiar imagen del menú
+      bananaPlayImg.src = 'ABananaDraw.png';
+      if (menuMusic) menuMusic.pause();
+      
+      // El botón Jugar ahora irá a la habitación con el mensaje
+      // (Ya configurado en iniciarJuegoFinalMode)
+      
+      // Recargar la página para aplicar el modo final
+      window.location.reload();
     }
 
     // ==================== JUEGO PRINCIPAL ====================
@@ -971,6 +1083,10 @@
       const chaseContainer = document.getElementById("chaseContainer");
       const chaseMusic = document.getElementById("chaseMusic");
       const heartbeatSound = document.getElementById("heartbeatSound");
+      const gameScreenEl = document.getElementById("gameScreen");
+      const bananaGameImg = document.getElementById("bananaGame");
+      const tvMessage = document.getElementById("tv-message");
+      const tvAnimal = document.getElementById("animal");
       
       window.chaseMusic = chaseMusic;
       window.heartbeatSound = heartbeatSound;
@@ -997,7 +1113,7 @@
       let rage = savedProgress.rage;
       let day = savedProgress.day;
       let correctCount = 0;
-      let totalErrors = savedProgress.totalErrors; // Total de errores en el día
+      let totalErrors = savedProgress.totalErrors;
       let gameActive = true;
       let currentTimeout = null;
       let dialogueTimeout = null;
@@ -1091,7 +1207,6 @@
             playGlitchTransition(() => {
               chaseContainer.style.display = "flex";
               
-              // Reproducir Boss.mp3 en loop
               const bossMusic = new Audio('Boss.mp3');
               bossMusic.loop = true;
               bossMusic.volume = 0.7;
@@ -1127,31 +1242,26 @@
         const canvas = document.getElementById('threeCanvas');
         const ctx = canvas.getContext('2d');
         
-        // Configurar canvas
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         canvas.style.width = '100%';
         canvas.style.height = '100%';
         
-        // Estado del boss
         let bossHP = 10;
         let bossHits = 0;
-        let attackState = 'idle'; // idle, attacking, cooldown
+        let attackState = 'idle';
         let attackCooldown = 0;
         let lineX = 0;
         let lineY = 0;
         let lineWidth = 5;
-        let lineHeight = 300;
         let isLineStatic = false;
         let mouseX = 0;
         let mouseY = 0;
         let deathSequenceStarted = false;
         
-        // Posición de Ms. BananaS (en el centro)
         const bossX = canvas.width / 2;
         const bossY = canvas.height / 2 - 50;
         
-        // Crear imagen de Ms. BananaS
         const bossImg = new Image();
         bossImg.src = "https://raw.githubusercontent.com/Raphapro900/Ms.BananaS/refs/heads/main/banana2.png";
         bossImg.onload = () => { console.log("Boss image loaded"); };
@@ -1160,7 +1270,6 @@
         playerImg.src = "https://raw.githubusercontent.com/Raphapro900/Ms.BananaS/refs/heads/main/banana.png";
         playerImg.onload = () => { console.log("Player image loaded"); };
         
-        // Corazones (vidas)
         let hearts = [];
         for (let i = 0; i < 10; i++) {
           hearts.push({ x: 50 + i * 40, y: 50, alive: true });
@@ -1173,7 +1282,6 @@
         bossHPDisplay.textContent = `❤️ ${bossHP}/${bossHP}`;
         bossTimer.textContent = '⏱️ Presiona E para atacar';
         
-        // Movimiento del mouse
         document.addEventListener('mousemove', (e) => {
           const rect = canvas.getBoundingClientRect();
           const scaleX = canvas.width / rect.width;
@@ -1182,23 +1290,19 @@
           mouseY = (e.clientY - rect.top) * scaleY;
         });
         
-        // Atacar con tecla E
         document.addEventListener('keydown', (e) => {
           if (e.key === 'e' || e.key === 'E') {
             if (!bossFightActive || deathSequenceStarted) return;
             
             if (attackState === 'idle') {
-              // Iniciar ataque: línea se queda estática donde está el mouse
               isLineStatic = true;
               lineX = mouseX;
               lineY = mouseY;
               attackState = 'attacking';
               bossTimer.textContent = '⚡ ¡ATACANDO!';
               
-              // Verificar si la línea toca a Ms. BananaS
               checkHit();
               
-              // Volver a idle después de 1 segundo
               setTimeout(() => {
                 isLineStatic = false;
                 attackState = 'idle';
@@ -1209,26 +1313,22 @@
         });
         
         function checkHit() {
-          // Calcular distancia entre la línea y Ms. BananaS
           const distX = Math.abs(lineX - bossX);
           const distY = Math.abs(lineY - bossY);
-          const halfWidth = lineWidth / 2 + 50; // Ancho de Ms. BananaS
-          const halfHeight = lineHeight / 2 + 70;
+          const halfWidth = lineWidth / 2 + 50;
+          const halfHeight = 70;
           
           if (distX < halfWidth && distY < halfHeight) {
-            // ¡GOLPE! Quitar un corazón
             for (let i = hearts.length - 1; i >= 0; i--) {
               if (hearts[i].alive) {
                 hearts[i].alive = false;
                 bossHits++;
                 bossHPDisplay.textContent = `❤️ ${bossHP - bossHits}/${bossHP}`;
                 
-                // 🔥 SONIDO OUCH.WAV 🔥
                 const ouchSound = new Audio('Ouch.wav');
                 ouchSound.volume = 0.7;
                 ouchSound.play().catch(e => console.log("Ouch.wav error:", e));
                 
-                // Efecto visual en Ms. BananaS (parpadeo)
                 bossImg.style = 'filter: brightness(2) hue-rotate(30deg);';
                 setTimeout(() => {
                   bossImg.style = '';
@@ -1239,7 +1339,6 @@
             }
             
             if (bossHits >= bossHP) {
-              // BOSS DERROTADO
               deathSequenceStarted = true;
               bossFightActive = false;
               bossUI.textContent = "🎉 ¡JEFE DERROTADO! 🎉";
@@ -1264,16 +1363,13 @@
           }
         }
         
-        // Ciclo de animación
         function animateBoss2D() {
           if (!bossFightActive && !deathSequenceStarted) {
             return;
           }
           
-          // Limpiar canvas
           ctx.clearRect(0, 0, canvas.width, canvas.height);
           
-          // Fondo oscuro
           const gradient = ctx.createRadialGradient(
             canvas.width/2, canvas.height/2, 50,
             canvas.width/2, canvas.height/2, 500
@@ -1283,7 +1379,6 @@
           ctx.fillStyle = gradient;
           ctx.fillRect(0, 0, canvas.width, canvas.height);
           
-          // Dibujar Ms. BananaS (el boss)
           if (bossImg.complete && bossImg.naturalWidth > 0) {
             const size = 120;
             ctx.drawImage(bossImg, bossX - size/2, bossY - size/2, size, size);
@@ -1294,7 +1389,6 @@
             ctx.fillText('🍌', bossX, bossY + 20);
           }
           
-          // Dibujar el jugador (corazón - mouse)
           ctx.fillStyle = '#ff0044';
           ctx.shadowColor = '#ff0044';
           ctx.shadowBlur = 20;
@@ -1304,7 +1398,6 @@
           ctx.fillText('❤️', mouseX, mouseY);
           ctx.shadowBlur = 0;
           
-          // Dibujar línea de ataque
           if (attackState === 'attacking' || isLineStatic) {
             ctx.fillStyle = 'rgba(255, 0, 0, 0.8)';
             ctx.shadowColor = '#ff0000';
@@ -1313,11 +1406,9 @@
             const x = isLineStatic ? lineX : mouseX;
             const y = isLineStatic ? lineY : mouseY;
             
-            // Línea vertical de arriba a abajo
             ctx.fillRect(x - lineWidth/2, 0, lineWidth, canvas.height);
             ctx.shadowBlur = 0;
             
-            // Efecto de brillo
             const glowGradient = ctx.createLinearGradient(x - 30, 0, x + 30, 0);
             glowGradient.addColorStop(0, 'rgba(255,0,0,0)');
             glowGradient.addColorStop(0.5, 'rgba(255,0,0,0.3)');
@@ -1326,7 +1417,6 @@
             ctx.fillRect(x - 30, 0, 60, canvas.height);
           }
           
-          // Dibujar corazones (vidas)
           hearts.forEach((heart, index) => {
             if (heart.alive) {
               ctx.fillStyle = '#ff0044';
@@ -1340,7 +1430,6 @@
             }
           });
           
-          // Dibujar el timer de ataque
           if (attackState === 'attacking') {
             ctx.fillStyle = '#ff4444';
             ctx.font = '20px monospace';
@@ -1348,20 +1437,6 @@
             ctx.fillText('⚡ ATACANDO ⚡', canvas.width/2, canvas.height - 50);
           }
           
-          // Verificar si el jugador está sobre la línea (para feedback)
-          if (attackState === 'attacking' || isLineStatic) {
-            const x = isLineStatic ? lineX : mouseX;
-            const distX = Math.abs(mouseX - x);
-            const distY = Math.abs(mouseY - bossY);
-            
-            if (distX < 30 && distY < 100 && bossFightActive) {
-              // El jugador está sobre la línea
-              ctx.fillStyle = 'rgba(0, 255, 0, 0.2)';
-              ctx.fillRect(0, 0, canvas.width, canvas.height);
-            }
-          }
-          
-          // Si el boss está muerto, mostrar mensaje
           if (deathSequenceStarted) {
             ctx.fillStyle = '#ffdd44';
             ctx.font = '40px "Indie Flower", cursive';
@@ -1378,10 +1453,10 @@
             window.bossMusic.pause();
             window.bossMusic.currentTime = 0;
           }
-          showCredits();
+          // Después del boss → pantalla de espera (no créditos)
+          goToWaitingScreen();
         }
         
-        // Limpiar al terminar
         window.cleanupBoss2D = function() {
           if (window.bossMusic) {
             window.bossMusic.pause();
@@ -1394,7 +1469,7 @@
       function completeGame(hasErrors) {
         gameActive = false;
         if (!hasErrors) {
-          // Sin errores → final feliz
+          // Sin errores → final feliz (créditos con 20s de espera)
           showCredits();
         } else {
           // Con errores → bossfight
@@ -1713,7 +1788,6 @@
                 showDialogue(`✨ ¡Completaste el Día ${day}! ✨`, "c2.wav", 2500);
                 day++;
                 correctCount = 0;
-                // Reiniciar contador de errores para el nuevo día
                 totalErrors = 0;
                 saveProgress(day, rage, totalErrors);
                 updateUI();
@@ -1723,7 +1797,6 @@
                 }, 2500);
               } else {
                 // DÍA 5 COMPLETADO
-                // Verificar si hubo errores en todo el día 5
                 const hasErrors = totalErrors > 0;
                 completeGame(hasErrors);
                 return;
@@ -1735,14 +1808,12 @@
             btn.style.backgroundColor = "#882222";
             buttons.forEach(b => { if (b.innerText === currentAnimal.name) b.style.backgroundColor = "#aa6644"; });
             rage++;
-            totalErrors++; // Contar error total en el día
+            totalErrors++;
             updateUI();
-            // Sonido de fallo
             const sound = getRandomSound(['f1.wav', 'f2.wav', 'f3.wav', 'f4.wav']);
             showDialogue("❌ ¡Fallaste! Era " + currentAnimal.name + ". Furia: " + rage + "/10", sound, 2000);
             saveProgress(day, rage, totalErrors);
             
-            // Si llega a 10 de furia → persecución en el bosque
             if (rage >= 10) { 
               onRageReachedTen(); 
             } else { 
@@ -1784,9 +1855,9 @@
         }
         resetGameScreenState();
         
-        let welcomeSound = "Primer dia.wav";
+        let welcomeSound = "Primer dia.mp3";
         if (day >= 2 && day <= 5) {
-          welcomeSound = "Dias.wav";
+          welcomeSound = "Dias.mp3";
         }
         showDialogue(`🍌 DÍA ${day} - ¡Continúa la aventura! Elige el animal correcto.`, welcomeSound, 3500);
       });
