@@ -172,7 +172,6 @@
       display: block;
     }
     
-    /* Ocultar Ms. BananaS en el modo final feliz */
     #gameScreen.final-mode #bananaGame {
       display: none !important;
     }
@@ -201,7 +200,6 @@
       object-fit: contain; 
     }
     
-    /* Mensaje en la TV para el final feliz */
     #tv-message {
       display: none;
       color: #00ff88;
@@ -532,11 +530,25 @@
       font-family: 'Share Tech Mono', monospace !important;
       text-shadow: 0 0 10px #ff0000;
     }
+    
+    /* Estilos para el reset en cualquier momento */
+    .reset-polling-badge {
+      position: fixed;
+      bottom: 10px;
+      right: 10px;
+      color: #666;
+      font-size: 0.5rem;
+      font-family: monospace !important;
+      z-index: 9999;
+      opacity: 0.3;
+      pointer-events: none;
+    }
   </style>
 </head>
 <body>
 
   <div id="resetNotification" class="reset-notification">🔄 RESETEANDO JUEGO...</div>
+  <div class="reset-polling-badge" id="pollingBadge">🔄 Escuchando reset...</div>
 
   <div id="waitingScreen" class="waiting-screen">
     <h1>🍌 Ms. BananaS 🍌</h1>
@@ -589,7 +601,6 @@
       <div id="infoBox"><span id="closeBtn">✖</span><div id="infoContent"></div></div>
     </div>
 
-    <!-- GAME SCREEN con elementos para el final feliz -->
     <div id="gameScreen">
       <audio id="roomMusic" src="Room Theme.mp3" loop></audio>
       <img id="bananaGame" src="banana.png" alt="Ms. BananaS">
@@ -648,7 +659,7 @@
       window.open(resetUrl, '_blank');
     }
 
-    // ==================== SISTEMA DE BLOQUEO ====================
+    // ==================== SISTEMA DE BLOQUEO Y PROGRESO ====================
     const LOCK_STORAGE_KEY = "gameLocked_V5";
     const RESET_SIGNAL_KEY = "resetSignal";
     const DAY_PROGRESS_KEY = "gameDayProgress";
@@ -658,7 +669,7 @@
     const WAITING_MODE_KEY = "waitingMode";
     const GLITCH_RED_KEY = "glitchRedMode";
     const TOTAL_ERRORS_KEY = "totalErrors";
-    const FINAL_MODE_KEY = "finalMode"; // Nuevo: para el final feliz sin Game Not Found
+    const FINAL_MODE_KEY = "finalMode";
     
     function saveProgress(day, rage, totalErrors) {
       localStorage.setItem(DAY_PROGRESS_KEY, day);
@@ -686,12 +697,13 @@
       localStorage.removeItem(GLITCH_RED_KEY);
       localStorage.removeItem(TOTAL_ERRORS_KEY);
       localStorage.removeItem(FINAL_MODE_KEY);
+      localStorage.removeItem(LOCK_STORAGE_KEY);
     }
     
     function setFinalMode() {
       localStorage.setItem(FINAL_MODE_KEY, "true");
       localStorage.setItem(COMPLETED_KEY, "true");
-      console.log("🎮 Final feliz activado - Modo mensaje en TV");
+      console.log("🎮 Final feliz activado");
     }
     
     function isFinalMode() {
@@ -739,12 +751,6 @@
     }
     
     function clearGameLocked() { 
-      localStorage.removeItem(LOCK_STORAGE_KEY); 
-      localStorage.removeItem(COMPLETED_KEY);
-      localStorage.removeItem(BOSS_DEFEATED_KEY);
-      localStorage.removeItem(WAITING_MODE_KEY);
-      localStorage.removeItem(GLITCH_RED_KEY);
-      localStorage.removeItem(FINAL_MODE_KEY);
       clearProgress();
       console.log("🔓 Juego desbloqueado - Todo reiniciado"); 
     }
@@ -759,6 +765,7 @@
       return false; 
     }
 
+    // ==================== ELEMENTOS DOM ====================
     const lockScreen = document.getElementById('lockScreen');
     const waitingScreen = document.getElementById('waitingScreen');
     const glitchRedScreen = document.getElementById('glitchRedScreen');
@@ -779,6 +786,7 @@
     const gameScreen = document.getElementById('gameScreen');
     const bananaGameImg = document.getElementById('bananaGame');
     const resetNotification = document.getElementById('resetNotification');
+    const pollingBadge = document.getElementById('pollingBadge');
 
     function stopAllGameMusic() { 
       if (menuMusic) { menuMusic.pause(); menuMusic.currentTime = 0; } 
@@ -792,16 +800,53 @@
       }
     }
 
-    // ==================== RESET SOLO DESDE LA PÁGINA /reset/ ====================
+    // ==================== RESET EN CUALQUIER MOMENTO ====================
     function performReset() {
       resetNotification.style.display = 'block';
       resetNotification.textContent = '🔄 RESETEANDO JUEGO...';
+      
+      // Guardar señal de reset
       localStorage.setItem(RESET_SIGNAL_KEY, "reset");
+      
+      // Detener todos los sonidos
       stopAllGameMusic();
       if (window.chaseMusic) window.chaseMusic.pause();
       if (window.heartbeatSound) window.heartbeatSound.pause();
-      setTimeout(() => { window.location.reload(); }, 1000);
+      if (window.bossMusic) window.bossMusic.pause();
+      
+      setTimeout(() => { 
+        window.location.reload(); 
+      }, 1000);
     }
+
+    // ==================== POLLING DE RESET SIEMPRE ACTIVO ====================
+    let resetPollInterval = null;
+    let resetAttempts = 0;
+
+    function startUniversalResetPolling() {
+      if (resetPollInterval) return;
+      
+      resetPollInterval = setInterval(() => {
+        resetAttempts++;
+        const signal = localStorage.getItem(RESET_SIGNAL_KEY);
+        if (signal === "reset") {
+          console.log("✅ SEÑAL DE RESET DETECTADA EN CUALQUIER MOMENTO");
+          localStorage.removeItem(RESET_SIGNAL_KEY);
+          clearInterval(resetPollInterval);
+          resetPollInterval = null;
+          
+          // Mostrar notificación y recargar
+          resetNotification.style.display = 'block';
+          resetNotification.textContent = '🔄 RESETEANDO JUEGO...';
+          setTimeout(() => { window.location.reload(); }, 800);
+        }
+      }, 1500); // Cada 1.5 segundos
+      
+      console.log("🔄 Polling de reset universal activado");
+    }
+
+    // Iniciar el polling universal al cargar la página
+    startUniversalResetPolling();
 
     // ============================================
     // INICIALIZACIÓN
@@ -816,29 +861,23 @@
       startGlitchRedPolling();
     }
     else if (isFinalMode()) {
-      // MODO FINAL FELIZ - No hay Game Not Found
+      // MODO FINAL FELIZ
       gameContent.style.display = 'block';
       lockScreen.style.display = 'none';
       waitingScreen.style.display = 'none';
       glitchRedScreen.style.display = 'none';
       stopAllGameMusic();
       
-      // Configurar el modo final en la habitación
       bananaPlayImg.src = 'ABananaDraw.png';
       if (menuMusic) menuMusic.pause();
       
-      // Ocultar Ms. BananaS en la habitación
       gameScreen.classList.add('final-mode');
-      
-      // Mostrar el mensaje en la TV
       tvMessage.style.display = 'flex';
       tvAnimal.style.display = 'none';
       
-      // Mostrar el menú directamente
       document.getElementById('startScreen').style.display = 'flex';
       document.getElementById('gameScreen').style.display = 'none';
       
-      // El botón Jugar llevará a la habitación con el mensaje
       iniciarJuegoFinalMode();
     }
     else if (isWaitingMode()) {
@@ -878,37 +917,7 @@
       iniciarJuego(); 
     }
 
-    // ==================== FUNCIÓN PARA EL MODO FINAL ====================
-    function iniciarJuegoFinalMode() {
-      // Cuando el jugador hace clic en Jugar, va a la habitación con el mensaje
-      const bananaPlay = document.getElementById("bananaPlay");
-      
-      bananaPlay.addEventListener("click", function iniciarPartidaFinal(e) {
-        e.preventDefault();
-        
-        // Ocultar menú y mostrar habitación en modo final
-        document.getElementById('startScreen').style.display = 'none';
-        document.getElementById('gameScreen').style.display = 'block';
-        gameScreen.classList.add('final-mode');
-        
-        // Asegurar que el mensaje se muestre
-        tvMessage.style.display = 'flex';
-        tvAnimal.style.display = 'none';
-        
-        // Ocultar Ms. BananaS
-        bananaGameImg.style.display = 'none';
-        
-        // No mostrar opciones de animales
-        document.querySelector('.options').style.display = 'none';
-        document.getElementById('rageText').style.display = 'none';
-        document.getElementById('dayText').style.display = 'none';
-        
-        // No reproducir música de la habitación
-        if (roomMusic) roomMusic.pause();
-      });
-    }
-
-    // ==================== POLLING ====================
+    // ==================== POLLING ADICIONAL (para modos específicos) ====================
     function startWaitingPolling() {
       let pollInterval, attempts = 0;
       function checkLocalStorageSignal() {
@@ -1012,7 +1021,6 @@
       
       thanksAudio.play().catch(e => console.log("Thanks.wav error:", e));
       
-      // ⏱️ ESPERAR 20 SEGUNDOS ANTES DE MOSTRAR CRÉDITOS ⏱️
       setTimeout(() => {
         dialogueBox.style.display = "none";
         creditsContainer.style.display = 'flex';
@@ -1035,10 +1043,8 @@
 
     // ==================== IR AL MODO FINAL FELIZ ====================
     function goToFinalMode() {
-      // Guardar estado de final feliz
       setFinalMode();
       
-      // Ocultar todo el juego
       document.getElementById('startScreen').style.display = 'none';
       document.getElementById('gameScreen').style.display = 'none';
       document.getElementById('gameContent').style.display = 'block';
@@ -1047,18 +1053,35 @@
       waitingScreen.style.display = 'none';
       creditsContainer.style.display = 'none';
       
-      // Mostrar menú con ABananaDraw.png
       document.getElementById('startScreen').style.display = 'flex';
       
-      // Cambiar imagen del menú
       bananaPlayImg.src = 'ABananaDraw.png';
       if (menuMusic) menuMusic.pause();
       
-      // El botón Jugar ahora irá a la habitación con el mensaje
-      // (Ya configurado en iniciarJuegoFinalMode)
-      
-      // Recargar la página para aplicar el modo final
       window.location.reload();
+    }
+
+    // ==================== FUNCIÓN PARA EL MODO FINAL ====================
+    function iniciarJuegoFinalMode() {
+      const bananaPlay = document.getElementById("bananaPlay");
+      
+      bananaPlay.addEventListener("click", function iniciarPartidaFinal(e) {
+        e.preventDefault();
+        
+        document.getElementById('startScreen').style.display = 'none';
+        document.getElementById('gameScreen').style.display = 'block';
+        gameScreen.classList.add('final-mode');
+        
+        tvMessage.style.display = 'flex';
+        tvAnimal.style.display = 'none';
+        bananaGameImg.style.display = 'none';
+        
+        document.querySelector('.options').style.display = 'none';
+        document.getElementById('rageText').style.display = 'none';
+        document.getElementById('dayText').style.display = 'none';
+        
+        if (roomMusic) roomMusic.pause();
+      });
     }
 
     // ==================== JUEGO PRINCIPAL ====================
@@ -1453,7 +1476,6 @@
             window.bossMusic.pause();
             window.bossMusic.currentTime = 0;
           }
-          // Después del boss → pantalla de espera (no créditos)
           goToWaitingScreen();
         }
         
@@ -1469,10 +1491,8 @@
       function completeGame(hasErrors) {
         gameActive = false;
         if (!hasErrors) {
-          // Sin errores → final feliz (créditos con 20s de espera)
           showCredits();
         } else {
-          // Con errores → bossfight
           startBossFight();
         }
       }
@@ -1796,7 +1816,6 @@
                   returnToMenu();
                 }, 2500);
               } else {
-                // DÍA 5 COMPLETADO
                 const hasErrors = totalErrors > 0;
                 completeGame(hasErrors);
                 return;
