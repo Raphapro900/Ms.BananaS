@@ -514,41 +514,23 @@
       display: none;
     }
     
-    .reset-notification {
-      position: fixed;
-      top: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0,0,0,0.9);
-      color: #ff4444;
-      padding: 10px 20px;
-      border-radius: 10px;
-      border: 2px solid #ff4444;
-      font-size: 1.2rem;
-      z-index: 9999;
-      display: none;
-      font-family: 'Share Tech Mono', monospace !important;
-      text-shadow: 0 0 10px #ff0000;
-    }
-    
-    /* Estilos para el reset en cualquier momento */
+    /* Badge de polling - opcional y muy sutil */
     .reset-polling-badge {
       position: fixed;
       bottom: 10px;
       right: 10px;
-      color: #666;
-      font-size: 0.5rem;
+      color: #333;
+      font-size: 0.4rem;
       font-family: monospace !important;
       z-index: 9999;
-      opacity: 0.3;
+      opacity: 0.15;
       pointer-events: none;
     }
   </style>
 </head>
 <body>
 
-  <div id="resetNotification" class="reset-notification">🔄 RESETEANDO JUEGO...</div>
-  <div class="reset-polling-badge" id="pollingBadge">🔄 Escuchando reset...</div>
+  <div class="reset-polling-badge" id="pollingBadge">🔄</div>
 
   <div id="waitingScreen" class="waiting-screen">
     <h1>🍌 Ms. BananaS 🍌</h1>
@@ -785,7 +767,6 @@
     const tvMessage = document.getElementById('tv-message');
     const gameScreen = document.getElementById('gameScreen');
     const bananaGameImg = document.getElementById('bananaGame');
-    const resetNotification = document.getElementById('resetNotification');
     const pollingBadge = document.getElementById('pollingBadge');
 
     function stopAllGameMusic() { 
@@ -800,11 +781,8 @@
       }
     }
 
-    // ==================== RESET EN CUALQUIER MOMENTO ====================
+    // ==================== RESET CON GLITCH.MP4 ====================
     function performReset() {
-      resetNotification.style.display = 'block';
-      resetNotification.textContent = '🔄 RESETEANDO JUEGO...';
-      
       // Guardar señal de reset
       localStorage.setItem(RESET_SIGNAL_KEY, "reset");
       
@@ -814,9 +792,19 @@
       if (window.heartbeatSound) window.heartbeatSound.pause();
       if (window.bossMusic) window.bossMusic.pause();
       
-      setTimeout(() => { 
-        window.location.reload(); 
-      }, 1000);
+      // Mostrar glitch.mp4 y recargar
+      glitchVideo.style.display = 'flex';
+      glitchVideoPlayer.currentTime = 0;
+      glitchVideoPlayer.play();
+      glitchVideoPlayer.onended = () => {
+        window.location.reload();
+      };
+      // Fallback por si el video no termina
+      setTimeout(() => {
+        if (glitchVideo.style.display === 'flex') {
+          window.location.reload();
+        }
+      }, 3000);
     }
 
     // ==================== POLLING DE RESET SIEMPRE ACTIVO ====================
@@ -835,12 +823,20 @@
           clearInterval(resetPollInterval);
           resetPollInterval = null;
           
-          // Mostrar notificación y recargar
-          resetNotification.style.display = 'block';
-          resetNotification.textContent = '🔄 RESETEANDO JUEGO...';
-          setTimeout(() => { window.location.reload(); }, 800);
+          // Mostrar glitch.mp4 y recargar
+          glitchVideo.style.display = 'flex';
+          glitchVideoPlayer.currentTime = 0;
+          glitchVideoPlayer.play();
+          glitchVideoPlayer.onended = () => {
+            window.location.reload();
+          };
+          setTimeout(() => {
+            if (glitchVideo.style.display === 'flex') {
+              window.location.reload();
+            }
+          }, 3000);
         }
-      }, 1500); // Cada 1.5 segundos
+      }, 1500);
       
       console.log("🔄 Polling de reset universal activado");
     }
@@ -890,9 +886,7 @@
     } 
     else if (isGameLocked()) {
       if (checkForResetSignal()) { 
-        glitchVideo.style.display = 'flex';
-        glitchVideoPlayer.play();
-        glitchVideoPlayer.onended = () => { window.location.reload(); };
+        performReset();
       } else { 
         gameContent.style.display = 'none'; 
         lockScreen.style.display = 'flex'; 
@@ -929,9 +923,7 @@
           localStorage.removeItem(RESET_SIGNAL_KEY);
           clearInterval(pollInterval);
           clearGameLocked();
-          glitchVideo.style.display = 'flex';
-          glitchVideoPlayer.play();
-          glitchVideoPlayer.onended = () => { window.location.reload(); };
+          performReset();
           return true;
         }
         return false;
@@ -956,9 +948,7 @@
           localStorage.removeItem(RESET_SIGNAL_KEY);
           clearInterval(pollInterval);
           clearGameLocked();
-          glitchVideo.style.display = 'flex';
-          glitchVideoPlayer.play();
-          glitchVideoPlayer.onended = () => { window.location.reload(); };
+          performReset();
           return true;
         }
         return false;
@@ -978,9 +968,7 @@
           localStorage.removeItem(RESET_SIGNAL_KEY);
           clearInterval(pollInterval);
           clearGameLocked();
-          glitchVideo.style.display = 'flex';
-          glitchVideoPlayer.play();
-          glitchVideoPlayer.onended = () => { window.location.reload(); };
+          performReset();
           return true;
         }
         return false;
@@ -1945,7 +1933,7 @@
       });
       
       // ============================================
-      // BOTÓN RESET
+      // BOTÓN RESET (con glitch.mp4)
       // ============================================
       document.getElementById('resetBtn').addEventListener('click', performReset);
     }
