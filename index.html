@@ -274,6 +274,49 @@
       pointer-events: none; 
     }
     
+    .waiting-screen { 
+      position: fixed; 
+      top: 0; 
+      left: 0; 
+      width: 100%; 
+      height: 100%; 
+      background-color: #0a0a2a; 
+      z-index: 10000; 
+      display: none; 
+      flex-direction: column; 
+      align-items: center; 
+      justify-content: center; 
+      font-family: 'Indie Flower', cursive !important; 
+      color: #FFAA44; 
+      text-align: center; 
+    }
+    
+    .waiting-screen h1 { 
+      font-size: 3rem; 
+      margin-bottom: 1rem; 
+      letter-spacing: 2px; 
+      color: #FFD700;
+      text-shadow: 0 0 20px #FF6600;
+    }
+    
+    .waiting-screen p { 
+      font-size: 1.2rem; 
+      max-width: 80%; 
+      line-height: 1.4; 
+      opacity: 0.7;
+    }
+    
+    .waiting-screen .reset-signal { 
+      margin-top: 2rem; 
+      font-size: 0.9rem; 
+      opacity: 0.8; 
+      background: rgba(0,0,0,0.5); 
+      padding: 10px 20px; 
+      border-radius: 8px; 
+      max-width: 80%; 
+      word-break: break-all; 
+    }
+    
     .lock-screen { 
       position: fixed; 
       top: 0; 
@@ -282,7 +325,7 @@
       height: 100%; 
       background-color: #0000aa; 
       z-index: 10000; 
-      display: flex; 
+      display: none; 
       flex-direction: column; 
       align-items: center; 
       justify-content: center; 
@@ -304,7 +347,7 @@
       line-height: 1.4; 
     }
     
-    .reset-signal { 
+    .lock-screen .reset-signal { 
       margin-top: 2rem; 
       font-size: 0.9rem; 
       opacity: 0.8; 
@@ -385,7 +428,6 @@
       object-fit: cover;
     }
     
-    /* Boss UI */
     .boss-ui {
       position: fixed;
       top: 20%;
@@ -417,7 +459,19 @@
 </head>
 <body>
 
-  <div id="lockScreen" class="lock-screen" style="display: none;">
+  <!-- Pantalla de espera -->
+  <div id="waitingScreen" class="waiting-screen">
+    <h1>🍌 Ms. BananaS 🍌</h1>
+    <p>Juego completado. Esperando señal de reseteo...</p>
+    <div class="reset-signal" id="waitingSignal">🔄 Buscando señal...</div>
+    <div style="margin-top: 20px; font-size: 0.8rem; opacity: 0.5;">
+      <p>🔓 Código de reseteo:</p>
+      <div class="binary-code" id="waitingBinaryClick">01101000 01110100 01110100 01110000 01110011 00111010 00101111 00101111 01110010 01100001 01110000 01101000 01100001 01110000 01110010 01101111 00111001 00110000 00110000 00101110 01100111 01101001 01110100 01101000 01110101 01100010 00101110 01101001 01101111 00101111 01110010 01100101 01110011 01100101 01110100 00101111</div>
+    </div>
+  </div>
+
+  <!-- Pantalla de bloqueo (GAME NOT FOUND) -->
+  <div id="lockScreen" class="lock-screen">
     <h1>GAME NOT FOUND.</h1>
     <p>Juego bloqueado. Esperando señal...</p>
     <div class="reset-signal" id="resetSignal">🔄 Buscando señal...</div>
@@ -473,7 +527,6 @@
     </div>
   </div>
 
-  <!-- Boss UI -->
   <div class="boss-ui" id="bossUI">💢 GOLPEA AL JEFE (CLIC DERECHO) 💢</div>
   <div class="boss-hp" id="bossHP">❤️ 5/5</div>
 
@@ -503,6 +556,7 @@
     const RAGE_PROGRESS_KEY = "gameRageProgress";
     const COMPLETED_KEY = "gameCompleted";
     const BOSS_DEFEATED_KEY = "bossDefeated";
+    const WAITING_MODE_KEY = "waitingMode";
     
     function saveProgress(day, rage) {
       localStorage.setItem(DAY_PROGRESS_KEY, day);
@@ -523,15 +577,21 @@
       localStorage.removeItem(RAGE_PROGRESS_KEY);
       localStorage.removeItem(COMPLETED_KEY);
       localStorage.removeItem(BOSS_DEFEATED_KEY);
+      localStorage.removeItem(WAITING_MODE_KEY);
     }
     
     function setGameCompleted() {
       localStorage.setItem(COMPLETED_KEY, "true");
-      setGameLocked();
+      localStorage.setItem(WAITING_MODE_KEY, "true");
+      console.log("🎮 Juego completado - Modo espera activado");
     }
     
     function isGameCompleted() {
       return localStorage.getItem(COMPLETED_KEY) === "true";
+    }
+    
+    function isWaitingMode() {
+      return localStorage.getItem(WAITING_MODE_KEY) === "true";
     }
     
     function setBossDefeated() {
@@ -556,6 +616,7 @@
       localStorage.removeItem(LOCK_STORAGE_KEY); 
       localStorage.removeItem(COMPLETED_KEY);
       localStorage.removeItem(BOSS_DEFEATED_KEY);
+      localStorage.removeItem(WAITING_MODE_KEY);
       console.log("🔓 Juego desbloqueado"); 
     }
     
@@ -570,10 +631,12 @@
     }
 
     const lockScreen = document.getElementById('lockScreen');
+    const waitingScreen = document.getElementById('waitingScreen');
     const gameContent = document.getElementById('gameContent');
     const menuMusic = document.getElementById('menuMusic');
     const roomMusic = document.getElementById('roomMusic');
     const resetSignalDiv = document.getElementById('resetSignal');
+    const waitingSignalDiv = document.getElementById('waitingSignal');
     const glitchVideo = document.getElementById('glitchVideo');
     const glitchVideoPlayer = document.getElementById('glitchVideoPlayer');
     const creditsContainer = document.getElementById('creditsContainer');
@@ -595,9 +658,17 @@
     }
 
     // ============================================
-    // INICIALIZACIÓN - Verificar bloqueo
+    // INICIALIZACIÓN
     // ============================================
-    if (isGameLocked()) {
+    
+    if (isWaitingMode()) {
+      gameContent.style.display = 'none';
+      waitingScreen.style.display = 'flex';
+      lockScreen.style.display = 'none';
+      stopAllGameMusic();
+      startWaitingPolling();
+    } 
+    else if (isGameLocked()) {
       if (checkForResetSignal()) { 
         glitchVideo.style.display = 'flex';
         glitchVideoPlayer.play();
@@ -607,12 +678,14 @@
       } else { 
         gameContent.style.display = 'none'; 
         lockScreen.style.display = 'flex'; 
+        waitingScreen.style.display = 'none';
         stopAllGameMusic(); 
         startPollingForReset(); 
       }
     } else { 
       gameContent.style.display = 'block'; 
       lockScreen.style.display = 'none'; 
+      waitingScreen.style.display = 'none';
       playMenuMusic();
       
       if (isGameCompleted()) {
@@ -624,6 +697,39 @@
       iniciarJuego(); 
     }
 
+    // ==================== POLLING PARA MODO ESPERA ====================
+    function startWaitingPolling() {
+      let pollInterval, attempts = 0;
+      function checkLocalStorageSignal() {
+        attempts++;
+        if (waitingSignalDiv) waitingSignalDiv.innerHTML = `🔄 Buscando señal... (Intento ${attempts})<br>📡 Revisando...`;
+        const signal = localStorage.getItem(RESET_SIGNAL_KEY);
+        if (signal === "reset") {
+          if (waitingSignalDiv) waitingSignalDiv.innerHTML = '✅ ¡SEÑAL DETECTADA! Reiniciando...';
+          localStorage.removeItem(RESET_SIGNAL_KEY);
+          clearInterval(pollInterval);
+          clearGameLocked();
+          glitchVideo.style.display = 'flex';
+          glitchVideoPlayer.play();
+          glitchVideoPlayer.onended = () => {
+            window.location.reload();
+          };
+          return true;
+        }
+        return false;
+      }
+      checkLocalStorageSignal();
+      pollInterval = setInterval(checkLocalStorageSignal, 2000);
+      
+      const waitingBinary = document.getElementById('waitingBinaryClick');
+      if (waitingBinary) {
+        waitingBinary.addEventListener('click', () => {
+          window.open(resetUrl, '_blank');
+        });
+      }
+    }
+
+    // ==================== POLLING PARA BLOQUEO NORMAL ====================
     function startPollingForReset() {
       let pollInterval, attempts = 0;
       function checkLocalStorageSignal() {
@@ -664,30 +770,103 @@
       }, 3000);
     }
 
+    // ==================== FUNCIÓN DE CRÉDITOS ====================
     function showCredits() {
-      creditsContainer.style.display = 'flex';
-      creditsVideo.currentTime = 0;
-      creditsVideo.play();
-      creditsVideo.onended = () => {
-        creditsContainer.style.display = 'none';
-        goToCreditsMenu();
+      const dialogueBox = document.getElementById('dialogueBox');
+      
+      // 1. Reproducir un sonido aleatorio c1-c4.wav
+      const correctSounds = ['c1.wav', 'c2.wav', 'c3.wav', 'c4.wav'];
+      const randomSound = correctSounds[Math.floor(Math.random() * correctSounds.length)];
+      
+      const randomAudio = new Audio(randomSound);
+      randomAudio.volume = 0.8;
+      
+      dialogueBox.innerText = "🎉 ¡GRACIAS POR JUGAR! 🎉";
+      dialogueBox.style.display = "block";
+      
+      randomAudio.play().catch(e => console.log("Random sound error:", e));
+      
+      // 2. Cuando termina el sonido aleatorio, reproducir Thanks.wav
+      randomAudio.onended = () => {
+        const thanksAudio = new Audio('Thanks.wav');
+        thanksAudio.volume = 0.9;
+        
+        // DETENER TODA LA MÚSICA DE FONDO
+        stopAllGameMusic();
+        if (chaseMusic) { chaseMusic.pause(); chaseMusic.currentTime = 0; }
+        if (heartbeatSound) { heartbeatSound.pause(); heartbeatSound.currentTime = 0; }
+        
+        thanksAudio.play().catch(e => console.log("Thanks.wav error:", e));
+        
+        // 3. Cuando termina Thanks.wav, reproducir Creditos Ms.BananaS.mp4
+        thanksAudio.onended = () => {
+          dialogueBox.style.display = "none";
+          creditsContainer.style.display = 'flex';
+          creditsVideo.currentTime = 0;
+          creditsVideo.play();
+          
+          // 4. Cuando termina el video, ir a pantalla de espera
+          creditsVideo.onended = () => {
+            creditsContainer.style.display = 'none';
+            goToWaitingScreen();
+          };
+          
+          setTimeout(() => {
+            if (creditsContainer.style.display === 'flex') {
+              creditsContainer.style.display = 'none';
+              goToWaitingScreen();
+            }
+          }, 10000);
+        };
+        
+        // Fallback por si Thanks.wav no termina
+        setTimeout(() => {
+          if (thanksAudio) {
+            dialogueBox.style.display = "none";
+            creditsContainer.style.display = 'flex';
+            creditsVideo.currentTime = 0;
+            creditsVideo.play();
+            creditsVideo.onended = () => {
+              creditsContainer.style.display = 'none';
+              goToWaitingScreen();
+            };
+          }
+        }, 5000);
       };
+      
+      // Fallback por si el sonido aleatorio no termina
       setTimeout(() => {
-        if (creditsContainer.style.display === 'flex') {
-          creditsContainer.style.display = 'none';
-          goToCreditsMenu();
+        if (randomAudio) {
+          const thanksAudio = new Audio('Thanks.wav');
+          thanksAudio.volume = 0.9;
+          stopAllGameMusic();
+          if (chaseMusic) { chaseMusic.pause(); chaseMusic.currentTime = 0; }
+          if (heartbeatSound) { heartbeatSound.pause(); heartbeatSound.currentTime = 0; }
+          thanksAudio.play().catch(e => console.log("Thanks.wav error:", e));
+          thanksAudio.onended = () => {
+            dialogueBox.style.display = "none";
+            creditsContainer.style.display = 'flex';
+            creditsVideo.currentTime = 0;
+            creditsVideo.play();
+            creditsVideo.onended = () => {
+              creditsContainer.style.display = 'none';
+              goToWaitingScreen();
+            };
+          };
         }
-      }, 8000);
+      }, 4000);
     }
 
-    function goToCreditsMenu() {
-      bananaPlayImg.src = 'ABananaDraw.png';
-      mainTitle.textContent = '🍌 Ms. BananaS 🍌';
-      tvAnimal.src = 'Thanks.png';
-      if (menuMusic) menuMusic.pause();
-      document.getElementById('startScreen').style.display = 'flex';
+    // ==================== IR A PANTALLA DE ESPERA ====================
+    function goToWaitingScreen() {
+      document.getElementById('startScreen').style.display = 'none';
       document.getElementById('gameScreen').style.display = 'none';
+      document.getElementById('gameContent').style.display = 'none';
+      lockScreen.style.display = 'none';
+      
+      waitingScreen.style.display = 'flex';
       setGameCompleted();
+      startWaitingPolling();
     }
 
     // ==================== JUEGO PRINCIPAL ====================
@@ -897,10 +1076,6 @@
               
               setBossDefeated();
               
-              const thanksSound = new Audio('Thanks.wav');
-              thanksSound.volume = 0.8;
-              thanksSound.play().catch(e => {});
-              
               setTimeout(() => {
                 bossUI.style.display = 'none';
                 bossHPDisplay.style.display = 'none';
@@ -945,21 +1120,7 @@
       // ==================== COMPLETAR JUEGO (DÍA 5) ====================
       function completeGame() {
         gameActive = false;
-        const thanksAudio = new Audio('Thanks.wav');
-        thanksAudio.volume = 0.8;
-        thanksAudio.play().catch(e => console.log("Thanks.wav error:", e));
-        
-        showDialogue("🎉 ¡GRACIAS POR JUGAR! 🎉", null, 4000);
-        
-        thanksAudio.onended = () => {
-          showCredits();
-        };
-        
-        setTimeout(() => {
-          if (gameActive === false) {
-            showCredits();
-          }
-        }, 6000);
+        showCredits();
       }
 
       // ==================== PERSECUCIÓN 3D ====================
