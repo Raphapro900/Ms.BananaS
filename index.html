@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Ms. BananaS</title>
+  <title>Ms. BananaS - Undertale Boss</title>
   <link href="https://fonts.googleapis.com/css2?family=Indie+Flower&family=Share+Tech+Mono&display=swap" rel="stylesheet">
   <style>
     * { 
@@ -358,6 +358,60 @@
       word-break: break-all; 
     }
     
+    /* GAME NOT FOUND ROJO GLITCHEADO */
+    .glitch-red-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #8b0000;
+      z-index: 9999;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Share Tech Mono', monospace !important;
+      color: #ff0000;
+      text-align: center;
+      overflow: hidden;
+    }
+    
+    .glitch-red-screen h1 {
+      font-size: 6rem;
+      text-shadow: 0 0 30px #ff0000, 0 0 60px #ff0000, 0 0 120px #ff0000;
+      animation: glitchText 0.1s infinite;
+      color: #ff0000;
+      font-family: 'Share Tech Mono', monospace !important;
+    }
+    
+    .glitch-red-screen .glitch-line {
+      font-size: 2rem;
+      text-shadow: 0 0 20px #ff0000;
+      animation: glitchText 0.15s infinite;
+      color: #ff2200;
+      font-family: 'Share Tech Mono', monospace !important;
+      opacity: 0.9;
+      margin: 5px 0;
+    }
+    
+    @keyframes glitchText {
+      0% { transform: translate(0); opacity: 1; }
+      20% { transform: translate(-5px, 3px); opacity: 0.8; }
+      40% { transform: translate(5px, -3px); opacity: 1; }
+      60% { transform: translate(-3px, 5px); opacity: 0.9; }
+      80% { transform: translate(3px, -5px); opacity: 1; }
+      100% { transform: translate(0); opacity: 1; }
+    }
+    
+    .glitch-red-screen .reset-signal-red {
+      margin-top: 3rem;
+      font-size: 0.8rem;
+      opacity: 0.7;
+      color: #ff6666;
+      font-family: 'Share Tech Mono', monospace !important;
+    }
+    
     .binary-code { 
       font-family: 'Share Tech Mono', monospace !important; 
       font-size: 0.75rem; 
@@ -470,11 +524,23 @@
     </div>
   </div>
 
-  <!-- Pantalla de bloqueo (GAME NOT FOUND) -->
+  <!-- Pantalla de bloqueo GAME NOT FOUND (normal) -->
   <div id="lockScreen" class="lock-screen">
     <h1>GAME NOT FOUND.</h1>
     <p>Juego bloqueado. Esperando señal...</p>
     <div class="reset-signal" id="resetSignal">🔄 Buscando señal...</div>
+  </div>
+
+  <!-- Pantalla ROJA GLITCHEADA -->
+  <div id="glitchRedScreen" class="glitch-red-screen">
+    <h1>GAME NOT FOUND.</h1>
+    <div class="glitch-line">ME MaT4sT3E3</div>
+    <div class="glitch-line">V3tE3E</div>
+    <div class="glitch-line">PoO0RR-RQUE3E3EE333E3E3</div>
+    <div class="glitch-line">YAA4AA4AA4</div>
+    <div class="glitch-line">AAAAAAAAAAAHHHHHH</div>
+    <div class="glitch-line">A4AS3eES1n- NN00o0</div>
+    <div class="reset-signal-red" id="glitchResetSignal">🔄 Buscando señal de reseteo...</div>
   </div>
 
   <div id="glitchVideo" class="glitch-video">
@@ -528,7 +594,7 @@
   </div>
 
   <div class="boss-ui" id="bossUI">💢 GOLPEA AL JEFE (CLIC DERECHO) 💢</div>
-  <div class="boss-hp" id="bossHP">❤️ 5/5</div>
+  <div class="boss-hp" id="bossHP">❤️ 10/10</div>
 
   <script type="importmap">
     {
@@ -557,6 +623,7 @@
     const COMPLETED_KEY = "gameCompleted";
     const BOSS_DEFEATED_KEY = "bossDefeated";
     const WAITING_MODE_KEY = "waitingMode";
+    const GLITCH_RED_KEY = "glitchRedMode";
     
     function saveProgress(day, rage) {
       localStorage.setItem(DAY_PROGRESS_KEY, day);
@@ -578,6 +645,7 @@
       localStorage.removeItem(COMPLETED_KEY);
       localStorage.removeItem(BOSS_DEFEATED_KEY);
       localStorage.removeItem(WAITING_MODE_KEY);
+      localStorage.removeItem(GLITCH_RED_KEY);
     }
     
     function setGameCompleted() {
@@ -602,6 +670,14 @@
       return localStorage.getItem(BOSS_DEFEATED_KEY) === "true";
     }
     
+    function setGlitchRedMode() {
+      localStorage.setItem(GLITCH_RED_KEY, "true");
+    }
+    
+    function isGlitchRedMode() {
+      return localStorage.getItem(GLITCH_RED_KEY) === "true";
+    }
+    
     function setGameLocked() { 
       localStorage.setItem(LOCK_STORAGE_KEY, "true"); 
       localStorage.removeItem(RESET_SIGNAL_KEY); 
@@ -617,7 +693,9 @@
       localStorage.removeItem(COMPLETED_KEY);
       localStorage.removeItem(BOSS_DEFEATED_KEY);
       localStorage.removeItem(WAITING_MODE_KEY);
-      console.log("🔓 Juego desbloqueado"); 
+      localStorage.removeItem(GLITCH_RED_KEY);
+      clearProgress();
+      console.log("🔓 Juego desbloqueado - Todo reiniciado"); 
     }
     
     function checkForResetSignal() { 
@@ -632,11 +710,13 @@
 
     const lockScreen = document.getElementById('lockScreen');
     const waitingScreen = document.getElementById('waitingScreen');
+    const glitchRedScreen = document.getElementById('glitchRedScreen');
     const gameContent = document.getElementById('gameContent');
     const menuMusic = document.getElementById('menuMusic');
     const roomMusic = document.getElementById('roomMusic');
     const resetSignalDiv = document.getElementById('resetSignal');
     const waitingSignalDiv = document.getElementById('waitingSignal');
+    const glitchResetSignalDiv = document.getElementById('glitchResetSignal');
     const glitchVideo = document.getElementById('glitchVideo');
     const glitchVideoPlayer = document.getElementById('glitchVideoPlayer');
     const creditsContainer = document.getElementById('creditsContainer');
@@ -661,10 +741,19 @@
     // INICIALIZACIÓN
     // ============================================
     
-    if (isWaitingMode()) {
+    if (isGlitchRedMode()) {
+      gameContent.style.display = 'none';
+      glitchRedScreen.style.display = 'flex';
+      lockScreen.style.display = 'none';
+      waitingScreen.style.display = 'none';
+      stopAllGameMusic();
+      startGlitchRedPolling();
+    }
+    else if (isWaitingMode()) {
       gameContent.style.display = 'none';
       waitingScreen.style.display = 'flex';
       lockScreen.style.display = 'none';
+      glitchRedScreen.style.display = 'none';
       stopAllGameMusic();
       startWaitingPolling();
     } 
@@ -679,6 +768,7 @@
         gameContent.style.display = 'none'; 
         lockScreen.style.display = 'flex'; 
         waitingScreen.style.display = 'none';
+        glitchRedScreen.style.display = 'none';
         stopAllGameMusic(); 
         startPollingForReset(); 
       }
@@ -686,6 +776,7 @@
       gameContent.style.display = 'block'; 
       lockScreen.style.display = 'none'; 
       waitingScreen.style.display = 'none';
+      glitchRedScreen.style.display = 'none';
       playMenuMusic();
       
       if (isGameCompleted()) {
@@ -697,7 +788,7 @@
       iniciarJuego(); 
     }
 
-    // ==================== POLLING PARA MODO ESPERA ====================
+    // ==================== POLLING ====================
     function startWaitingPolling() {
       let pollInterval, attempts = 0;
       function checkLocalStorageSignal() {
@@ -729,7 +820,30 @@
       }
     }
 
-    // ==================== POLLING PARA BLOQUEO NORMAL ====================
+    function startGlitchRedPolling() {
+      let pollInterval, attempts = 0;
+      function checkLocalStorageSignal() {
+        attempts++;
+        if (glitchResetSignalDiv) glitchResetSignalDiv.innerHTML = `🔄 Buscando señal de reseteo... (Intento ${attempts})<br>📡 Revisando...`;
+        const signal = localStorage.getItem(RESET_SIGNAL_KEY);
+        if (signal === "reset") {
+          if (glitchResetSignalDiv) glitchResetSignalDiv.innerHTML = '✅ ¡SEÑAL DETECTADA! Reiniciando...';
+          localStorage.removeItem(RESET_SIGNAL_KEY);
+          clearInterval(pollInterval);
+          clearGameLocked();
+          glitchVideo.style.display = 'flex';
+          glitchVideoPlayer.play();
+          glitchVideoPlayer.onended = () => {
+            window.location.reload();
+          };
+          return true;
+        }
+        return false;
+      }
+      checkLocalStorageSignal();
+      pollInterval = setInterval(checkLocalStorageSignal, 2000);
+    }
+
     function startPollingForReset() {
       let pollInterval, attempts = 0;
       function checkLocalStorageSignal() {
@@ -774,7 +888,6 @@
     function showCredits() {
       const dialogueBox = document.getElementById('dialogueBox');
       
-      // 1. Reproducir un sonido aleatorio c1-c4.wav
       const correctSounds = ['c1.wav', 'c2.wav', 'c3.wav', 'c4.wav'];
       const randomSound = correctSounds[Math.floor(Math.random() * correctSounds.length)];
       
@@ -786,26 +899,22 @@
       
       randomAudio.play().catch(e => console.log("Random sound error:", e));
       
-      // 2. Cuando termina el sonido aleatorio, reproducir Thanks.wav
       randomAudio.onended = () => {
         const thanksAudio = new Audio('Thanks.wav');
         thanksAudio.volume = 0.9;
         
-        // DETENER TODA LA MÚSICA DE FONDO
         stopAllGameMusic();
         if (chaseMusic) { chaseMusic.pause(); chaseMusic.currentTime = 0; }
         if (heartbeatSound) { heartbeatSound.pause(); heartbeatSound.currentTime = 0; }
         
         thanksAudio.play().catch(e => console.log("Thanks.wav error:", e));
         
-        // 3. Cuando termina Thanks.wav, reproducir Creditos Ms.BananaS.mp4
         thanksAudio.onended = () => {
           dialogueBox.style.display = "none";
           creditsContainer.style.display = 'flex';
           creditsVideo.currentTime = 0;
           creditsVideo.play();
           
-          // 4. Cuando termina el video, ir a pantalla de espera
           creditsVideo.onended = () => {
             creditsContainer.style.display = 'none';
             goToWaitingScreen();
@@ -819,7 +928,6 @@
           }, 10000);
         };
         
-        // Fallback por si Thanks.wav no termina
         setTimeout(() => {
           if (thanksAudio) {
             dialogueBox.style.display = "none";
@@ -834,7 +942,6 @@
         }, 5000);
       };
       
-      // Fallback por si el sonido aleatorio no termina
       setTimeout(() => {
         if (randomAudio) {
           const thanksAudio = new Audio('Thanks.wav');
@@ -863,10 +970,33 @@
       document.getElementById('gameScreen').style.display = 'none';
       document.getElementById('gameContent').style.display = 'none';
       lockScreen.style.display = 'none';
+      glitchRedScreen.style.display = 'none';
       
       waitingScreen.style.display = 'flex';
       setGameCompleted();
       startWaitingPolling();
+    }
+
+    // ==================== ACTIVAR PANTALLA ROJA GLITCHEADA ====================
+    function activateGlitchRedScreen() {
+      // Guardar estado
+      setGlitchRedMode();
+      setGameLocked();
+      
+      // Ocultar todo
+      document.getElementById('startScreen').style.display = 'none';
+      document.getElementById('gameScreen').style.display = 'none';
+      document.getElementById('gameContent').style.display = 'none';
+      lockScreen.style.display = 'none';
+      waitingScreen.style.display = 'none';
+      creditsContainer.style.display = 'none';
+      chaseContainer.style.display = 'none';
+      
+      // Mostrar pantalla roja
+      glitchRedScreen.style.display = 'flex';
+      
+      // Iniciar polling
+      startGlitchRedPolling();
     }
 
     // ==================== JUEGO PRINCIPAL ====================
@@ -985,7 +1115,7 @@
         };
       }
 
-      // ==================== BOSSFIGHT 3D ====================
+      // ==================== BOSSFIGHT UNDERTALE ESTILO 3D ====================
       function startBossFight() {
         bossFightActive = true;
         bossTriggered = true;
@@ -993,28 +1123,57 @@
         roomMusic.pause();
         gameScreen.style.display = "none";
         
-        bossUI.style.display = 'block';
-        bossHPDisplay.style.display = 'block';
-        bossHPDisplay.textContent = '❤️ 5/5';
+        // APAGÓN DE LUZ
+        showDialogue("💡 Apagando luces...", null, 1000);
         
-        showDialogue("⚔️ ¡UN JEFE APARECE! ¡DEFIENDETE!", null, 3000);
+        // 1. Sonido luz.mp3
+        const luzAudio = new Audio('luz.mp3');
+        luzAudio.volume = 0.8;
+        luzAudio.play().catch(e => console.log("luz.mp3 error:", e));
         
+        // 2. Después de luz.mp3, FFF.wav
+        luzAudio.onended = () => {
+          const fffAudio = new Audio('FFF.wav');
+          fffAudio.volume = 0.9;
+          fffAudio.play().catch(e => console.log("FFF.wav error:", e));
+          
+          // 3. Después de 2 segundos de FFF.wav, empezar bossfight
+          setTimeout(() => {
+            playGlitchTransition(() => {
+              chaseContainer.style.display = "flex";
+              chaseMusic.currentTime = 0;
+              chaseMusic.loop = true;
+              chaseMusic.volume = 0.5;
+              chaseMusic.play().catch(e => console.log("chaseMusic error:", e));
+              initBossFight3D();
+            });
+          }, 2000);
+        };
+        
+        // Fallback por si luz.mp3 no termina
         setTimeout(() => {
-          playGlitchTransition(() => {
-            chaseContainer.style.display = "flex";
-            chaseMusic.currentTime = 0;
-            chaseMusic.loop = true;
-            chaseMusic.volume = 0.7;
-            chaseMusic.play().catch(e => console.log("chaseMusic error:", e));
-            initBossFight3D();
-          });
+          if (luzAudio) {
+            const fffAudio = new Audio('FFF.wav');
+            fffAudio.volume = 0.9;
+            fffAudio.play().catch(e => console.log("FFF.wav error:", e));
+            setTimeout(() => {
+              playGlitchTransition(() => {
+                chaseContainer.style.display = "flex";
+                chaseMusic.currentTime = 0;
+                chaseMusic.loop = true;
+                chaseMusic.volume = 0.5;
+                chaseMusic.play().catch(e => console.log("chaseMusic error:", e));
+                initBossFight3D();
+              });
+            }, 2000);
+          }
         }, 3000);
       }
       
       function initBossFight3D() {
         const bossScene = new THREE.Scene();
-        bossScene.background = new THREE.Color(0x1a0505);
-        bossScene.fog = new THREE.FogExp2(0x1a0505, 0.02);
+        bossScene.background = new THREE.Color(0x0a0a1a);
+        bossScene.fog = new THREE.FogExp2(0x0a0a1a, 0.02);
         
         const bossCamera = new THREE.PerspectiveCamera(85, window.innerWidth / window.innerHeight, 0.05, 200);
         bossCamera.position.set(0, 1.68, 0);
@@ -1023,53 +1182,108 @@
         bossRenderer.setSize(window.innerWidth, window.innerHeight);
         bossRenderer.shadowMap.enabled = true;
         
-        const groundMat = new THREE.MeshStandardMaterial({ color: 0x2a1a1a, roughness: 0.9 });
-        const ground = new THREE.Mesh(new THREE.PlaneGeometry(80, 80), groundMat);
+        // Arena estilo Undertale
+        const groundMat = new THREE.MeshStandardMaterial({ color: 0x1a1a2a, roughness: 0.9 });
+        const ground = new THREE.Mesh(new THREE.PlaneGeometry(60, 60), groundMat);
         ground.rotation.x = -Math.PI / 2;
         ground.position.y = -0.1;
         ground.receiveShadow = true;
         bossScene.add(ground);
         
-        const barrierMat = new THREE.MeshStandardMaterial({ color: 0xff3333, emissive: 0x441111 });
-        for (let i = 0; i < 4; i++) {
-          const barrier = new THREE.Mesh(new THREE.BoxGeometry(0.5, 3, 15), barrierMat);
-          barrier.position.set(i < 2 ? (i === 0 ? -15 : 15) : 0, 1.5, i >= 2 ? (i === 2 ? -15 : 15) : 0);
-          bossScene.add(barrier);
+        // LÍNEA ROJA (barrera)
+        const lineMat = new THREE.MeshBasicMaterial({ color: 0xff0000, transparent: true, opacity: 0.7 });
+        const redLine = new THREE.Mesh(new THREE.BoxGeometry(15, 0.2, 0.5), lineMat);
+        redLine.position.set(0, 0.1, -3);
+        bossScene.add(redLine);
+        
+        // Línea parpadeante
+        let lineFlash = 0;
+        
+        // Corazones del boss (10)
+        let bossHP = 10;
+        let bossHits = 0;
+        const hearts = [];
+        
+        // Crear corazones flotantes (esferas rojas)
+        const heartMat = new THREE.MeshStandardMaterial({ color: 0xff0044, emissive: 0x660022 });
+        for (let i = 0; i < 10; i++) {
+          const heart = new THREE.Mesh(new THREE.SphereGeometry(0.3, 8, 8), heartMat);
+          heart.position.set(-5 + i * 1.2, 2.5, -3);
+          bossScene.add(heart);
+          hearts.push(heart);
         }
         
+        // El jefe (Ms. BananaS gigante)
         const textureLoader = new THREE.TextureLoader();
         const bossTexture = textureLoader.load("https://raw.githubusercontent.com/Raphapro900/Ms.BananaS/refs/heads/main/banana2.png");
-        const bossMat = new THREE.SpriteMaterial({ map: bossTexture, transparent: true, color: 0xff2200 });
+        const bossMat = new THREE.SpriteMaterial({ map: bossTexture, transparent: true, color: 0xff8800 });
         const boss = new THREE.Sprite(bossMat);
         boss.scale.set(2.5, 4.0, 1);
-        boss.position.set(0, 2.0, -8);
+        boss.position.set(0, 1.5, -6);
         bossScene.add(boss);
         
-        const redLight = new THREE.PointLight(0xff0000, 1.5, 30);
-        redLight.position.set(0, 5, -5);
-        bossScene.add(redLight);
+        // Ms. BananaS en 3D (objeto que se mueve hacia la línea)
+        const playerBananaMat = new THREE.SpriteMaterial({ 
+          map: textureLoader.load("https://raw.githubusercontent.com/Raphapro900/Ms.BananaS/refs/heads/main/banana.png"),
+          transparent: true 
+        });
+        const playerBanana = new THREE.Sprite(playerBananaMat);
+        playerBanana.scale.set(0.6, 0.9, 1);
+        playerBanana.position.set(0, 0.9, 2);
+        bossScene.add(playerBanana);
+        
+        // Luz ambiente
         const ambientLight = new THREE.AmbientLight(0x442222);
         bossScene.add(ambientLight);
+        const redLight = new THREE.PointLight(0xff0000, 1.5, 20);
+        redLight.position.set(0, 5, -3);
+        bossScene.add(redLight);
+        const blueLight = new THREE.PointLight(0x0000ff, 0.5, 15);
+        blueLight.position.set(-5, 3, 3);
+        bossScene.add(blueLight);
         
-        let bossHP = 5;
-        let bossHits = 0;
+        bossUI.style.display = 'block';
+        bossHPDisplay.style.display = 'block';
+        bossHPDisplay.textContent = `❤️ ${bossHP - bossHits}/${bossHP}`;
+        
+        // Movimiento de Ms. BananaS hacia la línea
+        let bananaMoveX = 0;
+        let bananaDirection = 1;
+        let movingToLine = false;
+        let hitCooldown = 0;
         
         function handleBossHit(e) {
           e.preventDefault();
-          if (bossFightActive && bossHits < bossHP) {
+          if (!bossFightActive || bossHits >= bossHP) return;
+          if (hitCooldown > 0) return;
+          
+          // Verificar si Ms. BananaS está cerca de la línea roja
+          const distToLine = Math.abs(playerBanana.position.z - (-3));
+          if (distToLine < 1.5) {
+            // Golpear al jefe
             bossHits++;
             bossHPDisplay.textContent = `❤️ ${bossHP - bossHits}/${bossHP}`;
             
+            // Efecto de impacto en el jefe
             boss.scale.set(3.0, 4.5, 1);
             setTimeout(() => {
               boss.scale.set(2.5, 4.0, 1);
             }, 200);
             
+            // Quitar un corazón
+            if (hearts.length > 0) {
+              const lastHeart = hearts.pop();
+              bossScene.remove(lastHeart);
+            }
+            
             const hitSound = new Audio('c' + (Math.floor(Math.random() * 4) + 1) + '.wav');
             hitSound.volume = 0.6;
             hitSound.play().catch(e => {});
             
+            hitCooldown = 30;
+            
             if (bossHits >= bossHP) {
+              // BOSS DERROTADO
               bossFightActive = false;
               bossUI.textContent = "🎉 ¡JEFE DERROTADO! 🎉";
               bossHPDisplay.textContent = "💀 ¡VENCISTE AL JEFE! 💀";
@@ -1085,36 +1299,160 @@
                 completeGameAfterBoss();
               }, 2000);
             }
+          } else {
+            // Ms. BananaS está lejos - mostrar mensaje
+            showDialogue("💢 ¡Acércate a la línea roja para golpear!", null, 1000);
           }
         }
         
+        // Movimiento automático de Ms. BananaS
+        let bananaTime = 0;
+        let deathSequenceStarted = false;
+        
         document.addEventListener('contextmenu', handleBossHit);
         
-        let bossTime = 0;
         function animateBoss() {
-          if (bossFightActive || bossHits < bossHP) {
-            bossTime += 0.02;
-            boss.position.x = Math.sin(bossTime) * 3;
-            boss.position.z = -8 + Math.cos(bossTime * 0.7) * 1;
-            requestAnimationFrame(animateBoss);
-          } else if (bossFightActive) {
-            bossTime += 0.02;
-            boss.position.x = Math.sin(bossTime) * 3;
-            boss.position.z = -8 + Math.cos(bossTime * 0.7) * 1;
-            requestAnimationFrame(animateBoss);
+          if (!bossFightActive && bossHits >= bossHP) {
+            // Boss muerto - no hacer nada
+            return;
           }
+          
+          bananaTime += 0.02;
+          bananaMoveX = Math.sin(bananaTime) * 3;
+          
+          // Ms. BananaS se mueve hacia la línea roja y vuelve
+          if (!movingToLine) {
+            playerBanana.position.x = bananaMoveX;
+            if (Math.random() < 0.01) {
+              movingToLine = true;
+            }
+          } else {
+            // Moverse hacia la línea
+            const targetZ = -3 + Math.sin(bananaTime * 0.5) * 0.5;
+            playerBanana.position.z += (targetZ - playerBanana.position.z) * 0.05;
+            playerBanana.position.x = bananaMoveX;
+            
+            if (Math.abs(playerBanana.position.z - (-3)) < 0.3) {
+              // Al llegar a la línea, volver
+              movingToLine = false;
+            }
+          }
+          
+          // Actualizar cooldown
+          if (hitCooldown > 0) hitCooldown--;
+          
+          // Movimiento del jefe
+          boss.position.x = Math.sin(bananaTime * 0.7) * 2;
+          boss.position.z = -6 + Math.cos(bananaTime * 0.5) * 1;
+          
+          // Parpadeo de la línea roja
+          lineFlash += 0.05;
+          redLine.material.opacity = 0.5 + Math.sin(lineFlash * 3) * 0.3;
+          
+          // Verificar si Ms. BananaS tocó la línea roja
+          const distToRedLine = Math.abs(playerBanana.position.z - (-3));
+          if (distToRedLine < 0.5 && bossFightActive && !deathSequenceStarted) {
+            // Ms. BananaS tocó la línea - pierde un corazón
+            if (hearts.length > 0) {
+              const lastHeart = hearts.pop();
+              bossScene.remove(lastHeart);
+              bossHits++;
+              bossHPDisplay.textContent = `❤️ ${bossHP - bossHits}/${bossHP}`;
+              
+              // Sonido de daño
+              const damageSound = new Audio('f' + (Math.floor(Math.random() * 4) + 1) + '.wav');
+              damageSound.volume = 0.5;
+              damageSound.play().catch(e => {});
+              
+              if (hearts.length === 0) {
+                // MUERTE DEL BOSS - ACTIVAR SECUENCIA
+                deathSequenceStarted = true;
+                bossFightActive = false;
+                startBossDeathSequence();
+              }
+            }
+          }
+          
+          // Render
           bossRenderer.render(bossScene, bossCamera);
+          requestAnimationFrame(animateBoss);
         }
         animateBoss();
         
         window.cleanupBoss = function() {
           document.removeEventListener('contextmenu', handleBossHit);
         };
-      }
-      
-      function completeGameAfterBoss() {
-        if (window.cleanupBoss) window.cleanupBoss();
-        showCredits();
+        
+        // ==================== SECUENCIA DE MUERTE DEL BOSS ====================
+        function startBossDeathSequence() {
+          bossUI.textContent = "💀 ¡MS. BANANAS HA MUERTO! 💀";
+          bossHPDisplay.textContent = "☠️ 0/10";
+          
+          // 1. Oh.wav con velocidad y tono bajo
+          const ohAudio = new Audio('Oh.wav');
+          ohAudio.playbackRate = 0.7;
+          ohAudio.volume = 0.9;
+          ohAudio.play().catch(e => console.log("Oh.wav error:", e));
+          
+          setTimeout(() => {
+            // 2. Sonido roto (generado en código)
+            playBrokenSound();
+            
+            setTimeout(() => {
+              // 3. glitch.mp4
+              playGlitchTransition(() => {
+                // 4. Pantalla roja glitcheada
+                activateGlitchRedScreen();
+              });
+            }, 3000);
+          }, 1500);
+        }
+        
+        // ==================== SONIDO ROTO (GENERADO EN CÓDIGO) ====================
+        function playBrokenSound() {
+          try {
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const bufferSize = audioCtx.sampleRate * 0.3;
+            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const data = buffer.getChannelData(0);
+            
+            for (let i = 0; i < bufferSize; i++) {
+              // Ruido glitch con patrones
+              const t = i / bufferSize;
+              const envelope = Math.exp(-t * 8);
+              data[i] = (Math.random() * 2 - 1) * envelope * 0.5;
+              
+              // Picos de "rotura"
+              if (i % 500 < 10) {
+                data[i] = (Math.random() > 0.5 ? 1 : -1) * 0.8;
+              }
+              if (i % 1200 < 20) {
+                data[i] = 0;
+              }
+            }
+            
+            const source = audioCtx.createBufferSource();
+            source.buffer = buffer;
+            source.connect(audioCtx.destination);
+            source.start();
+            
+            // Fallback con AudioContext
+            setTimeout(() => {
+              try { audioCtx.close(); } catch(e) {}
+            }, 500);
+          } catch(e) {
+            console.log("Broken sound fallback");
+          }
+        }
+        
+        function completeGameAfterBoss() {
+          if (window.cleanupBoss) window.cleanupBoss();
+          showCredits();
+        }
+        
+        window.cleanupBoss = function() {
+          document.removeEventListener('contextmenu', handleBossHit);
+        };
       }
 
       // ==================== COMPLETAR JUEGO (DÍA 5) ====================
