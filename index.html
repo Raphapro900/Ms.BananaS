@@ -96,30 +96,94 @@
       color: #884400; 
     }
     
+    /* ============ INFOBOX DESPLAZABLE ============ */
     #infoBox { 
       display: none; 
       position: absolute; 
-      top: 20%; 
+      top: 10%; 
       left: 50%; 
       transform: translateX(-50%); 
-      width: 70%; 
-      padding: 20px; 
+      width: 80%; 
+      max-width: 600px;
+      max-height: 80vh;
+      padding: 25px; 
       background: rgba(0,0,0,.95); 
       color: #FF9900; 
       border: 2px solid #FF6600; 
       border-radius: 10px; 
       z-index: 20; 
+      overflow-y: auto;
+      text-align: left;
+    }
+    
+    #infoBox::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    #infoBox::-webkit-scrollbar-track {
+      background: #1a0a00;
+      border-radius: 4px;
+    }
+    
+    #infoBox::-webkit-scrollbar-thumb {
+      background: #FF6600;
+      border-radius: 4px;
+    }
+    
+    #infoBox::-webkit-scrollbar-thumb:hover {
+      background: #FF9900;
     }
     
     #closeBtn { 
-      position: absolute; 
-      top: 5px; 
-      right: 10px; 
+      position: sticky; 
+      top: 0; 
+      float: right; 
       cursor: pointer; 
-      font-size: 1.2em; 
+      font-size: 1.5em; 
       color: #FF6600; 
+      background: rgba(0,0,0,0.8);
+      padding: 0 10px;
+      border-radius: 5px;
+      z-index: 21;
     }
     
+    #infoContent {
+      padding-right: 10px;
+    }
+    
+    #infoContent h2 {
+      color: #FFD700;
+      text-align: center;
+      margin-top: 0;
+    }
+    
+    #infoContent p {
+      color: #FFAA44;
+      line-height: 1.6;
+    }
+    
+    #infoContent .binary-code {
+      font-family: 'Share Tech Mono', monospace !important; 
+      font-size: 0.7rem; 
+      color: #88ff88; 
+      background: #00000080; 
+      padding: 10px; 
+      border-radius: 5px; 
+      display: block; 
+      margin-top: 10px; 
+      word-break: break-all; 
+      cursor: pointer; 
+      transition: all 0.2s; 
+      text-align: center;
+    }
+    
+    #infoContent .binary-code:hover { 
+      background: #00aa44; 
+      color: black; 
+      transform: scale(1.02); 
+    }
+    
+    /* ============ RESTO DE ESTILOS ============ */
     #gameScreen { 
       display: none; 
       width: 100%; 
@@ -358,7 +422,6 @@
       word-break: break-all; 
     }
     
-    /* GAME NOT FOUND ROJO GLITCHEADO */
     .glitch-red-screen {
       position: fixed;
       top: 0;
@@ -404,7 +467,7 @@
       100% { transform: translate(0); opacity: 1; }
     }
     
-    .glitch-red-screen .reset-signal-red {
+    .glitch-red-screen .reset-signal-red { 
       margin-top: 3rem;
       font-size: 0.8rem;
       opacity: 0.7;
@@ -484,7 +547,7 @@
     
     .boss-ui {
       position: fixed;
-      top: 20%;
+      top: 15%;
       left: 50%;
       transform: translateX(-50%);
       color: #ff4444;
@@ -498,7 +561,7 @@
     
     .boss-hp {
       position: fixed;
-      top: 30%;
+      top: 25%;
       left: 50%;
       transform: translateX(-50%);
       color: #ffaa44;
@@ -509,11 +572,43 @@
       pointer-events: none;
       display: none;
     }
+    
+    .boss-timer {
+      position: fixed;
+      bottom: 20%;
+      left: 50%;
+      transform: translateX(-50%);
+      color: #ff4444;
+      font-size: 3rem;
+      font-family: 'Share Tech Mono', monospace !important;
+      text-shadow: 0 0 20px #ff0000;
+      z-index: 1009;
+      pointer-events: none;
+      display: none;
+    }
+    
+    .reset-notification {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.9);
+      color: #ff4444;
+      padding: 10px 20px;
+      border-radius: 10px;
+      border: 2px solid #ff4444;
+      font-size: 1.2rem;
+      z-index: 9999;
+      display: none;
+      font-family: 'Share Tech Mono', monospace !important;
+      text-shadow: 0 0 10px #ff0000;
+    }
   </style>
 </head>
 <body>
 
-  <!-- Pantalla de espera -->
+  <div id="resetNotification" class="reset-notification">🔄 RESETEANDO JUEGO...</div>
+
   <div id="waitingScreen" class="waiting-screen">
     <h1>🍌 Ms. BananaS 🍌</h1>
     <p>Juego completado. Esperando señal de reseteo...</p>
@@ -524,14 +619,12 @@
     </div>
   </div>
 
-  <!-- Pantalla de bloqueo GAME NOT FOUND (normal) -->
   <div id="lockScreen" class="lock-screen">
     <h1>GAME NOT FOUND.</h1>
     <p>Juego bloqueado. Esperando señal...</p>
     <div class="reset-signal" id="resetSignal">🔄 Buscando señal...</div>
   </div>
 
-  <!-- Pantalla ROJA GLITCHEADA -->
   <div id="glitchRedScreen" class="glitch-red-screen">
     <h1>GAME NOT FOUND.</h1>
     <div class="glitch-line">ME MaT4sT3E3</div>
@@ -560,6 +653,7 @@
           <button class="menuBtn" id="howBtn">📖 How to Play</button><br>
           <button class="menuBtn" id="shopBtn">🛒 Shop</button><br>
           <button class="menuBtn" id="exitBtn">🚪 Exit</button>
+          <button class="menuBtn" id="resetBtn" style="border-color: #ff4444; color: #ff4444; margin-top: 10px;">🔄 Reset (R)</button>
         </div>
       </div>
       <audio id="menuMusic" src="bananamenu.mp3" loop></audio>
@@ -593,8 +687,9 @@
     </div>
   </div>
 
-  <div class="boss-ui" id="bossUI">💢 GOLPEA AL JEFE (CLIC DERECHO) 💢</div>
+  <div class="boss-ui" id="bossUI">⚔️ ¡MS. BANANAS TE DESAFÍA! ⚔️</div>
   <div class="boss-hp" id="bossHP">❤️ 10/10</div>
+  <div class="boss-timer" id="bossTimer">⏱️ 10</div>
 
   <script type="importmap">
     {
@@ -724,6 +819,7 @@
     const bananaPlayImg = document.getElementById('bananaPlay');
     const mainTitle = document.getElementById('mainTitle');
     const tvAnimal = document.getElementById('animal');
+    const resetNotification = document.getElementById('resetNotification');
 
     function stopAllGameMusic() { 
       if (menuMusic) { menuMusic.pause(); menuMusic.currentTime = 0; } 
@@ -736,6 +832,29 @@
         menuMusic.play().catch(e => console.log("menuMusic error:", e));
       }
     }
+
+    // ==================== RESET EN CUALQUIER MOMENTO ====================
+    function performReset() {
+      resetNotification.style.display = 'block';
+      resetNotification.textContent = '🔄 RESETEANDO JUEGO...';
+      
+      localStorage.setItem(RESET_SIGNAL_KEY, "reset");
+      
+      stopAllGameMusic();
+      if (window.chaseMusic) window.chaseMusic.pause();
+      if (window.heartbeatSound) window.heartbeatSound.pause();
+      
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'r' || e.key === 'R') {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+        performReset();
+      }
+    });
 
     // ============================================
     // INICIALIZACIÓN
@@ -904,8 +1023,8 @@
         thanksAudio.volume = 0.9;
         
         stopAllGameMusic();
-        if (chaseMusic) { chaseMusic.pause(); chaseMusic.currentTime = 0; }
-        if (heartbeatSound) { heartbeatSound.pause(); heartbeatSound.currentTime = 0; }
+        if (window.chaseMusic) { window.chaseMusic.pause(); window.chaseMusic.currentTime = 0; }
+        if (window.heartbeatSound) { window.heartbeatSound.pause(); window.heartbeatSound.currentTime = 0; }
         
         thanksAudio.play().catch(e => console.log("Thanks.wav error:", e));
         
@@ -947,8 +1066,8 @@
           const thanksAudio = new Audio('Thanks.wav');
           thanksAudio.volume = 0.9;
           stopAllGameMusic();
-          if (chaseMusic) { chaseMusic.pause(); chaseMusic.currentTime = 0; }
-          if (heartbeatSound) { heartbeatSound.pause(); heartbeatSound.currentTime = 0; }
+          if (window.chaseMusic) { window.chaseMusic.pause(); window.chaseMusic.currentTime = 0; }
+          if (window.heartbeatSound) { window.heartbeatSound.pause(); window.heartbeatSound.currentTime = 0; }
           thanksAudio.play().catch(e => console.log("Thanks.wav error:", e));
           thanksAudio.onended = () => {
             dialogueBox.style.display = "none";
@@ -979,11 +1098,9 @@
 
     // ==================== ACTIVAR PANTALLA ROJA GLITCHEADA ====================
     function activateGlitchRedScreen() {
-      // Guardar estado
       setGlitchRedMode();
       setGameLocked();
       
-      // Ocultar todo
       document.getElementById('startScreen').style.display = 'none';
       document.getElementById('gameScreen').style.display = 'none';
       document.getElementById('gameContent').style.display = 'none';
@@ -992,10 +1109,8 @@
       creditsContainer.style.display = 'none';
       chaseContainer.style.display = 'none';
       
-      // Mostrar pantalla roja
       glitchRedScreen.style.display = 'flex';
       
-      // Iniciar polling
       startGlitchRedPolling();
     }
 
@@ -1021,6 +1136,9 @@
       const chaseContainer = document.getElementById("chaseContainer");
       const chaseMusic = document.getElementById("chaseMusic");
       const heartbeatSound = document.getElementById("heartbeatSound");
+      
+      window.chaseMusic = chaseMusic;
+      window.heartbeatSound = heartbeatSound;
 
       const animals = [
         { name: "Seal", file: "Seal.webp" },
@@ -1048,12 +1166,12 @@
       let gameActive = true;
       let currentTimeout = null;
       let dialogueTimeout = null;
-      let bossFightActive = false;
-      let failCount = 0;
       let bossTriggered = false;
+      let bossFightActive = false;
 
       const bossUI = document.getElementById('bossUI');
       const bossHPDisplay = document.getElementById('bossHP');
+      const bossTimer = document.getElementById('bossTimer');
 
       function playSound(audioElement, src, volume = 0.8) {
         if (!audioElement) return;
@@ -1126,31 +1244,31 @@
         // APAGÓN DE LUZ
         showDialogue("💡 Apagando luces...", null, 1000);
         
-        // 1. Sonido luz.mp3
         const luzAudio = new Audio('luz.mp3');
         luzAudio.volume = 0.8;
         luzAudio.play().catch(e => console.log("luz.mp3 error:", e));
         
-        // 2. Después de luz.mp3, FFF.wav
         luzAudio.onended = () => {
           const fffAudio = new Audio('FFF.wav');
           fffAudio.volume = 0.9;
           fffAudio.play().catch(e => console.log("FFF.wav error:", e));
           
-          // 3. Después de 2 segundos de FFF.wav, empezar bossfight
           setTimeout(() => {
             playGlitchTransition(() => {
               chaseContainer.style.display = "flex";
-              chaseMusic.currentTime = 0;
-              chaseMusic.loop = true;
-              chaseMusic.volume = 0.5;
-              chaseMusic.play().catch(e => console.log("chaseMusic error:", e));
+              
+              // Reproducir Boss.mp3
+              const bossMusic = new Audio('Boss.mp3');
+              bossMusic.loop = true;
+              bossMusic.volume = 0.7;
+              bossMusic.play().catch(e => console.log("Boss.mp3 error:", e));
+              window.bossMusic = bossMusic;
+              
               initBossFight3D();
             });
           }, 2000);
         };
         
-        // Fallback por si luz.mp3 no termina
         setTimeout(() => {
           if (luzAudio) {
             const fffAudio = new Audio('FFF.wav');
@@ -1159,10 +1277,11 @@
             setTimeout(() => {
               playGlitchTransition(() => {
                 chaseContainer.style.display = "flex";
-                chaseMusic.currentTime = 0;
-                chaseMusic.loop = true;
-                chaseMusic.volume = 0.5;
-                chaseMusic.play().catch(e => console.log("chaseMusic error:", e));
+                const bossMusic = new Audio('Boss.mp3');
+                bossMusic.loop = true;
+                bossMusic.volume = 0.7;
+                bossMusic.play().catch(e => console.log("Boss.mp3 error:", e));
+                window.bossMusic = bossMusic;
                 initBossFight3D();
               });
             }, 2000);
@@ -1175,102 +1294,127 @@
         bossScene.background = new THREE.Color(0x0a0a1a);
         bossScene.fog = new THREE.FogExp2(0x0a0a1a, 0.02);
         
-        const bossCamera = new THREE.PerspectiveCamera(85, window.innerWidth / window.innerHeight, 0.05, 200);
-        bossCamera.position.set(0, 1.68, 0);
+        const bossCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.05, 200);
+        bossCamera.position.set(0, 0.5, 5);
+        bossCamera.lookAt(0, 0, -5);
         
         const bossRenderer = new THREE.WebGLRenderer({ canvas: document.getElementById("threeCanvas"), antialias: true });
         bossRenderer.setSize(window.innerWidth, window.innerHeight);
         bossRenderer.shadowMap.enabled = true;
         
-        // Arena estilo Undertale
+        // Arena
         const groundMat = new THREE.MeshStandardMaterial({ color: 0x1a1a2a, roughness: 0.9 });
-        const ground = new THREE.Mesh(new THREE.PlaneGeometry(60, 60), groundMat);
+        const ground = new THREE.Mesh(new THREE.PlaneGeometry(30, 30), groundMat);
         ground.rotation.x = -Math.PI / 2;
         ground.position.y = -0.1;
         ground.receiveShadow = true;
         bossScene.add(ground);
         
-        // LÍNEA ROJA (barrera)
-        const lineMat = new THREE.MeshBasicMaterial({ color: 0xff0000, transparent: true, opacity: 0.7 });
-        const redLine = new THREE.Mesh(new THREE.BoxGeometry(15, 0.2, 0.5), lineMat);
-        redLine.position.set(0, 0.1, -3);
+        // LÍNEA ROJA (ataque) - de arriba a abajo
+        const lineMat = new THREE.MeshBasicMaterial({ 
+          color: 0xff0000, 
+          transparent: true, 
+          opacity: 0.9
+        });
+        const redLine = new THREE.Mesh(new THREE.BoxGeometry(0.3, 8, 0.3), lineMat);
+        redLine.position.set(0, 0, -5);
+        redLine.visible = false;
         bossScene.add(redLine);
         
-        // Línea parpadeante
-        let lineFlash = 0;
+        // Luz de la línea
+        const lineLight = new THREE.PointLight(0xff0000, 0, 10);
+        lineLight.position.set(0, 0, -5);
+        bossScene.add(lineLight);
         
-        // Corazones del boss (10)
-        let bossHP = 10;
-        let bossHits = 0;
-        const hearts = [];
-        
-        // Crear corazones flotantes (esferas rojas)
-        const heartMat = new THREE.MeshStandardMaterial({ color: 0xff0044, emissive: 0x660022 });
-        for (let i = 0; i < 10; i++) {
-          const heart = new THREE.Mesh(new THREE.SphereGeometry(0.3, 8, 8), heartMat);
-          heart.position.set(-5 + i * 1.2, 2.5, -3);
-          bossScene.add(heart);
-          hearts.push(heart);
-        }
-        
-        // El jefe (Ms. BananaS gigante)
+        // El jefe (Ms. BananaS)
         const textureLoader = new THREE.TextureLoader();
         const bossTexture = textureLoader.load("https://raw.githubusercontent.com/Raphapro900/Ms.BananaS/refs/heads/main/banana2.png");
         const bossMat = new THREE.SpriteMaterial({ map: bossTexture, transparent: true, color: 0xff8800 });
         const boss = new THREE.Sprite(bossMat);
-        boss.scale.set(2.5, 4.0, 1);
-        boss.position.set(0, 1.5, -6);
+        boss.scale.set(3.0, 4.5, 1);
+        boss.position.set(0, 1.8, -7);
         bossScene.add(boss);
         
-        // Ms. BananaS en 3D (objeto que se mueve hacia la línea)
-        const playerBananaMat = new THREE.SpriteMaterial({ 
+        // Jugador (Ms. BananaS pequeña)
+        const playerMat = new THREE.SpriteMaterial({ 
           map: textureLoader.load("https://raw.githubusercontent.com/Raphapro900/Ms.BananaS/refs/heads/main/banana.png"),
           transparent: true 
         });
-        const playerBanana = new THREE.Sprite(playerBananaMat);
-        playerBanana.scale.set(0.6, 0.9, 1);
-        playerBanana.position.set(0, 0.9, 2);
-        bossScene.add(playerBanana);
+        const player = new THREE.Sprite(playerMat);
+        player.scale.set(0.8, 1.2, 1);
+        player.position.set(0, 0.8, 2);
+        bossScene.add(player);
         
-        // Luz ambiente
+        // Luces
         const ambientLight = new THREE.AmbientLight(0x442222);
         bossScene.add(ambientLight);
-        const redLight = new THREE.PointLight(0xff0000, 1.5, 20);
+        const redLight = new THREE.PointLight(0xff0000, 1.0, 20);
         redLight.position.set(0, 5, -3);
         bossScene.add(redLight);
-        const blueLight = new THREE.PointLight(0x0000ff, 0.5, 15);
-        blueLight.position.set(-5, 3, 3);
-        bossScene.add(blueLight);
         
+        // UI del boss
         bossUI.style.display = 'block';
         bossHPDisplay.style.display = 'block';
-        bossHPDisplay.textContent = `❤️ ${bossHP - bossHits}/${bossHP}`;
+        bossTimer.style.display = 'block';
+        bossUI.textContent = '⚔️ ¡MS. BANANAS TE DESAFÍA! ⚔️';
         
-        // Movimiento de Ms. BananaS hacia la línea
-        let bananaMoveX = 0;
-        let bananaDirection = 1;
-        let movingToLine = false;
-        let hitCooldown = 0;
+        let bossHP = 10;
+        let bossHits = 0;
+        let attackTimer = 10;
+        let attackCooldown = 0;
+        let isAttacking = false;
+        let lineX = 0;
+        let lineSpeed = 3;
+        let playerX = 0;
+        let canAttack = false;
+        let deathSequenceStarted = false;
         
-        function handleBossHit(e) {
+        // Crear corazones
+        const hearts = [];
+        const heartMat = new THREE.MeshStandardMaterial({ color: 0xff0044, emissive: 0x660022 });
+        for (let i = 0; i < 10; i++) {
+          const heart = new THREE.Mesh(new THREE.SphereGeometry(0.25, 8, 8), heartMat);
+          heart.position.set(-4.5 + i * 1.0, 3.5, -2);
+          bossScene.add(heart);
+          hearts.push(heart);
+        }
+        
+        bossHPDisplay.textContent = `❤️ ${bossHP}/${bossHP}`;
+        
+        // Controles: A y D para moverse
+        let moveLeft = false;
+        let moveRight = false;
+        
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'a' || e.key === 'A') moveLeft = true;
+          if (e.key === 'd' || e.key === 'D') moveRight = true;
+        });
+        document.addEventListener('keyup', (e) => {
+          if (e.key === 'a' || e.key === 'A') moveLeft = false;
+          if (e.key === 'd' || e.key === 'D') moveRight = false;
+        });
+        
+        // Ataque con clic derecho
+        function handleAttack(e) {
           e.preventDefault();
-          if (!bossFightActive || bossHits >= bossHP) return;
-          if (hitCooldown > 0) return;
+          if (!bossFightActive || deathSequenceStarted) return;
+          if (!canAttack) {
+            showDialogue("💢 ¡Espera a que ataque para golpear!", null, 1000);
+            return;
+          }
           
-          // Verificar si Ms. BananaS está cerca de la línea roja
-          const distToLine = Math.abs(playerBanana.position.z - (-3));
-          if (distToLine < 1.5) {
+          // Verificar si el jugador está cerca de la línea roja
+          const distToLine = Math.abs(player.position.x - lineX);
+          if (distToLine < 0.8 && isAttacking) {
             // Golpear al jefe
             bossHits++;
             bossHPDisplay.textContent = `❤️ ${bossHP - bossHits}/${bossHP}`;
             
-            // Efecto de impacto en el jefe
-            boss.scale.set(3.0, 4.5, 1);
+            boss.scale.set(3.5, 5.0, 1);
             setTimeout(() => {
-              boss.scale.set(2.5, 4.0, 1);
+              boss.scale.set(3.0, 4.5, 1);
             }, 200);
             
-            // Quitar un corazón
             if (hearts.length > 0) {
               const lastHeart = hearts.pop();
               bossScene.remove(lastHeart);
@@ -1280,97 +1424,143 @@
             hitSound.volume = 0.6;
             hitSound.play().catch(e => {});
             
-            hitCooldown = 30;
+            canAttack = false;
             
             if (bossHits >= bossHP) {
               // BOSS DERROTADO
+              deathSequenceStarted = true;
               bossFightActive = false;
               bossUI.textContent = "🎉 ¡JEFE DERROTADO! 🎉";
-              bossHPDisplay.textContent = "💀 ¡VENCISTE AL JEFE! 💀";
+              bossHPDisplay.textContent = "💀 0/10";
+              bossTimer.style.display = 'none';
+              
+              if (window.bossMusic) {
+                window.bossMusic.pause();
+                window.bossMusic.currentTime = 0;
+              }
               
               setBossDefeated();
               
               setTimeout(() => {
                 bossUI.style.display = 'none';
                 bossHPDisplay.style.display = 'none';
-                bossUI.textContent = "💢 GOLPEA AL JEFE (CLIC DERECHO) 💢";
+                bossTimer.style.display = 'none';
                 chaseContainer.style.display = "none";
-                chaseMusic.pause();
                 completeGameAfterBoss();
               }, 2000);
             }
           } else {
-            // Ms. BananaS está lejos - mostrar mensaje
-            showDialogue("💢 ¡Acércate a la línea roja para golpear!", null, 1000);
+            showDialogue("💢 ¡No estás cerca de la línea roja!", null, 1000);
           }
         }
         
-        // Movimiento automático de Ms. BananaS
-        let bananaTime = 0;
-        let deathSequenceStarted = false;
+        document.addEventListener('contextmenu', handleAttack);
         
-        document.addEventListener('contextmenu', handleBossHit);
+        // Animación del boss
+        let bossTime = 0;
+        let lastAttackTime = 0;
         
         function animateBoss() {
-          if (!bossFightActive && bossHits >= bossHP) {
+          if (!bossFightActive && !deathSequenceStarted) {
             // Boss muerto - no hacer nada
             return;
           }
           
-          bananaTime += 0.02;
-          bananaMoveX = Math.sin(bananaTime) * 3;
+          bossTime += 0.02;
           
-          // Ms. BananaS se mueve hacia la línea roja y vuelve
-          if (!movingToLine) {
-            playerBanana.position.x = bananaMoveX;
-            if (Math.random() < 0.01) {
-              movingToLine = true;
-            }
-          } else {
-            // Moverse hacia la línea
-            const targetZ = -3 + Math.sin(bananaTime * 0.5) * 0.5;
-            playerBanana.position.z += (targetZ - playerBanana.position.z) * 0.05;
-            playerBanana.position.x = bananaMoveX;
+          // Movimiento del jugador
+          const moveSpeed = 0.08;
+          if (moveLeft) playerX -= moveSpeed;
+          if (moveRight) playerX += moveSpeed;
+          playerX = Math.max(-3.5, Math.min(3.5, playerX));
+          player.position.x = playerX;
+          
+          // Animación del jefe
+          boss.position.x = Math.sin(bossTime * 0.5) * 1.5;
+          boss.position.z = -7 + Math.cos(bossTime * 0.3) * 0.5;
+          
+          // Sistema de ataque
+          attackCooldown -= 0.016;
+          
+          if (attackCooldown <= 0 && !isAttacking && !deathSequenceStarted) {
+            // Iniciar ataque cada 10 segundos
+            isAttacking = true;
+            canAttack = true;
+            attackTimer = 10;
+            attackCooldown = 10;
+            lastAttackTime = bossTime;
             
-            if (Math.abs(playerBanana.position.z - (-3)) < 0.3) {
-              // Al llegar a la línea, volver
-              movingToLine = false;
+            // Elegir posición aleatoria para la línea
+            lineX = (Math.random() - 0.5) * 6;
+            lineSpeed = 2 + Math.random() * 3;
+            
+            // Mostrar línea
+            redLine.position.x = lineX;
+            redLine.visible = true;
+            lineLight.position.x = lineX;
+            lineLight.intensity = 2;
+            
+            // Mostrar timer
+            bossTimer.textContent = `⏱️ ${Math.ceil(attackTimer)}`;
+            bossTimer.style.display = 'block';
+            
+            // Sonido de ataque
+            const attackSound = new Audio('f' + (Math.floor(Math.random() * 4) + 1) + '.wav');
+            attackSound.volume = 0.4;
+            attackSound.play().catch(e => {});
+          }
+          
+          if (isAttacking && !deathSequenceStarted) {
+            attackTimer -= 0.016;
+            bossTimer.textContent = `⏱️ ${Math.ceil(attackTimer)}`;
+            
+            // Línea se mueve de arriba a abajo (efecto visual)
+            redLine.position.z = -5 + Math.sin(bossTime * 3) * 1;
+            
+            // Verificar si el jugador tocó la línea
+            const distToLineX = Math.abs(player.position.x - lineX);
+            const distToLineZ = Math.abs(player.position.z - (-5));
+            
+            if (distToLineX < 0.5 && distToLineZ < 0.5 && !deathSequenceStarted) {
+              // ¡GOLPE! El jugador pierde un corazón
+              if (hearts.length > 0) {
+                const lastHeart = hearts.pop();
+                bossScene.remove(lastHeart);
+                bossHits++;
+                bossHPDisplay.textContent = `❤️ ${bossHP - bossHits}/${bossHP}`;
+                
+                const damageSound = new Audio('f' + (Math.floor(Math.random() * 4) + 1) + '.wav');
+                damageSound.volume = 0.5;
+                damageSound.play().catch(e => {});
+                
+                // Efecto de daño
+                player.scale.set(1.0, 1.5, 1);
+                setTimeout(() => {
+                  player.scale.set(0.8, 1.2, 1);
+                }, 200);
+                
+                if (hearts.length === 0) {
+                  // MUERTE DEL JUGADOR
+                  deathSequenceStarted = true;
+                  bossFightActive = false;
+                  startPlayerDeathSequence();
+                }
+              }
+            }
+            
+            if (attackTimer <= 0) {
+              // Fin del ataque
+              isAttacking = false;
+              canAttack = false;
+              redLine.visible = false;
+              lineLight.intensity = 0;
+              bossTimer.style.display = 'none';
             }
           }
           
-          // Actualizar cooldown
-          if (hitCooldown > 0) hitCooldown--;
-          
-          // Movimiento del jefe
-          boss.position.x = Math.sin(bananaTime * 0.7) * 2;
-          boss.position.z = -6 + Math.cos(bananaTime * 0.5) * 1;
-          
-          // Parpadeo de la línea roja
-          lineFlash += 0.05;
-          redLine.material.opacity = 0.5 + Math.sin(lineFlash * 3) * 0.3;
-          
-          // Verificar si Ms. BananaS tocó la línea roja
-          const distToRedLine = Math.abs(playerBanana.position.z - (-3));
-          if (distToRedLine < 0.5 && bossFightActive && !deathSequenceStarted) {
-            // Ms. BananaS tocó la línea - pierde un corazón
-            if (hearts.length > 0) {
-              const lastHeart = hearts.pop();
-              bossScene.remove(lastHeart);
-              bossHits++;
-              bossHPDisplay.textContent = `❤️ ${bossHP - bossHits}/${bossHP}`;
-              
-              // Sonido de daño
-              const damageSound = new Audio('f' + (Math.floor(Math.random() * 4) + 1) + '.wav');
-              damageSound.volume = 0.5;
-              damageSound.play().catch(e => {});
-              
-              if (hearts.length === 0) {
-                // MUERTE DEL BOSS - ACTIVAR SECUENCIA
-                deathSequenceStarted = true;
-                bossFightActive = false;
-                startBossDeathSequence();
-              }
-            }
+          // Luz parpadeante
+          if (isAttacking) {
+            lineLight.intensity = 1 + Math.sin(bossTime * 10) * 0.5;
           }
           
           // Render
@@ -1379,14 +1569,16 @@
         }
         animateBoss();
         
-        window.cleanupBoss = function() {
-          document.removeEventListener('contextmenu', handleBossHit);
-        };
-        
-        // ==================== SECUENCIA DE MUERTE DEL BOSS ====================
-        function startBossDeathSequence() {
-          bossUI.textContent = "💀 ¡MS. BANANAS HA MUERTO! 💀";
+        // ==================== SECUENCIA DE MUERTE DEL JUGADOR ====================
+        function startPlayerDeathSequence() {
+          bossUI.textContent = "💀 ¡HAS MUERTO! 💀";
           bossHPDisplay.textContent = "☠️ 0/10";
+          bossTimer.style.display = 'none';
+          
+          if (window.bossMusic) {
+            window.bossMusic.pause();
+            window.bossMusic.currentTime = 0;
+          }
           
           // 1. Oh.wav con velocidad y tono bajo
           const ohAudio = new Audio('Oh.wav');
@@ -1395,7 +1587,7 @@
           ohAudio.play().catch(e => console.log("Oh.wav error:", e));
           
           setTimeout(() => {
-            // 2. Sonido roto (generado en código)
+            // 2. Sonido roto
             playBrokenSound();
             
             setTimeout(() => {
@@ -1408,7 +1600,7 @@
           }, 1500);
         }
         
-        // ==================== SONIDO ROTO (GENERADO EN CÓDIGO) ====================
+        // ==================== SONIDO ROTO ====================
         function playBrokenSound() {
           try {
             const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -1417,12 +1609,9 @@
             const data = buffer.getChannelData(0);
             
             for (let i = 0; i < bufferSize; i++) {
-              // Ruido glitch con patrones
               const t = i / bufferSize;
               const envelope = Math.exp(-t * 8);
               data[i] = (Math.random() * 2 - 1) * envelope * 0.5;
-              
-              // Picos de "rotura"
               if (i % 500 < 10) {
                 data[i] = (Math.random() > 0.5 ? 1 : -1) * 0.8;
               }
@@ -1436,7 +1625,6 @@
             source.connect(audioCtx.destination);
             source.start();
             
-            // Fallback con AudioContext
             setTimeout(() => {
               try { audioCtx.close(); } catch(e) {}
             }, 500);
@@ -1446,12 +1634,20 @@
         }
         
         function completeGameAfterBoss() {
-          if (window.cleanupBoss) window.cleanupBoss();
+          document.removeEventListener('contextmenu', handleAttack);
+          if (window.bossMusic) {
+            window.bossMusic.pause();
+            window.bossMusic.currentTime = 0;
+          }
           showCredits();
         }
         
         window.cleanupBoss = function() {
-          document.removeEventListener('contextmenu', handleBossHit);
+          document.removeEventListener('contextmenu', handleAttack);
+          if (window.bossMusic) {
+            window.bossMusic.pause();
+            window.bossMusic.currentTime = 0;
+          }
         };
       }
 
@@ -1461,7 +1657,7 @@
         showCredits();
       }
 
-      // ==================== PERSECUCIÓN 3D ====================
+      // ==================== PERSECUCIÓN 3D (BOSQUE) ====================
       let chaseActive = false;
       let chaseAnimationId = null;
       let scene, camera, renderer;
@@ -1763,7 +1959,6 @@
           if (btn.innerText === currentAnimal.name) {
             btn.style.backgroundColor = "#2a6a2a";
             correctCount++;
-            failCount = 0;
             updateUI();
             const sound = getRandomSound(correctSounds);
             showDialogue("✅ ¡Correcto!", sound, 1500);
@@ -1780,7 +1975,8 @@
                   returnToMenu();
                 }, 2500);
               } else {
-                completeGame();
+                // DÍA 5 COMPLETADO → BOSSFIGHT
+                startBossFight();
                 return;
               }
               return;
@@ -1790,17 +1986,12 @@
             btn.style.backgroundColor = "#882222";
             buttons.forEach(b => { if (b.innerText === currentAnimal.name) b.style.backgroundColor = "#aa6644"; });
             rage++;
-            failCount++;
             updateUI();
             const sound = getRandomSound(wrongSounds);
             showDialogue("❌ ¡Fallaste! Era " + currentAnimal.name + ". Furia: " + rage + "/10", sound, 2000);
             saveProgress(day, rage);
             
-            if (failCount >= 3 && rage < 10 && !bossTriggered) {
-              startBossFight();
-              return;
-            }
-            
+            // Si llega a 10 de furia → persecución en el bosque
             if (rage >= 10) { 
               onRageReachedTen(); 
             } else { 
@@ -1814,7 +2005,6 @@
         gameActive = true;
         correctCount = 0;
         bossTriggered = false;
-        failCount = 0;
         updateUI();
         nextAnimal();
       }
@@ -1850,7 +2040,7 @@
       });
       
       // ============================================
-      // BOTÓN HOW TO PLAY
+      // BOTÓN HOW TO PLAY (DESPLAZABLE)
       // ============================================
       howBtn.addEventListener("click", function() {
         infoBox.style.display = "block";
@@ -1863,10 +2053,16 @@
           Día 3: 25 aciertos<br>
           Día 4: 30 aciertos<br>
           Día 5: 35 aciertos</p>
-          <p>Cada fallo suma FURIA. Llega a 10 y algo malo ocurrirá...</p>
-          <p>Si fallas 3 veces seguidas (sin llegar a 10), ¡aparece un JEFE!</p>
+          <p>Cada fallo suma FURIA. Llega a 10 y entrarás al BOSQUE.</p>
+          <p>Al completar el Día 5, ¡aparece un JEFE estilo UNDERTALE!</p>
           <p>La FURIA NO se reinicia entre días. ¡Ten cuidado!</p>
-          <p>Al completar un día, volverás al menú principal y avanzarás al siguiente día.</p>
+          <br>
+          <p><strong>⚔️ Bossfight (Día 5):</strong><br>
+          • Ms. BananaS ataca cada 10 segundos con una LÍNEA ROJA<br>
+          • Muévete con <strong>A</strong> (izquierda) y <strong>D</strong> (derecha)<br>
+          • Esquiva la línea roja para no perder corazones<br>
+          • Haz <strong>CLIC DERECHO</strong> cuando estés cerca de la línea para atacar<br>
+          • Tienes 10 corazones. ¡No los pierdas todos!</p>
           <br>
           <p><strong>🎮 Controles misteriosos:</strong><br>
           <span class="controls-mystery">? ? ? ?</span><br>
@@ -1904,6 +2100,11 @@
       closeBtn.addEventListener("click", function() {
         infoBox.style.display = "none";
       });
+      
+      // ============================================
+      // BOTÓN RESET
+      // ============================================
+      document.getElementById('resetBtn').addEventListener('click', performReset);
     }
   </script>
 </body>
