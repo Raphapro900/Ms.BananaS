@@ -781,10 +781,9 @@
       }
     }
 
-    // ==================== RESET CON GLITCH.MP4 ====================
+    // ==================== FUNCIÓN DE RESET CON GLITCH.MP4 ====================
     function performReset() {
-      // Guardar señal de reset
-      localStorage.setItem(RESET_SIGNAL_KEY, "reset");
+      console.log("🔄 RESET ACTIVADO - Reproduciendo glitch.mp4");
       
       // Detener todos los sonidos
       stopAllGameMusic();
@@ -792,19 +791,35 @@
       if (window.heartbeatSound) window.heartbeatSound.pause();
       if (window.bossMusic) window.bossMusic.pause();
       
-      // Mostrar glitch.mp4 y recargar
+      // Mostrar glitch.mp4
       glitchVideo.style.display = 'flex';
       glitchVideoPlayer.currentTime = 0;
-      glitchVideoPlayer.play();
+      
+      // Intentar reproducir el video
+      const playPromise = glitchVideoPlayer.play();
+      if (playPromise !== undefined) {
+        playPromise.then(() => {
+          console.log("▶️ glitch.mp4 reproduciendo");
+        }).catch(error => {
+          console.warn("⚠️ No se pudo reproducir glitch.mp4:", error);
+          // Fallback: recargar directamente
+          window.location.reload();
+        });
+      }
+      
+      // Cuando termina el video, recargar
       glitchVideoPlayer.onended = () => {
+        console.log("⏹️ glitch.mp4 terminado - Recargando");
         window.location.reload();
       };
-      // Fallback por si el video no termina
+      
+      // Fallback por si el video no termina o no se reproduce
       setTimeout(() => {
         if (glitchVideo.style.display === 'flex') {
+          console.log("⏰ Fallback: recargando después de 3 segundos");
           window.location.reload();
         }
-      }, 3000);
+      }, 3500);
     }
 
     // ==================== POLLING DE RESET SIEMPRE ACTIVO ====================
@@ -818,27 +833,17 @@
         resetAttempts++;
         const signal = localStorage.getItem(RESET_SIGNAL_KEY);
         if (signal === "reset") {
-          console.log("✅ SEÑAL DE RESET DETECTADA EN CUALQUIER MOMENTO");
+          console.log("✅ SEÑAL DE RESET DETECTADA (Intento " + resetAttempts + ")");
           localStorage.removeItem(RESET_SIGNAL_KEY);
           clearInterval(resetPollInterval);
           resetPollInterval = null;
           
-          // Mostrar glitch.mp4 y recargar
-          glitchVideo.style.display = 'flex';
-          glitchVideoPlayer.currentTime = 0;
-          glitchVideoPlayer.play();
-          glitchVideoPlayer.onended = () => {
-            window.location.reload();
-          };
-          setTimeout(() => {
-            if (glitchVideo.style.display === 'flex') {
-              window.location.reload();
-            }
-          }, 3000);
+          // Ejecutar reset
+          performReset();
         }
       }, 1500);
       
-      console.log("🔄 Polling de reset universal activado");
+      console.log("🔄 Polling de reset universal activado (cada 1.5s)");
     }
 
     // Iniciar el polling universal al cargar la página
