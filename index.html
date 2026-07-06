@@ -514,6 +514,27 @@
       display: none;
     }
     
+    /* Boss Attack UI */
+    .boss-attack-indicator {
+      position: fixed;
+      top: 45%;
+      left: 50%;
+      transform: translateX(-50%);
+      color: #ff4444;
+      font-size: 3rem;
+      font-family: 'Share Tech Mono', monospace !important;
+      text-shadow: 0 0 30px #ff0000;
+      z-index: 1010;
+      pointer-events: none;
+      display: none;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    
+    .boss-attack-indicator.show {
+      opacity: 1;
+    }
+    
     .reset-polling-badge {
       position: fixed;
       bottom: 10px;
@@ -526,7 +547,7 @@
       pointer-events: none;
     }
     
-    /* Pantalla de overlay para escenas */
+    /* Scene overlay */
     .scene-overlay {
       position: fixed;
       top: 0;
@@ -556,7 +577,7 @@
       padding: 20px;
     }
     
-    .scene-overlay .spider-shake {
+    .spider-shake {
       animation: spiderShake 0.1s infinite;
     }
     
@@ -585,17 +606,26 @@
       0% { opacity: 0; }
       100% { opacity: 1; }
     }
+    
+    .heart-icon {
+      color: #ff0044;
+      font-size: 1.5rem;
+      text-shadow: 0 0 10px #ff0044;
+    }
   </style>
 </head>
 <body>
 
   <div class="reset-polling-badge" id="pollingBadge">🔄</div>
 
-  <!-- Pantallas de escena (para House.png, Inside.png, Spider.png) -->
+  <!-- Scene overlay -->
   <div id="sceneOverlay" class="scene-overlay">
     <img id="sceneImage" src="" alt="Scene">
     <div id="sceneText" class="scene-text"></div>
   </div>
+
+  <!-- Boss Attack Indicator -->
+  <div id="bossAttackIndicator" class="boss-attack-indicator">⚡ ¡ATACANDO! ⚡</div>
 
   <div id="waitingScreen" class="waiting-screen">
     <h1>🍌 Ms. BananaS 🍌</h1>
@@ -628,6 +658,12 @@
     <video id="glitchVideoPlayer" src="glitch.mp4"></video>
   </div>
 
+  <!-- Creditss.mp4 (video diferente para el boss) -->
+  <div id="creditssContainer" class="credits-container" style="z-index: 9998;">
+    <video id="creditssVideo" src="Creditss.mp4"></video>
+  </div>
+
+  <!-- Créditos normales -->
   <div id="creditsContainer" class="credits-container">
     <video id="creditsVideo" src="Creditos Ms.BananaS.mp4"></video>
   </div>
@@ -685,7 +721,7 @@
 
   <div class="boss-ui" id="bossUI">⚔️ ¡MS. BANANAS TE DESAFÍA! ⚔️</div>
   <div class="boss-hp" id="bossHP">❤️ 10/10</div>
-  <div class="boss-timer" id="bossTimer">⏱️ Presiona E para atacar</div>
+  <div class="boss-timer" id="bossTimer">⏱️ 5</div>
 
   <script type="importmap">
     {
@@ -856,6 +892,8 @@
     const glitchVideoPlayer = document.getElementById('glitchVideoPlayer');
     const creditsContainer = document.getElementById('creditsContainer');
     const creditsVideo = document.getElementById('creditsVideo');
+    const creditssContainer = document.getElementById('creditssContainer');
+    const creditssVideo = document.getElementById('creditssVideo');
     const bananaPlayImg = document.getElementById('bananaPlay');
     const mainTitle = document.getElementById('mainTitle');
     const tvAnimal = document.getElementById('animal');
@@ -866,6 +904,7 @@
     const sceneOverlay = document.getElementById('sceneOverlay');
     const sceneImage = document.getElementById('sceneImage');
     const sceneText = document.getElementById('sceneText');
+    const bossAttackIndicator = document.getElementById('bossAttackIndicator');
 
     // ==================== FUNCIONES DE ESCENA ====================
     function showScene(imageSrc, text = '', className = '') {
@@ -887,7 +926,7 @@
       return audio;
     }
 
-    // ==================== FUNCIÓN DE CRÉDITOS CON CONTADOR ====================
+    // ==================== FUNCIÓN DE CRÉDITOS ====================
     function showCreditsWithTimer() {
       const dialogueBox = document.getElementById('dialogueBox');
       
@@ -903,7 +942,6 @@
       
       thanksAudio.play().catch(e => console.log("Thanks.wav error:", e));
       
-      // Contador de 1 a 32 segundos
       let counter = 1;
       const maxCounter = 32;
       
@@ -919,7 +957,6 @@
           
           creditsVideo.onended = () => {
             creditsContainer.style.display = 'none';
-            // Reproducir glitch.mp4 para transición a ABananaDraw
             playGlitchTransition(() => {
               goToFinalMode();
             });
@@ -935,13 +972,26 @@
           }, 10000);
         }
       }, 1000);
+    }
+
+    // ==================== FUNCIÓN DE CRÉDITOS DEL BOSS ====================
+    function showCreditssVideo() {
+      creditssContainer.style.display = 'flex';
+      creditssVideo.currentTime = 0;
+      creditssVideo.play();
       
-      // Fallback por si Thanks.wav no termina
+      creditssVideo.onended = () => {
+        creditssContainer.style.display = 'none';
+        // Ir a pantalla de espera
+        goToWaitingScreen();
+      };
+      
       setTimeout(() => {
-        if (thanksAudio) {
-          // Ya se maneja con el contador
+        if (creditssContainer.style.display === 'flex') {
+          creditssContainer.style.display = 'none';
+          goToWaitingScreen();
         }
-      }, 5000);
+      }, 15000);
     }
 
     // ==================== FUNCIONES DE LA CASA ====================
@@ -955,31 +1005,24 @@
       isInHouse = true;
       setHouseVisited();
       
-      // Access.mp3
       playSoundFile('Access.mp3');
       
-      // Fade out a pantalla negra
       sceneOverlay.style.display = 'flex';
       sceneOverlay.style.background = 'black';
       sceneImage.style.display = 'none';
       sceneText.textContent = '';
       
-      // Después de 1.5 segundos, mostrar House.png
       setTimeout(() => {
         showScene('House.png', '🏠 Casa de Ms. BananaS');
         sceneOverlay.style.background = 'rgba(0,0,0,0.8)';
-        
-        // Escuchar comandos en la casa
         document.addEventListener('keydown', houseKeyHandler);
       }, 1500);
     }
     
     function houseKeyHandler(e) {
       if (e.key === 'Enter') {
-        // Entrar a la casa
         enterInside();
       } else if (e.key.toLowerCase() === 'leave') {
-        // Salir de la casa
         leaveHouse();
       }
     }
@@ -989,25 +1032,18 @@
       isInside = true;
       setInsideVisited();
       
-      // Door.mp3
       playSoundFile('Door.mp3');
       
-      // Esperar 4 segundos
       setTimeout(() => {
-        // DoorC.mp3
         playSoundFile('DoorC.mp3');
-        
-        // Mostrar Inside.png con Ms. BananaS
         showScene('Inside.png', '🍌 ¡Dentro de la casa!');
         
         if (!insideVisited) {
           insideVisited = true;
           
-          // huh.wav después de 1 segundo
           setTimeout(() => {
             playSoundFile('huh.wav');
             
-            // Contador de 16 segundos
             let counter = 0;
             const maxCounter = 16;
             sceneText.textContent = `🍌 ¡Dentro de la casa! ⏱️ ${counter}/${maxCounter}`;
@@ -1017,14 +1053,12 @@
               sceneText.textContent = `🍌 ¡Dentro de la casa! ⏱️ ${counter}/${maxCounter}`;
               if (counter >= maxCounter) {
                 clearInterval(insideTimer);
-                // Salir de la casa con DoorC.mp3
                 playSoundFile('DoorC.mp3');
                 setTimeout(() => {
                   hideScene();
                   isInside = false;
                   isInHouse = false;
                   showScene('House.png', '🏠 Casa de Ms. BananaS');
-                  // Volver a escuchar comandos
                   document.removeEventListener('keydown', houseKeyHandler);
                   document.addEventListener('keydown', houseKeyHandler);
                 }, 500);
@@ -1032,8 +1066,6 @@
             }, 1000);
           }, 1000);
         } else {
-          // Segunda entrada - sin Ms. BananaS
-          // Contador de 5 segundos
           let counter = 0;
           const maxCounter = 5;
           sceneText.textContent = `⏱️ ${counter}/${maxCounter}`;
@@ -1043,13 +1075,10 @@
             sceneText.textContent = `⏱️ ${counter}/${maxCounter}`;
             if (counter >= maxCounter) {
               clearInterval(secondTimer);
-              // Mostrar Spider.png temblando
               showScene('Spider.png', '🕷️', 'spider-shake');
-              // Spider.mp3
               playSoundFile('Spider.mp3');
               
               setTimeout(() => {
-                // Game Not Found
                 hideScene();
                 setGameLocked();
                 setGlitchRedMode();
@@ -1063,23 +1092,19 @@
     }
     
     function leaveHouse() {
-      // Access.mp3
       playSoundFile('Access.mp3');
       
-      // Fade out a pantalla negra
       sceneOverlay.style.display = 'flex';
       sceneOverlay.style.background = 'black';
       sceneImage.style.display = 'none';
       sceneText.textContent = '';
       
-      // Después de 1.5 segundos, volver a la habitación final
       setTimeout(() => {
         hideScene();
         isInHouse = false;
         isInside = false;
         document.removeEventListener('keydown', houseKeyHandler);
         
-        // Mostrar habitación final con cartel, mesa y hamburguesa
         gameScreen.classList.add('final-mode');
         tvMessage.style.display = 'flex';
         tvAnimal.style.display = 'none';
@@ -1089,10 +1114,7 @@
         document.getElementById('dayText').style.display = 'none';
         document.getElementById('gameScreen').style.display = 'block';
         
-        // Mostrar hamburguesa en la mesa (simulado con mensaje)
         showDialogue("🍔 Hay una hamburguesa en la mesa. ¿Quieres comerla?", null, 5000);
-        
-        // Escuchar si escribe "eat" o "comer"
         document.addEventListener('keydown', eatHandler);
       }, 1500);
     }
@@ -1109,10 +1131,8 @@
       const rage = parseInt(localStorage.getItem(RAGE_PROGRESS_KEY)) || 0;
       
       if (rage >= 1 && rage <= 9) {
-        // bana.wav
         playSoundFile('bana.wav');
         
-        // Contador de 13 segundos
         let counter = 0;
         const maxCounter = 13;
         showDialogue(`🍌 ¡Has comido la hamburguesa! ⏱️ ${counter}/${maxCounter}`, null, 1000);
@@ -1122,7 +1142,6 @@
           showDialogue(`🍌 ¡Has comido la hamburguesa! ⏱️ ${counter}/${maxCounter}`, null, 1000);
           if (counter >= maxCounter) {
             clearInterval(burgerTimer);
-            // Iniciar bossfight
             startBossFight();
           }
         }, 1000);
@@ -1143,10 +1162,9 @@
       }
     }
 
-    // ==================== FUNCIÓN DE RESET CON GLITCH.MP4 ====================
+    // ==================== FUNCIÓN DE RESET ====================
     function performReset() {
-      console.log("🔄 RESET ACTIVADO - Reproduciendo glitch.mp4");
-      
+      console.log("🔄 RESET ACTIVADO");
       stopAllGameMusic();
       if (window.chaseMusic) window.chaseMusic.pause();
       if (window.heartbeatSound) window.heartbeatSound.pause();
@@ -1155,30 +1173,23 @@
       glitchVideo.style.display = 'flex';
       glitchVideoPlayer.currentTime = 0;
       
-      const playPromise = glitchVideoPlayer.play();
-      if (playPromise !== undefined) {
-        playPromise.then(() => {
-          console.log("▶️ glitch.mp4 reproduciendo");
-        }).catch(error => {
-          console.warn("⚠️ No se pudo reproducir glitch.mp4:", error);
-          window.location.reload();
-        });
-      }
+      glitchVideoPlayer.play().catch(error => {
+        console.warn("⚠️ No se pudo reproducir glitch.mp4:", error);
+        window.location.reload();
+      });
       
       glitchVideoPlayer.onended = () => {
-        console.log("⏹️ glitch.mp4 terminado - Recargando");
         window.location.reload();
       };
       
       setTimeout(() => {
         if (glitchVideo.style.display === 'flex') {
-          console.log("⏰ Fallback: recargando después de 3 segundos");
           window.location.reload();
         }
       }, 3500);
     }
 
-    // ==================== POLLING DE RESET SIEMPRE ACTIVO ====================
+    // ==================== POLLING DE RESET ====================
     let resetPollInterval = null;
     let resetAttempts = 0;
 
@@ -1189,15 +1200,13 @@
         resetAttempts++;
         const signal = localStorage.getItem(RESET_SIGNAL_KEY);
         if (signal === "reset") {
-          console.log("✅ SEÑAL DE RESET DETECTADA (Intento " + resetAttempts + ")");
+          console.log("✅ SEÑAL DE RESET DETECTADA");
           localStorage.removeItem(RESET_SIGNAL_KEY);
           clearInterval(resetPollInterval);
           resetPollInterval = null;
           performReset();
         }
       }, 1500);
-      
-      console.log("🔄 Polling de reset universal activado (cada 1.5s)");
     }
 
     startUniversalResetPolling();
@@ -1370,6 +1379,18 @@
       window.location.reload();
     }
 
+    function goToWaitingScreen() {
+      document.getElementById('startScreen').style.display = 'none';
+      document.getElementById('gameScreen').style.display = 'none';
+      document.getElementById('gameContent').style.display = 'none';
+      lockScreen.style.display = 'none';
+      glitchRedScreen.style.display = 'none';
+      
+      waitingScreen.style.display = 'flex';
+      setGameCompleted();
+      startWaitingPolling();
+    }
+
     // ==================== FUNCIÓN PARA EL MODO FINAL ====================
     function iniciarJuegoFinalMode() {
       const bananaPlay = document.getElementById("bananaPlay");
@@ -1391,7 +1412,6 @@
         
         if (roomMusic) roomMusic.pause();
         
-        // Escuchar comandos en la habitación final
         document.addEventListener('keydown', finalRoomKeyHandler);
       });
     }
@@ -1399,22 +1419,17 @@
     function finalRoomKeyHandler(e) {
       const key = e.key.toLowerCase();
       if (key === 'b' || key === 'banana') {
-        // Escribir "Banana" - activar Access.mp3 y fade out
         document.removeEventListener('keydown', finalRoomKeyHandler);
         playSoundFile('Access.mp3');
         
-        // Fade out a pantalla negra
         sceneOverlay.style.display = 'flex';
         sceneOverlay.style.background = 'black';
         sceneImage.style.display = 'none';
         sceneText.textContent = '';
         
-        // Después de 1.5 segundos, mostrar House.png
         setTimeout(() => {
           showScene('House.png', '🏠 Casa de Ms. BananaS');
           sceneOverlay.style.background = 'rgba(0,0,0,0.8)';
-          
-          // Escuchar comandos en la casa
           document.addEventListener('keydown', houseKeyHandler);
         }, 1500);
       }
@@ -1543,7 +1558,7 @@
         };
       }
 
-      // ==================== BOSSFIGHT 2D ESTILO UNDERTALE ====================
+      // ==================== BOSSFIGHT 2D ESTILO UNDERTALE CON CUBITOS ====================
       function startBossFight() {
         bossFightActive = true;
         bossTriggered = true;
@@ -1606,21 +1621,27 @@
         canvas.style.width = '100%';
         canvas.style.height = '100%';
         
+        // ==================== ESTADO DEL BOSS ====================
         let bossHP = 10;
         let bossHits = 0;
-        let attackState = 'idle';
-        let attackCooldown = 0;
+        let phase = 'attack'; // 'attack' o 'player_turn'
+        let attackTimer = 5;
+        let cubes = [];
+        let isLineStatic = false;
         let lineX = 0;
         let lineY = 0;
         let lineWidth = 5;
-        let isLineStatic = false;
         let mouseX = 0;
         let mouseY = 0;
         let deathSequenceStarted = false;
+        let cubeInterval = null;
+        let gameLoopId = null;
+        let canAttack = false;
         
         const bossX = canvas.width / 2;
         const bossY = canvas.height / 2 - 50;
         
+        // ==================== IMÁGENES ====================
         const bossImg = new Image();
         bossImg.src = "https://raw.githubusercontent.com/Raphapro900/Ms.BananaS/refs/heads/main/banana2.png";
         bossImg.onload = () => { console.log("Boss image loaded"); };
@@ -1629,18 +1650,24 @@
         playerImg.src = "https://raw.githubusercontent.com/Raphapro900/Ms.BananaS/refs/heads/main/banana.png";
         playerImg.onload = () => { console.log("Player image loaded"); };
         
+        // ==================== CORAZONES ====================
         let hearts = [];
         for (let i = 0; i < 10; i++) {
           hearts.push({ x: 50 + i * 40, y: 50, alive: true });
         }
         
+        // ==================== UI DEL BOSS ====================
         bossUI.style.display = 'block';
         bossHPDisplay.style.display = 'block';
         bossTimer.style.display = 'block';
         bossUI.textContent = '⚔️ ¡MS. BANANAS TE DESAFÍA! ⚔️';
         bossHPDisplay.textContent = `❤️ ${bossHP}/${bossHP}`;
-        bossTimer.textContent = '⏱️ Presiona E para atacar';
+        bossTimer.textContent = '⏱️ 5';
+        bossAttackIndicator.style.display = 'block';
+        bossAttackIndicator.textContent = '⚔️ ¡ESQUIVA LOS CUBITOS! ⚔️';
+        bossAttackIndicator.classList.add('show');
         
+        // ==================== MOVIMIENTO DEL MOUSE ====================
         document.addEventListener('mousemove', (e) => {
           const rect = canvas.getBoundingClientRect();
           const scaleX = canvas.width / rect.width;
@@ -1649,25 +1676,82 @@
           mouseY = (e.clientY - rect.top) * scaleY;
         });
         
+        // ==================== SISTEMA DE CUBITOS ====================
+        function spawnCubes() {
+          if (phase !== 'attack' || deathSequenceStarted) return;
+          
+          // Generar 3-5 cubitos que caen desde arriba
+          const count = 3 + Math.floor(Math.random() * 3);
+          for (let i = 0; i < count; i++) {
+            const size = 20 + Math.random() * 20;
+            cubes.push({
+              x: 20 + Math.random() * (canvas.width - 40),
+              y: -50 - Math.random() * 100,
+              size: size,
+              speed: 120 + Math.random() * 200,
+              color: `hsl(${Math.random() * 360}, 80%, 60%)`
+            });
+          }
+        }
+        
+        function startCubeAttack() {
+          if (cubeInterval) clearInterval(cubeInterval);
+          // Generar cubitos cada 600-900ms
+          const spawnRate = 600 + Math.random() * 300;
+          cubeInterval = setInterval(spawnCubes, spawnRate);
+          // Generar algunos inmediatamente
+          setTimeout(spawnCubes, 200);
+          setTimeout(spawnCubes, 500);
+        }
+        
+        function stopCubeAttack() {
+          if (cubeInterval) {
+            clearInterval(cubeInterval);
+            cubeInterval = null;
+          }
+          cubes = [];
+        }
+        
+        // ==================== DETECCIÓN DE COLISIÓN ====================
+        function checkCubeCollision(cube) {
+          const playerSize = 25;
+          const distX = Math.abs(cube.x - mouseX);
+          const distY = Math.abs(cube.y - mouseY);
+          const threshold = cube.size / 2 + playerSize;
+          return distX < threshold && distY < threshold;
+        }
+        
+        // ==================== ATAQUE DEL JUGADOR ====================
         document.addEventListener('keydown', (e) => {
           if (e.key === 'e' || e.key === 'E') {
             if (!bossFightActive || deathSequenceStarted) return;
-            
-            if (attackState === 'idle') {
-              isLineStatic = true;
-              lineX = mouseX;
-              lineY = mouseY;
-              attackState = 'attacking';
-              bossTimer.textContent = '⚡ ¡ATACANDO!';
-              
-              checkHit();
-              
-              setTimeout(() => {
-                isLineStatic = false;
-                attackState = 'idle';
-                bossTimer.textContent = '⏱️ Presiona E para atacar';
-              }, 1000);
+            if (phase !== 'player_turn') {
+              showDialogue("💢 ¡Espera a que termine el ataque!", null, 1000);
+              return;
             }
+            if (!canAttack) return;
+            
+            // Ataque: línea roja estática
+            isLineStatic = true;
+            lineX = mouseX;
+            lineY = mouseY;
+            canAttack = false;
+            bossTimer.textContent = '⚡ ¡ATACANDO! ⚡';
+            bossAttackIndicator.textContent = '⚡ ¡ATACA! ⚡';
+            
+            // Verificar si la línea toca a Ms. BananaS
+            checkHit();
+            
+            // Volver a fase de ataque después de 1.5 segundos
+            setTimeout(() => {
+              isLineStatic = false;
+              phase = 'attack';
+              attackTimer = 5;
+              bossTimer.textContent = `⏱️ ${attackTimer}`;
+              bossAttackIndicator.textContent = '⚔️ ¡ESQUIVA LOS CUBITOS! ⚔️';
+              canAttack = false;
+              startCubeAttack();
+            }, 1500);
           }
         });
         
@@ -1688,6 +1772,7 @@
                 ouchSound.volume = 0.7;
                 ouchSound.play().catch(e => console.log("Ouch.wav error:", e));
                 
+                // Efecto visual
                 bossImg.style = 'filter: brightness(2) hue-rotate(30deg);';
                 setTimeout(() => {
                   bossImg.style = '';
@@ -1698,11 +1783,14 @@
             }
             
             if (bossHits >= bossHP) {
+              // BOSS DERROTADO - Creditss.mp4
               deathSequenceStarted = true;
               bossFightActive = false;
+              stopCubeAttack();
               bossUI.textContent = "🎉 ¡JEFE DERROTADO! 🎉";
               bossHPDisplay.textContent = "💀 0/10";
               bossTimer.style.display = 'none';
+              bossAttackIndicator.style.display = 'none';
               
               if (window.bossMusic) {
                 window.bossMusic.pause();
@@ -1715,20 +1803,57 @@
                 bossUI.style.display = 'none';
                 bossHPDisplay.style.display = 'none';
                 bossTimer.style.display = 'none';
+                bossAttackIndicator.style.display = 'none';
                 chaseContainer.style.display = "none";
-                completeGameAfterBoss();
+                completeBossFight();
               }, 2000);
             }
           }
         }
         
-        function animateBoss2D() {
+        // ==================== COMPLETAR BOSSFIGHT ====================
+        function completeBossFight() {
+          if (window.cleanupBoss2D) window.cleanupBoss2D();
+          // Reproducir Creditss.mp4
+          showCreditssVideo();
+        }
+        
+        // ==================== CICLO DE ANIMACIÓN ====================
+        let lastTime = 0;
+        let attackAccumulator = 0;
+        
+        function animateBoss2D(timestamp) {
           if (!bossFightActive && !deathSequenceStarted) {
             return;
           }
           
+          const delta = lastTime ? (timestamp - lastTime) / 1000 : 0.016;
+          lastTime = timestamp;
+          
+          // ==================== ACTUALIZAR TIMER DE ATAQUE ====================
+          if (phase === 'attack' && !deathSequenceStarted) {
+            attackAccumulator += delta;
+            if (attackAccumulator >= 1) {
+              attackAccumulator = 0;
+              attackTimer--;
+              bossTimer.textContent = `⏱️ ${attackTimer}`;
+              
+              if (attackTimer <= 0) {
+                // Cambiar a turno del jugador
+                phase = 'player_turn';
+                canAttack = true;
+                stopCubeAttack();
+                bossTimer.textContent = '⚡ ¡TU TURNO! (E) ⚡';
+                bossAttackIndicator.textContent = '⚡ ¡TU TURNO! PRESIONA E ⚡';
+                showDialogue("⚡ ¡ATACA CON E!", null, 1500);
+              }
+            }
+          }
+          
+          // ==================== LIMPIAR CANVAS ====================
           ctx.clearRect(0, 0, canvas.width, canvas.height);
           
+          // Fondo
           const gradient = ctx.createRadialGradient(
             canvas.width/2, canvas.height/2, 50,
             canvas.width/2, canvas.height/2, 500
@@ -1738,6 +1863,66 @@
           ctx.fillStyle = gradient;
           ctx.fillRect(0, 0, canvas.width, canvas.height);
           
+          // ==================== ACTUALIZAR Y DIBUJAR CUBITOS ====================
+          if (phase === 'attack') {
+            const cubesToRemove = [];
+            for (let i = 0; i < cubes.length; i++) {
+              const cube = cubes[i];
+              cube.y += cube.speed * delta;
+              
+              // Dibujar cubito
+              ctx.fillStyle = cube.color;
+              ctx.shadowColor = cube.color;
+              ctx.shadowBlur = 15;
+              ctx.fillRect(cube.x - cube.size/2, cube.y - cube.size/2, cube.size, cube.size);
+              ctx.shadowBlur = 0;
+              
+              // Verificar colisión con el jugador
+              if (checkCubeCollision(cube) && !deathSequenceStarted) {
+                // ¡GOLPE! Perder un corazón
+                for (let j = hearts.length - 1; j >= 0; j--) {
+                  if (hearts[j].alive) {
+                    hearts[j].alive = false;
+                    bossHits++;
+                    bossHPDisplay.textContent = `❤️ ${bossHP - bossHits}/${bossHP}`;
+                    
+                    const damageSound = new Audio('f' + (Math.floor(Math.random() * 4) + 1) + '.wav');
+                    damageSound.volume = 0.5;
+                    damageSound.play().catch(e => {});
+                    
+                    // Efecto de daño al jugador
+                    document.querySelector('.chaseUI').style.color = '#ff0000';
+                    setTimeout(() => {
+                      document.querySelector('.chaseUI').style.color = '#ffaa33';
+                    }, 200);
+                    
+                    if (hearts.filter(h => h.alive).length === 0) {
+                      // MUERTE DEL JUGADOR
+                      deathSequenceStarted = true;
+                      bossFightActive = false;
+                      stopCubeAttack();
+                      startPlayerDeathSequence();
+                      return;
+                    }
+                    break;
+                  }
+                }
+                cubesToRemove.push(i);
+              }
+              
+              // Eliminar cubitos que salen de la pantalla
+              if (cube.y > canvas.height + 50) {
+                cubesToRemove.push(i);
+              }
+            }
+            
+            // Eliminar cubitos marcados
+            for (let i = cubesToRemove.length - 1; i >= 0; i--) {
+              cubes.splice(cubesToRemove[i], 1);
+            }
+          }
+          
+          // ==================== DIBUJAR MS. BANANAS ====================
           if (bossImg.complete && bossImg.naturalWidth > 0) {
             const size = 120;
             ctx.drawImage(bossImg, bossX - size/2, bossY - size/2, size, size);
@@ -1748,6 +1933,7 @@
             ctx.fillText('🍌', bossX, bossY + 20);
           }
           
+          // ==================== DIBUJAR JUGADOR (CORAZÓN) ====================
           ctx.fillStyle = '#ff0044';
           ctx.shadowColor = '#ff0044';
           ctx.shadowBlur = 20;
@@ -1757,26 +1943,24 @@
           ctx.fillText('❤️', mouseX, mouseY);
           ctx.shadowBlur = 0;
           
-          if (attackState === 'attacking' || isLineStatic) {
+          // ==================== DIBUJAR LÍNEA DE ATAQUE ====================
+          if (isLineStatic) {
             ctx.fillStyle = 'rgba(255, 0, 0, 0.8)';
             ctx.shadowColor = '#ff0000';
             ctx.shadowBlur = 30;
-            
-            const x = isLineStatic ? lineX : mouseX;
-            const y = isLineStatic ? lineY : mouseY;
-            
-            ctx.fillRect(x - lineWidth/2, 0, lineWidth, canvas.height);
+            ctx.fillRect(lineX - lineWidth/2, 0, lineWidth, canvas.height);
             ctx.shadowBlur = 0;
             
-            const glowGradient = ctx.createLinearGradient(x - 30, 0, x + 30, 0);
+            const glowGradient = ctx.createLinearGradient(lineX - 30, 0, lineX + 30, 0);
             glowGradient.addColorStop(0, 'rgba(255,0,0,0)');
             glowGradient.addColorStop(0.5, 'rgba(255,0,0,0.3)');
             glowGradient.addColorStop(1, 'rgba(255,0,0,0)');
             ctx.fillStyle = glowGradient;
-            ctx.fillRect(x - 30, 0, 60, canvas.height);
+            ctx.fillRect(lineX - 30, 0, 60, canvas.height);
           }
           
-          hearts.forEach((heart, index) => {
+          // ==================== DIBUJAR CORAZONES ====================
+          hearts.forEach((heart) => {
             if (heart.alive) {
               ctx.fillStyle = '#ff0044';
               ctx.shadowColor = '#ff0044';
@@ -1789,33 +1973,111 @@
             }
           });
           
-          if (attackState === 'attacking') {
-            ctx.fillStyle = '#ff4444';
-            ctx.font = '20px monospace';
+          // ==================== INDICADOR DE ATAQUE ====================
+          if (phase === 'player_turn' && canAttack) {
+            ctx.fillStyle = 'rgba(0, 255, 0, 0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#44ff44';
+            ctx.font = '24px "Indie Flower", cursive';
             ctx.textAlign = 'center';
-            ctx.fillText('⚡ ATACANDO ⚡', canvas.width/2, canvas.height - 50);
+            ctx.fillText('⚡ PRESIONA E PARA ATACAR ⚡', canvas.width/2, canvas.height - 30);
           }
           
-          if (deathSequenceStarted) {
-            ctx.fillStyle = '#ffdd44';
-            ctx.font = '40px "Indie Flower", cursive';
-            ctx.textAlign = 'center';
-            ctx.fillText('💀 ¡VENCISTE AL JEFE! 💀', canvas.width/2, canvas.height/2 + 100);
+          // ==================== SECUENCIA DE MUERTE DEL JUGADOR ====================
+          function startPlayerDeathSequence() {
+            bossUI.textContent = "💀 ¡HAS MUERTO! 💀";
+            bossHPDisplay.textContent = "☠️ 0/10";
+            bossTimer.style.display = 'none';
+            bossAttackIndicator.style.display = 'none';
+            
+            if (window.bossMusic) {
+              window.bossMusic.pause();
+              window.bossMusic.currentTime = 0;
+            }
+            
+            const ohAudio = new Audio('Oh.wav');
+            ohAudio.playbackRate = 0.7;
+            ohAudio.volume = 0.9;
+            ohAudio.play().catch(e => console.log("Oh.wav error:", e));
+            
+            setTimeout(() => {
+              playBrokenSound();
+              setTimeout(() => {
+                playGlitchTransition(() => {
+                  activateGlitchRedScreen();
+                });
+              }, 3000);
+            }, 1500);
           }
           
-          requestAnimationFrame(animateBoss2D);
-        }
-        animateBoss2D();
-        
-        function completeGameAfterBoss() {
-          if (window.bossMusic) {
-            window.bossMusic.pause();
-            window.bossMusic.currentTime = 0;
+          function playBrokenSound() {
+            try {
+              const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+              const bufferSize = audioCtx.sampleRate * 0.3;
+              const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+              const data = buffer.getChannelData(0);
+              
+              for (let i = 0; i < bufferSize; i++) {
+                const t = i / bufferSize;
+                const envelope = Math.exp(-t * 8);
+                data[i] = (Math.random() * 2 - 1) * envelope * 0.5;
+                if (i % 500 < 10) {
+                  data[i] = (Math.random() > 0.5 ? 1 : -1) * 0.8;
+                }
+                if (i % 1200 < 20) {
+                  data[i] = 0;
+                }
+              }
+              
+              const source = audioCtx.createBufferSource();
+              source.buffer = buffer;
+              source.connect(audioCtx.destination);
+              source.start();
+              
+              setTimeout(() => {
+                try { audioCtx.close(); } catch(e) {}
+              }, 500);
+            } catch(e) {
+              console.log("Broken sound fallback");
+            }
           }
-          goToWaitingScreen();
+          
+          function activateGlitchRedScreen() {
+            setGlitchRedMode();
+            setGameLocked();
+            
+            document.getElementById('startScreen').style.display = 'none';
+            document.getElementById('gameScreen').style.display = 'none';
+            document.getElementById('gameContent').style.display = 'none';
+            lockScreen.style.display = 'none';
+            waitingScreen.style.display = 'none';
+            creditsContainer.style.display = 'none';
+            chaseContainer.style.display = 'none';
+            
+            glitchRedScreen.style.display = 'flex';
+            startGlitchRedPolling();
+          }
+          
+          // Continuar el loop
+          if (bossFightActive || !deathSequenceStarted) {
+            gameLoopId = requestAnimationFrame(animateBoss2D);
+          }
         }
         
+        // ==================== INICIAR EL LOOP ====================
+        // Iniciar el ataque de cubitos
+        startCubeAttack();
+        
+        // Iniciar animación
+        gameLoopId = requestAnimationFrame(animateBoss2D);
+        
+        // ==================== LIMPIEZA ====================
         window.cleanupBoss2D = function() {
+          stopCubeAttack();
+          if (gameLoopId) {
+            cancelAnimationFrame(gameLoopId);
+            gameLoopId = null;
+          }
           if (window.bossMusic) {
             window.bossMusic.pause();
             window.bossMusic.currentTime = 0;
@@ -2236,9 +2498,9 @@
           <p>Si completas el Día 5 con errores → ¡Bossfight!</p>
           <br>
           <p><strong>⚔️ Bossfight (2D estilo Undertale):</strong><br>
-          • El corazón es tu MOUSE<br>
-          • Ms. BananaS está en el centro<br>
-          • Presiona <strong>E</strong> para atacar<br>
+          • Ms. BananaS te ataca con CUBITOS durante 5 segundos<br>
+          • Esquívalos moviendo el MOUSE<br>
+          • Después de 5 segundos, puedes ATACAR con <strong>E</strong><br>
           • La línea roja se queda estática donde está el mouse<br>
           • Si la línea toca a Ms. BananaS → le quita un corazón<br>
           • Tienes 10 corazones. ¡No los pierdas todos!</p>
