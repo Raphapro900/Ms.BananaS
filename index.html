@@ -231,6 +231,35 @@
       display: none;
     }
     
+    /* Input de texto en la parte inferior */
+    #text-input-display {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: #00ff88;
+      font-family: 'Share Tech Mono', monospace !important;
+      font-size: 1.5rem;
+      background: rgba(0,0,0,0.7);
+      padding: 10px 20px;
+      border-radius: 10px;
+      border: 2px solid #00ff88;
+      z-index: 9995;
+      display: none;
+      min-width: 200px;
+      text-align: center;
+      text-shadow: 0 0 10px #00ff88;
+    }
+    
+    #text-input-display .cursor {
+      animation: blink 0.5s infinite;
+    }
+    
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+    
     .options { 
       position: absolute; 
       bottom: 40px; 
@@ -514,7 +543,6 @@
       display: none;
     }
     
-    /* Boss Attack UI */
     .boss-attack-indicator {
       position: fixed;
       top: 45%;
@@ -578,15 +606,15 @@
     }
     
     .spider-shake {
-      animation: spiderShake 0.1s infinite;
+      animation: spiderShake 0.08s infinite;
     }
     
     @keyframes spiderShake {
-      0% { transform: translate(0, 0) rotate(0deg); }
-      25% { transform: translate(-10px, 5px) rotate(-2deg); }
-      50% { transform: translate(10px, -5px) rotate(2deg); }
-      75% { transform: translate(-5px, 10px) rotate(-1deg); }
-      100% { transform: translate(5px, -10px) rotate(1deg); }
+      0% { transform: translate(0, 0) rotate(0deg) scale(1); }
+      25% { transform: translate(-15px, 8px) rotate(-3deg) scale(1.05); }
+      50% { transform: translate(15px, -8px) rotate(3deg) scale(0.95); }
+      75% { transform: translate(-8px, 15px) rotate(-2deg) scale(1.05); }
+      100% { transform: translate(8px, -15px) rotate(2deg) scale(0.95); }
     }
     
     .fade-out {
@@ -618,6 +646,9 @@
 
   <div class="reset-polling-badge" id="pollingBadge">🔄</div>
 
+  <!-- Input display -->
+  <div id="text-input-display"><span id="inputText"></span><span class="cursor">|</span></div>
+
   <!-- Scene overlay -->
   <div id="sceneOverlay" class="scene-overlay">
     <img id="sceneImage" src="" alt="Scene">
@@ -643,14 +674,9 @@
     <div class="reset-signal" id="resetSignal">🔄 Buscando señal...</div>
   </div>
 
+  <!-- GAME NOT FOUND ROJO (normal, sin mensajes secretos) -->
   <div id="glitchRedScreen" class="glitch-red-screen">
     <h1>GAME NOT FOUND.</h1>
-    <div class="glitch-line">ME MaT4sT3E3</div>
-    <div class="glitch-line">V3tE3E</div>
-    <div class="glitch-line">PoO0RR-RQUE3E3EE333E3E3</div>
-    <div class="glitch-line">YAA4AA4AA4</div>
-    <div class="glitch-line">AAAAAAAAAAAHHHHHH</div>
-    <div class="glitch-line">A4AS3eES1n- NN00o0</div>
     <div class="reset-signal-red" id="glitchResetSignal">🔄 Buscando señal de reseteo...</div>
   </div>
 
@@ -658,7 +684,7 @@
     <video id="glitchVideoPlayer" src="glitch.mp4"></video>
   </div>
 
-  <!-- Creditss.mp4 (video diferente para el boss) -->
+  <!-- Creditss.mp4 -->
   <div id="creditssContainer" class="credits-container" style="z-index: 9998;">
     <video id="creditssVideo" src="Creditss.mp4"></video>
   </div>
@@ -905,6 +931,26 @@
     const sceneImage = document.getElementById('sceneImage');
     const sceneText = document.getElementById('sceneText');
     const bossAttackIndicator = document.getElementById('bossAttackIndicator');
+    const textInputDisplay = document.getElementById('text-input-display');
+    const inputTextSpan = document.getElementById('inputText');
+
+    let currentInput = '';
+
+    function updateInputDisplay() {
+      inputTextSpan.textContent = currentInput;
+      textInputDisplay.style.display = 'block';
+    }
+
+    function hideInputDisplay() {
+      textInputDisplay.style.display = 'none';
+      currentInput = '';
+      inputTextSpan.textContent = '';
+    }
+
+    function resetInput() {
+      currentInput = '';
+      inputTextSpan.textContent = '';
+    }
 
     // ==================== FUNCIONES DE ESCENA ====================
     function showScene(imageSrc, text = '', className = '') {
@@ -926,7 +972,7 @@
       return audio;
     }
 
-    // ==================== FUNCIÓN DE CRÉDITOS ====================
+    // ==================== FUNCIÓN DE CRÉDITOS CON CONTADOR DE 21 SEGUNDOS ====================
     function showCreditsWithTimer() {
       const dialogueBox = document.getElementById('dialogueBox');
       
@@ -942,8 +988,9 @@
       
       thanksAudio.play().catch(e => console.log("Thanks.wav error:", e));
       
+      // ⏱️ CONTADOR DE 1 A 21 SEGUNDOS ⏱️
       let counter = 1;
-      const maxCounter = 32;
+      const maxCounter = 21;
       
       const counterInterval = setInterval(() => {
         counter++;
@@ -982,7 +1029,6 @@
       
       creditssVideo.onended = () => {
         creditssContainer.style.display = 'none';
-        // Ir a pantalla de espera
         goToWaitingScreen();
       };
       
@@ -998,8 +1044,65 @@
     let insideVisited = false;
     let isInHouse = false;
     let isInside = false;
-    let houseTimer = null;
-    
+    let inputBuffer = '';
+    let isListeningForInput = false;
+
+    function startListeningForInput() {
+      isListeningForInput = true;
+      currentInput = '';
+      updateInputDisplay();
+    }
+
+    function stopListeningForInput() {
+      isListeningForInput = false;
+      hideInputDisplay();
+    }
+
+    function handleTextInput(e) {
+      if (!isListeningForInput) return;
+      
+      const key = e.key;
+      
+      if (key === 'Enter') {
+        // Procesar el comando completo
+        const command = currentInput.toLowerCase().trim();
+        
+        if (command === 'banana') {
+          // Activar Banana
+          document.removeEventListener('keydown', handleTextInput);
+          stopListeningForInput();
+          activateBanana();
+        } else if (command === 'enter') {
+          // Activar enter
+          document.removeEventListener('keydown', handleTextInput);
+          stopListeningForInput();
+          enterInside();
+        } else if (command === 'leave') {
+          // Activar leave
+          document.removeEventListener('keydown', handleTextInput);
+          stopListeningForInput();
+          leaveHouse();
+        } else {
+          // Comando no reconocido
+          showDialogue(`❌ Comando "${command}" no reconocido.`, null, 1500);
+          currentInput = '';
+          inputTextSpan.textContent = '';
+        }
+        return;
+      }
+      
+      if (key === 'Backspace') {
+        currentInput = currentInput.slice(0, -1);
+        inputTextSpan.textContent = currentInput;
+        return;
+      }
+      
+      if (key.length === 1 && key.match(/[a-zA-Z]/)) {
+        currentInput += key;
+        inputTextSpan.textContent = currentInput;
+      }
+    }
+
     function enterHouse() {
       if (isInHouse) return;
       isInHouse = true;
@@ -1015,16 +1118,10 @@
       setTimeout(() => {
         showScene('House.png', '🏠 Casa de Ms. BananaS');
         sceneOverlay.style.background = 'rgba(0,0,0,0.8)';
-        document.addEventListener('keydown', houseKeyHandler);
+        // Empezar a escuchar comandos
+        startListeningForInput();
+        document.addEventListener('keydown', handleTextInput);
       }, 1500);
-    }
-    
-    function houseKeyHandler(e) {
-      if (e.key === 'Enter') {
-        enterInside();
-      } else if (e.key.toLowerCase() === 'leave') {
-        leaveHouse();
-      }
     }
     
     function enterInside() {
@@ -1032,63 +1129,83 @@
       isInside = true;
       setInsideVisited();
       
-      playSoundFile('Door.mp3');
+      // Reproducir Door.mp3
+      const doorAudio = playSoundFile('Door.mp3');
       
-      setTimeout(() => {
-        playSoundFile('DoorC.mp3');
-        showScene('Inside.png', '🍌 ¡Dentro de la casa!');
-        
-        if (!insideVisited) {
-          insideVisited = true;
+      // Contador de 3 segundos
+      let counter = 0;
+      const maxCounter = 3;
+      showDialogue(`🚪 Abriendo puerta... ${counter}/${maxCounter}`, null, 1000);
+      
+      const doorTimer = setInterval(() => {
+        counter++;
+        showDialogue(`🚪 Abriendo puerta... ${counter}/${maxCounter}`, null, 1000);
+        if (counter >= maxCounter) {
+          clearInterval(doorTimer);
+          // DoorC.mp3
+          playSoundFile('DoorC.mp3');
           
-          setTimeout(() => {
-            playSoundFile('huh.wav');
+          // Mostrar Inside.png con Ms. BananaS
+          showScene('Inside.png', '🍌 ¡Dentro de la casa!');
+          
+          if (!insideVisited) {
+            insideVisited = true;
             
-            let counter = 0;
-            const maxCounter = 16;
-            sceneText.textContent = `🍌 ¡Dentro de la casa! ⏱️ ${counter}/${maxCounter}`;
+            // huh.wav después de 1 segundo
+            setTimeout(() => {
+              playSoundFile('huh.wav');
+              
+              // Contador de 16 segundos (sin mostrar)
+              let silentCounter = 0;
+              const maxSilent = 16;
+              
+              const insideTimer = setInterval(() => {
+                silentCounter++;
+                if (silentCounter >= maxSilent) {
+                  clearInterval(insideTimer);
+                  // Salir de la casa con DoorC.mp3
+                  playSoundFile('DoorC.mp3');
+                  setTimeout(() => {
+                    hideScene();
+                    isInside = false;
+                    isInHouse = false;
+                    showScene('House.png', '🏠 Casa de Ms. BananaS');
+                    // Volver a escuchar comandos
+                    startListeningForInput();
+                    document.addEventListener('keydown', handleTextInput);
+                  }, 500);
+                }
+              }, 1000);
+            }, 1000);
+          } else {
+            // Segunda entrada - sin Ms. BananaS
+            // Contador de 5 segundos (sin mostrar)
+            let silentCounter = 0;
+            const maxSilent = 5;
             
-            const insideTimer = setInterval(() => {
-              counter++;
-              sceneText.textContent = `🍌 ¡Dentro de la casa! ⏱️ ${counter}/${maxCounter}`;
-              if (counter >= maxCounter) {
-                clearInterval(insideTimer);
-                playSoundFile('DoorC.mp3');
+            const secondTimer = setInterval(() => {
+              silentCounter++;
+              if (silentCounter >= maxSilent) {
+                clearInterval(secondTimer);
+                // Mostrar Spider.png temblando
+                showScene('Spider.png', '🕷️', 'spider-shake');
+                // Spider.mp3 FUERTE
+                const spiderAudio = playSoundFile('Spider.mp3', 1.0);
+                spiderAudio.volume = 1.0;
+                
                 setTimeout(() => {
+                  // Game Not Found NORMAL (sin mensajes secretos)
                   hideScene();
-                  isInside = false;
-                  isInHouse = false;
-                  showScene('House.png', '🏠 Casa de Ms. BananaS');
-                  document.removeEventListener('keydown', houseKeyHandler);
-                  document.addEventListener('keydown', houseKeyHandler);
-                }, 500);
+                  setGameLocked();
+                  setGlitchRedMode();
+                  glitchRedScreen.style.display = 'flex';
+                  startGlitchRedPolling();
+                }, 2500);
               }
             }, 1000);
-          }, 1000);
-        } else {
-          let counter = 0;
-          const maxCounter = 5;
-          sceneText.textContent = `⏱️ ${counter}/${maxCounter}`;
-          
-          const secondTimer = setInterval(() => {
-            counter++;
-            sceneText.textContent = `⏱️ ${counter}/${maxCounter}`;
-            if (counter >= maxCounter) {
-              clearInterval(secondTimer);
-              showScene('Spider.png', '🕷️', 'spider-shake');
-              playSoundFile('Spider.mp3');
-              
-              setTimeout(() => {
-                hideScene();
-                setGameLocked();
-                setGlitchRedMode();
-                glitchRedScreen.style.display = 'flex';
-                startGlitchRedPolling();
-              }, 2000);
-            }
-          }, 1000);
+          }
         }
-      }, 4000);
+      }, 1000);
     }
     
     function leaveHouse() {
@@ -1103,7 +1220,8 @@
         hideScene();
         isInHouse = false;
         isInside = false;
-        document.removeEventListener('keydown', houseKeyHandler);
+        document.removeEventListener('keydown', handleTextInput);
+        stopListeningForInput();
         
         gameScreen.classList.add('final-mode');
         tvMessage.style.display = 'flex';
@@ -1116,6 +1234,23 @@
         
         showDialogue("🍔 Hay una hamburguesa en la mesa. ¿Quieres comerla?", null, 5000);
         document.addEventListener('keydown', eatHandler);
+      }, 1500);
+    }
+    
+    function activateBanana() {
+      playSoundFile('Access.mp3');
+      
+      sceneOverlay.style.display = 'flex';
+      sceneOverlay.style.background = 'black';
+      sceneImage.style.display = 'none';
+      sceneText.textContent = '';
+      
+      setTimeout(() => {
+        showScene('House.png', '🏠 Casa de Ms. BananaS');
+        sceneOverlay.style.background = 'rgba(0,0,0,0.8)';
+        // Empezar a escuchar comandos
+        startListeningForInput();
+        document.addEventListener('keydown', handleTextInput);
       }, 1500);
     }
     
@@ -1133,13 +1268,14 @@
       if (rage >= 1 && rage <= 9) {
         playSoundFile('bana.wav');
         
+        // Contador de 13 segundos (sin mostrar)
         let counter = 0;
         const maxCounter = 13;
-        showDialogue(`🍌 ¡Has comido la hamburguesa! ⏱️ ${counter}/${maxCounter}`, null, 1000);
+        
+        showDialogue("🍌 ¡Has comido la hamburguesa!", null, 1000);
         
         const burgerTimer = setInterval(() => {
           counter++;
-          showDialogue(`🍌 ¡Has comido la hamburguesa! ⏱️ ${counter}/${maxCounter}`, null, 1000);
           if (counter >= maxCounter) {
             clearInterval(burgerTimer);
             startBossFight();
@@ -1412,27 +1548,11 @@
         
         if (roomMusic) roomMusic.pause();
         
-        document.addEventListener('keydown', finalRoomKeyHandler);
+        // Empezar a escuchar "Banana"
+        startListeningForInput();
+        document.addEventListener('keydown', handleTextInput);
+        showDialogue("🔑 Escribe 'Banana' para ir a la casa", null, 3000);
       });
-    }
-    
-    function finalRoomKeyHandler(e) {
-      const key = e.key.toLowerCase();
-      if (key === 'b' || key === 'banana') {
-        document.removeEventListener('keydown', finalRoomKeyHandler);
-        playSoundFile('Access.mp3');
-        
-        sceneOverlay.style.display = 'flex';
-        sceneOverlay.style.background = 'black';
-        sceneImage.style.display = 'none';
-        sceneText.textContent = '';
-        
-        setTimeout(() => {
-          showScene('House.png', '🏠 Casa de Ms. BananaS');
-          sceneOverlay.style.background = 'rgba(0,0,0,0.8)';
-          document.addEventListener('keydown', houseKeyHandler);
-        }, 1500);
-      }
     }
 
     // ==================== JUEGO PRINCIPAL ====================
@@ -1680,7 +1800,6 @@
         function spawnCubes() {
           if (phase !== 'attack' || deathSequenceStarted) return;
           
-          // Generar 3-5 cubitos que caen desde arriba
           const count = 3 + Math.floor(Math.random() * 3);
           for (let i = 0; i < count; i++) {
             const size = 20 + Math.random() * 20;
@@ -1696,10 +1815,8 @@
         
         function startCubeAttack() {
           if (cubeInterval) clearInterval(cubeInterval);
-          // Generar cubitos cada 600-900ms
           const spawnRate = 600 + Math.random() * 300;
           cubeInterval = setInterval(spawnCubes, spawnRate);
-          // Generar algunos inmediatamente
           setTimeout(spawnCubes, 200);
           setTimeout(spawnCubes, 500);
         }
@@ -1731,7 +1848,6 @@
             }
             if (!canAttack) return;
             
-            // Ataque: línea roja estática
             isLineStatic = true;
             lineX = mouseX;
             lineY = mouseY;
@@ -1739,10 +1855,8 @@
             bossTimer.textContent = '⚡ ¡ATACANDO! ⚡';
             bossAttackIndicator.textContent = '⚡ ¡ATACA! ⚡';
             
-            // Verificar si la línea toca a Ms. BananaS
             checkHit();
             
-            // Volver a fase de ataque después de 1.5 segundos
             setTimeout(() => {
               isLineStatic = false;
               phase = 'attack';
@@ -1772,7 +1886,6 @@
                 ouchSound.volume = 0.7;
                 ouchSound.play().catch(e => console.log("Ouch.wav error:", e));
                 
-                // Efecto visual
                 bossImg.style = 'filter: brightness(2) hue-rotate(30deg);';
                 setTimeout(() => {
                   bossImg.style = '';
@@ -1783,7 +1896,6 @@
             }
             
             if (bossHits >= bossHP) {
-              // BOSS DERROTADO - Creditss.mp4
               deathSequenceStarted = true;
               bossFightActive = false;
               stopCubeAttack();
@@ -1811,10 +1923,8 @@
           }
         }
         
-        // ==================== COMPLETAR BOSSFIGHT ====================
         function completeBossFight() {
           if (window.cleanupBoss2D) window.cleanupBoss2D();
-          // Reproducir Creditss.mp4
           showCreditssVideo();
         }
         
@@ -1830,7 +1940,6 @@
           const delta = lastTime ? (timestamp - lastTime) / 1000 : 0.016;
           lastTime = timestamp;
           
-          // ==================== ACTUALIZAR TIMER DE ATAQUE ====================
           if (phase === 'attack' && !deathSequenceStarted) {
             attackAccumulator += delta;
             if (attackAccumulator >= 1) {
@@ -1839,7 +1948,6 @@
               bossTimer.textContent = `⏱️ ${attackTimer}`;
               
               if (attackTimer <= 0) {
-                // Cambiar a turno del jugador
                 phase = 'player_turn';
                 canAttack = true;
                 stopCubeAttack();
@@ -1850,10 +1958,8 @@
             }
           }
           
-          // ==================== LIMPIAR CANVAS ====================
           ctx.clearRect(0, 0, canvas.width, canvas.height);
           
-          // Fondo
           const gradient = ctx.createRadialGradient(
             canvas.width/2, canvas.height/2, 50,
             canvas.width/2, canvas.height/2, 500
@@ -1863,23 +1969,20 @@
           ctx.fillStyle = gradient;
           ctx.fillRect(0, 0, canvas.width, canvas.height);
           
-          // ==================== ACTUALIZAR Y DIBUJAR CUBITOS ====================
+          // Actualizar y dibujar cubitos
           if (phase === 'attack') {
             const cubesToRemove = [];
             for (let i = 0; i < cubes.length; i++) {
               const cube = cubes[i];
               cube.y += cube.speed * delta;
               
-              // Dibujar cubito
               ctx.fillStyle = cube.color;
               ctx.shadowColor = cube.color;
               ctx.shadowBlur = 15;
               ctx.fillRect(cube.x - cube.size/2, cube.y - cube.size/2, cube.size, cube.size);
               ctx.shadowBlur = 0;
               
-              // Verificar colisión con el jugador
               if (checkCubeCollision(cube) && !deathSequenceStarted) {
-                // ¡GOLPE! Perder un corazón
                 for (let j = hearts.length - 1; j >= 0; j--) {
                   if (hearts[j].alive) {
                     hearts[j].alive = false;
@@ -1890,14 +1993,12 @@
                     damageSound.volume = 0.5;
                     damageSound.play().catch(e => {});
                     
-                    // Efecto de daño al jugador
                     document.querySelector('.chaseUI').style.color = '#ff0000';
                     setTimeout(() => {
                       document.querySelector('.chaseUI').style.color = '#ffaa33';
                     }, 200);
                     
                     if (hearts.filter(h => h.alive).length === 0) {
-                      // MUERTE DEL JUGADOR
                       deathSequenceStarted = true;
                       bossFightActive = false;
                       stopCubeAttack();
@@ -1910,19 +2011,17 @@
                 cubesToRemove.push(i);
               }
               
-              // Eliminar cubitos que salen de la pantalla
               if (cube.y > canvas.height + 50) {
                 cubesToRemove.push(i);
               }
             }
             
-            // Eliminar cubitos marcados
             for (let i = cubesToRemove.length - 1; i >= 0; i--) {
               cubes.splice(cubesToRemove[i], 1);
             }
           }
           
-          // ==================== DIBUJAR MS. BANANAS ====================
+          // Dibujar Ms. BananaS
           if (bossImg.complete && bossImg.naturalWidth > 0) {
             const size = 120;
             ctx.drawImage(bossImg, bossX - size/2, bossY - size/2, size, size);
@@ -1933,7 +2032,7 @@
             ctx.fillText('🍌', bossX, bossY + 20);
           }
           
-          // ==================== DIBUJAR JUGADOR (CORAZÓN) ====================
+          // Dibujar jugador (corazón)
           ctx.fillStyle = '#ff0044';
           ctx.shadowColor = '#ff0044';
           ctx.shadowBlur = 20;
@@ -1943,7 +2042,7 @@
           ctx.fillText('❤️', mouseX, mouseY);
           ctx.shadowBlur = 0;
           
-          // ==================== DIBUJAR LÍNEA DE ATAQUE ====================
+          // Línea de ataque
           if (isLineStatic) {
             ctx.fillStyle = 'rgba(255, 0, 0, 0.8)';
             ctx.shadowColor = '#ff0000';
@@ -1959,7 +2058,7 @@
             ctx.fillRect(lineX - 30, 0, 60, canvas.height);
           }
           
-          // ==================== DIBUJAR CORAZONES ====================
+          // Corazones
           hearts.forEach((heart) => {
             if (heart.alive) {
               ctx.fillStyle = '#ff0044';
@@ -1973,7 +2072,6 @@
             }
           });
           
-          // ==================== INDICADOR DE ATAQUE ====================
           if (phase === 'player_turn' && canAttack) {
             ctx.fillStyle = 'rgba(0, 255, 0, 0.1)';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -1983,7 +2081,7 @@
             ctx.fillText('⚡ PRESIONA E PARA ATACAR ⚡', canvas.width/2, canvas.height - 30);
           }
           
-          // ==================== SECUENCIA DE MUERTE DEL JUGADOR ====================
+          // Secuencia de muerte del jugador
           function startPlayerDeathSequence() {
             bossUI.textContent = "💀 ¡HAS MUERTO! 💀";
             bossHPDisplay.textContent = "☠️ 0/10";
@@ -2058,20 +2156,14 @@
             startGlitchRedPolling();
           }
           
-          // Continuar el loop
           if (bossFightActive || !deathSequenceStarted) {
             gameLoopId = requestAnimationFrame(animateBoss2D);
           }
         }
         
-        // ==================== INICIAR EL LOOP ====================
-        // Iniciar el ataque de cubitos
         startCubeAttack();
-        
-        // Iniciar animación
         gameLoopId = requestAnimationFrame(animateBoss2D);
         
-        // ==================== LIMPIEZA ====================
         window.cleanupBoss2D = function() {
           stopCubeAttack();
           if (gameLoopId) {
