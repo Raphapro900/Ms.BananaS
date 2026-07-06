@@ -402,7 +402,6 @@
     .lock-screen p { font-size: 1.5rem; max-width: 80%; line-height: 1.4; }
     .lock-screen .reset-signal { margin-top: 2rem; font-size: 0.9rem; opacity: 0.8; background: rgba(0,0,0,0.5); padding: 10px 20px; border-radius: 8px; max-width: 80%; word-break: break-all; }
     
-    /* GAME NOT FOUND ROJO - NORMAL (sin mensajes secretos) */
     .glitch-red-screen {
       position: fixed;
       top: 0;
@@ -745,6 +744,14 @@
     const INSIDE_VISITED_KEY = "insideVisited";
     const BANANA_TRIGGERED_KEY = "bananaTriggered";
     
+    function clearAllCookies() {
+      // Borrar TODAS las cookies
+      document.cookie.split(";").forEach(function(c) {
+        document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+      });
+      console.log("🍪 Todas las cookies borradas");
+    }
+    
     function saveProgress(day, rage, totalErrors) {
       localStorage.setItem(DAY_PROGRESS_KEY, day);
       localStorage.setItem(RAGE_PROGRESS_KEY, rage);
@@ -760,6 +767,7 @@
     
     function clearProgress() {
       localStorage.removeItem(DAY_PROGRESS_KEY, RAGE_PROGRESS_KEY, COMPLETED_KEY, BOSS_DEFEATED_KEY, WAITING_MODE_KEY, GLITCH_RED_KEY, TOTAL_ERRORS_KEY, FINAL_MODE_KEY, LOCK_STORAGE_KEY, HOUSE_VISITED_KEY, INSIDE_VISITED_KEY, BANANA_TRIGGERED_KEY);
+      clearAllCookies();
     }
     
     function setFinalMode() { localStorage.setItem(FINAL_MODE_KEY, "true"); localStorage.setItem(COMPLETED_KEY, "true"); }
@@ -830,7 +838,7 @@
       return audio;
     }
 
-    // ==================== FUNCIÓN DE CRÉDITOS (21 segundos) ====================
+    // ==================== FUNCIÓN DE CRÉDITOS (79 SEGUNDOS = 1m 19s) ====================
     function showCreditsWithTimer() {
       const dialogueBox = document.getElementById('dialogueBox');
       dialogueBox.innerText = "🎉 ¡GRACIAS POR JUGAR! 🎉";
@@ -844,7 +852,7 @@
       thanksAudio.play().catch(e => console.log("Thanks.wav error:", e));
       
       let counter = 1;
-      const maxCounter = 21;
+      const maxCounter = 79; // 1 minuto y 19 segundos
       const counterInterval = setInterval(() => {
         counter++;
         dialogueBox.innerText = `🎉 ¡GRACIAS POR JUGAR! 🎉\n⏱️ ${counter}/${maxCounter}`;
@@ -911,7 +919,7 @@
       sceneImage.style.display = 'none';
       sceneText.textContent = '';
       setTimeout(() => {
-        showScene('House.png', '🏠 Casa de Ms. BananaS');
+        showScene('House.png', ''); // <-- House.png es la imagen, sin texto extra
         sceneOverlay.style.background = 'rgba(0,0,0,0.8)';
         startListeningForInput();
         document.addEventListener('keydown', handleTextInput);
@@ -921,16 +929,18 @@
     function enterInside() {
       if (isInside) return;
       isInside = true; setInsideVisited();
+      
+      // Door.mp3
       playSoundFile('Door.mp3');
-      let counter = 0;
-      const maxCounter = 3;
-      showDialogue(`🚪 Abriendo puerta...`, null, 1000);
-      const doorTimer = setInterval(() => {
-        counter++;
-        if (counter >= maxCounter) {
-          clearInterval(doorTimer);
-          playSoundFile('DoorC.mp3');
+      
+      // Después de 2 segundos suena DoorC.mp3
+      setTimeout(() => {
+        playSoundFile('DoorC.mp3');
+        
+        // Después de 0.5 segundos, mostrar Inside.png con Ms.BananaS
+        setTimeout(() => {
           showScene('Inside.png', '🍌 ¡Dentro de la casa!');
+          
           if (!insideVisited) {
             insideVisited = true;
             setTimeout(() => {
@@ -945,7 +955,7 @@
                   setTimeout(() => {
                     hideScene();
                     isInside = false; isInHouse = false;
-                    showScene('House.png', '🏠 Casa de Ms. BananaS');
+                    showScene('House.png', '');
                     startListeningForInput();
                     document.addEventListener('keydown', handleTextInput);
                   }, 500);
@@ -953,6 +963,7 @@
               }, 1000);
             }, 1000);
           } else {
+            // Segunda entrada - Spider.png
             let silentCounter = 0;
             const maxSilent = 5;
             const secondTimer = setInterval(() => {
@@ -972,8 +983,8 @@
               }
             }, 1000);
           }
-        }
-      }, 1000);
+        }, 500);
+      }, 2000);
     }
     
     function leaveHouse() {
@@ -1007,7 +1018,7 @@
       sceneImage.style.display = 'none';
       sceneText.textContent = '';
       setTimeout(() => {
-        showScene('House.png', '🏠 Casa de Ms. BananaS');
+        showScene('House.png', '');
         sceneOverlay.style.background = 'rgba(0,0,0,0.8)';
         startListeningForInput();
         document.addEventListener('keydown', handleTextInput);
@@ -1025,7 +1036,7 @@
     function eatBurger() {
       const rage = parseInt(localStorage.getItem(RAGE_PROGRESS_KEY)) || 0;
       if (rage >= 1 && rage <= 9) {
-        // Bana.wav con REVERB antes del boss
+        // Bana.wav con reverb
         playSoundFile('bana.wav');
         let counter = 0;
         const maxCounter = 13;
@@ -1047,11 +1058,14 @@
 
     // ==================== FUNCIÓN DE RESET ====================
     function performReset() {
-      console.log("🔄 RESET ACTIVADO");
+      console.log("🔄 RESET ACTIVADO - Borrando cookies y localStorage");
+      clearProgress(); // Esto borra localStorage y TODAS las cookies
+      
       stopAllGameMusic();
       if (window.chaseMusic) window.chaseMusic.pause();
       if (window.heartbeatSound) window.heartbeatSound.pause();
       if (window.bossMusic) window.bossMusic.pause();
+      
       glitchVideo.style.display = 'flex';
       glitchVideoPlayer.currentTime = 0;
       glitchVideoPlayer.play().catch(() => window.location.reload());
@@ -1365,7 +1379,7 @@
         };
       }
 
-      // ==================== BOSSFIGHT 2D CON BANA.WAV (REVERB) Y ABANANA.PNG ====================
+      // ==================== BOSSFIGHT 2D ====================
       function startBossFight() {
         bossFightActive = true;
         bossTriggered = true;
@@ -1373,8 +1387,6 @@
         roomMusic.pause();
         gameScreen.style.display = "none";
         
-        // Bana.wav ya se reprodujo en eatBurger() con reverb
-        // Ahora continuar con el boss
         showDialogue("💡 Apagando luces...", null, 1000);
         
         const luzAudio = new Audio('luz.mp3');
@@ -1430,7 +1442,6 @@
         canvas.style.width = '100%';
         canvas.style.height = '100%';
         
-        // ==================== ESTADO DEL BOSS ====================
         let bossHP = 10;
         let bossHits = 0;
         let phase = 'attack';
@@ -1438,7 +1449,6 @@
         let cubes = [];
         let isLineMoving = false;
         let lineX = 0;
-        let lineY = 0;
         let lineDirection = 1;
         let lineWidth = 5;
         let mouseX = 0;
@@ -1452,7 +1462,6 @@
         const bossX = canvas.width / 2;
         const bossY = canvas.height / 2 - 50;
         
-        // ==================== IMÁGENES ====================
         // BOSS = ABanana.png
         const bossImg = new Image();
         bossImg.src = "https://raw.githubusercontent.com/Raphapro900/Ms.BananaS/refs/heads/main/ABanana.png";
@@ -1462,13 +1471,11 @@
         playerImg.src = "https://raw.githubusercontent.com/Raphapro900/Ms.BananaS/refs/heads/main/banana.png";
         playerImg.onload = () => { console.log("Player image loaded"); };
         
-        // ==================== CORAZONES ====================
         let hearts = [];
         for (let i = 0; i < 10; i++) {
           hearts.push({ x: 50 + i * 40, y: 50, alive: true });
         }
         
-        // ==================== UI DEL BOSS ====================
         bossUI.style.display = 'block';
         bossHPDisplay.style.display = 'block';
         bossTimer.style.display = 'block';
@@ -1479,7 +1486,6 @@
         bossAttackIndicator.textContent = '⚔️ ¡ESQUIVA LOS CUBITOS! ⚔️';
         bossAttackIndicator.classList.add('show');
         
-        // ==================== MOVIMIENTO DEL MOUSE ====================
         document.addEventListener('mousemove', (e) => {
           const rect = canvas.getBoundingClientRect();
           const scaleX = canvas.width / rect.width;
@@ -1488,7 +1494,6 @@
           mouseY = (e.clientY - rect.top) * scaleY;
         });
         
-        // ==================== SISTEMA DE CUBITOS ====================
         function spawnCubes() {
           if (phase !== 'attack' || deathSequenceStarted) return;
           const count = 3 + Math.floor(Math.random() * 3);
@@ -1517,7 +1522,6 @@
           cubes = [];
         }
         
-        // ==================== DETECCIÓN DE COLISIÓN ====================
         function checkCubeCollision(cube) {
           const playerSize = 25;
           const distX = Math.abs(cube.x - mouseX);
@@ -1526,7 +1530,6 @@
           return distX < threshold && distY < threshold;
         }
         
-        // ==================== ATAQUE DEL JUGADOR ====================
         document.addEventListener('keydown', (e) => {
           if (e.key === 'e' || e.key === 'E') {
             if (!bossFightActive || deathSequenceStarted) return;
@@ -1536,7 +1539,6 @@
             }
             if (!canAttack) return;
             
-            // Iniciar ataque - línea se mueve de izquierda a derecha por 2 segundos
             isLineMoving = true;
             lineX = 0;
             lineDirection = 1;
@@ -1545,25 +1547,18 @@
             bossTimer.textContent = '⚡ ¡ATACANDO! ⚡';
             bossAttackIndicator.textContent = '⚡ ¡ATACA! ⚡';
             
-            // Verificar durante 2 segundos
             const attackInterval = setInterval(() => {
               attackLineTime += 0.016;
-              // Mover línea de izquierda a derecha
               lineX += lineDirection * (canvas.width / 2) * 0.016 * 1.5;
-              if (lineX >= canvas.width) {
-                lineDirection = -1;
-              } else if (lineX <= 0) {
-                lineDirection = 1;
-              }
+              if (lineX >= canvas.width) { lineDirection = -1; }
+              else if (lineX <= 0) { lineDirection = 1; }
               
-              // Verificar si la línea toca a Ms. BananaS
               const distX = Math.abs(lineX - bossX);
               const distY = Math.abs(mouseY - bossY);
               const halfWidth = lineWidth / 2 + 50;
               const halfHeight = 70;
               
               if (distX < halfWidth && distY < halfHeight && attackLineTime < 2) {
-                // GOLPE AL BOSS!
                 clearInterval(attackInterval);
                 for (let i = hearts.length - 1; i >= 0; i--) {
                   if (hearts[i].alive) {
@@ -1577,12 +1572,9 @@
                     ouchSound.play().catch(e => console.log("Ouch.mp3 error:", e));
                     
                     bossImg.style = 'filter: brightness(2) hue-rotate(30deg);';
-                    setTimeout(() => {
-                      bossImg.style = '';
-                    }, 200);
+                    setTimeout(() => { bossImg.style = ''; }, 200);
                     
                     if (bossHits >= bossHP) {
-                      // BOSS DERROTADO
                       deathSequenceStarted = true;
                       bossFightActive = false;
                       stopCubeAttack();
@@ -1617,7 +1609,6 @@
               if (attackLineTime >= 2) {
                 clearInterval(attackInterval);
                 isLineMoving = false;
-                // Volver a fase de ataque
                 phase = 'attack';
                 attackTimer = 5;
                 bossTimer.textContent = `⏱️ ${attackTimer}`;
@@ -1634,14 +1625,11 @@
           showCreditssVideo();
         }
         
-        // ==================== CICLO DE ANIMACIÓN ====================
         let lastTime = 0;
         let attackAccumulator = 0;
         
         function animateBoss2D(timestamp) {
-          if (!bossFightActive && !deathSequenceStarted) {
-            return;
-          }
+          if (!bossFightActive && !deathSequenceStarted) return;
           
           const delta = lastTime ? (timestamp - lastTime) / 1000 : 0.016;
           lastTime = timestamp;
@@ -1652,7 +1640,6 @@
               attackAccumulator = 0;
               attackTimer--;
               bossTimer.textContent = `⏱️ ${attackTimer}`;
-              
               if (attackTimer <= 0) {
                 phase = 'player_turn';
                 canAttack = true;
@@ -1675,7 +1662,6 @@
           ctx.fillStyle = gradient;
           ctx.fillRect(0, 0, canvas.width, canvas.height);
           
-          // Actualizar y dibujar cubitos
           if (phase === 'attack') {
             const cubesToRemove = [];
             for (let i = 0; i < cubes.length; i++) {
@@ -1717,12 +1703,8 @@
                 }
                 cubesToRemove.push(i);
               }
-              
-              if (cube.y > canvas.height + 50) {
-                cubesToRemove.push(i);
-              }
+              if (cube.y > canvas.height + 50) { cubesToRemove.push(i); }
             }
-            
             for (let i = cubesToRemove.length - 1; i >= 0; i--) {
               cubes.splice(cubesToRemove[i], 1);
             }
@@ -1739,7 +1721,6 @@
             ctx.fillText('🍌', bossX, bossY + 20);
           }
           
-          // Dibujar jugador (corazón)
           ctx.fillStyle = '#ff0044';
           ctx.shadowColor = '#ff0044';
           ctx.shadowBlur = 20;
@@ -1749,14 +1730,12 @@
           ctx.fillText('❤️', mouseX, mouseY);
           ctx.shadowBlur = 0;
           
-          // Línea de ataque (se mueve de izquierda a derecha)
           if (isLineMoving) {
             ctx.fillStyle = 'rgba(255, 0, 0, 0.8)';
             ctx.shadowColor = '#ff0000';
             ctx.shadowBlur = 30;
             ctx.fillRect(lineX - lineWidth/2, 0, lineWidth, canvas.height);
             ctx.shadowBlur = 0;
-            
             const glowGradient = ctx.createLinearGradient(lineX - 30, 0, lineX + 30, 0);
             glowGradient.addColorStop(0, 'rgba(255,0,0,0)');
             glowGradient.addColorStop(0.5, 'rgba(255,0,0,0.3)');
@@ -1765,7 +1744,6 @@
             ctx.fillRect(lineX - 30, 0, 60, canvas.height);
           }
           
-          // Corazones
           hearts.forEach((heart) => {
             if (heart.alive) {
               ctx.fillStyle = '#ff0044';
@@ -1788,29 +1766,20 @@
             ctx.fillText('⚡ PRESIONA E PARA ATACAR ⚡', canvas.width/2, canvas.height - 30);
           }
           
-          // Secuencia de muerte del jugador
           function startPlayerDeathSequence() {
             bossUI.textContent = "💀 ¡HAS MUERTO! 💀";
             bossHPDisplay.textContent = "☠️ 0/10";
             bossTimer.style.display = 'none';
             bossAttackIndicator.style.display = 'none';
-            
-            if (window.bossMusic) {
-              window.bossMusic.pause();
-              window.bossMusic.currentTime = 0;
-            }
-            
+            if (window.bossMusic) { window.bossMusic.pause(); window.bossMusic.currentTime = 0; }
             const ohAudio = new Audio('Oh.wav');
             ohAudio.playbackRate = 0.7;
             ohAudio.volume = 0.9;
             ohAudio.play().catch(e => console.log("Oh.wav error:", e));
-            
             setTimeout(() => {
               playBrokenSound();
               setTimeout(() => {
-                playGlitchTransition(() => {
-                  activateGlitchRedScreen();
-                });
+                playGlitchTransition(() => { activateGlitchRedScreen(); });
               }, 3000);
             }, 1500);
           }
@@ -1860,18 +1829,11 @@
         
         window.cleanupBoss2D = function() {
           stopCubeAttack();
-          if (gameLoopId) {
-            cancelAnimationFrame(gameLoopId);
-            gameLoopId = null;
-          }
-          if (window.bossMusic) {
-            window.bossMusic.pause();
-            window.bossMusic.currentTime = 0;
-          }
+          if (gameLoopId) { cancelAnimationFrame(gameLoopId); gameLoopId = null; }
+          if (window.bossMusic) { window.bossMusic.pause(); window.bossMusic.currentTime = 0; }
         };
       }
 
-      // ==================== COMPLETAR JUEGO (DÍA 5) ====================
       function completeGame(hasErrors) {
         gameActive = false;
         if (!hasErrors) {
