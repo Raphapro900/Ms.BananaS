@@ -282,12 +282,42 @@
       setTimeout(() => { if (creditssContainer.style.display === 'flex') { creditssContainer.style.display = 'none'; goToWaitingScreen(); } }, 15000);
     }
 
+    // ==================== TRANSICIÓN DE ENTRADA A LA HABITACIÓN ====================
     function enterRoom() {
-      showDialogue("🍌 ¡Bienvenido! Estoy aquí para ayudarte...", null, 3000);
-      if (roomMusic) { roomMusic.currentTime = 0; roomMusic.loop = true; roomMusic.play().catch(e => console.log("roomMusic error:", e)); }
+      // Door.mp3 suena primero
       playSoundFile('Door.mp3');
-      setTimeout(() => { playSoundFile('DoorC.mp3'); }, 2000);
+      
+      // Después de 3 segundos suena DoorC.mp3
+      setTimeout(() => {
+        playSoundFile('DoorC.mp3');
+        
+        // Después de 0.5 segundos, mostrar Room.png y empezar el juego
+        setTimeout(() => {
+          document.getElementById('gameScreen').style.display = 'block';
+          
+          // Reproducir Room Theme.mp3
+          if (roomMusic) {
+            roomMusic.currentTime = 0;
+            roomMusic.loop = true;
+            roomMusic.play().catch(e => console.log("roomMusic error:", e));
+          }
+          
+          // Mostrar diálogo según el día
+          const day = parseInt(localStorage.getItem(DAY_PROGRESS_KEY)) || 1;
+          let welcomeSound = "Primer dia.mp3";
+          if (day >= 2 && day <= 5) {
+            welcomeSound = "Dias.wav";
+          }
+          showDialogue(`🍌 DÍA ${day} - ¡Continúa la aventura! Elige el animal correcto.`, welcomeSound, 3500);
+          
+          // Iniciar el juego
+          iniciarJuego();
+        }, 500);
+      }, 3000);
     }
+
+    function stopAllGameMusic() { if (menuMusic) { menuMusic.pause(); menuMusic.currentTime = 0; } if (roomMusic) { roomMusic.pause(); roomMusic.currentTime = 0; } }
+    function playMenuMusic() { if (menuMusic) { menuMusic.currentTime = 0; menuMusic.play().catch(e => console.log("menuMusic error:", e)); } }
 
     // ==================== FUNCIONES DE LA CASA ====================
     let insideVisited = false, isInHouse = false, isInside = false, isListeningForInput = false;
@@ -398,7 +428,6 @@
     function eatBurger() {
       const rage = parseInt(localStorage.getItem(RAGE_PROGRESS_KEY)) || 0;
       if (rage >= 1 && rage <= 9) {
-        // bana.wav suena y después de 16 segundos empieza el boss
         playSoundFile('bana.wav');
         showDialogue("🍌 ¡Has comido la hamburguesa!", null, 1000);
         setTimeout(() => {
@@ -408,9 +437,6 @@
         showDialogue("🍔 La hamburguesa está deliciosa. No pasa nada.", null, 2000);
       }
     }
-
-    function stopAllGameMusic() { if (menuMusic) { menuMusic.pause(); menuMusic.currentTime = 0; } if (roomMusic) { roomMusic.pause(); roomMusic.currentTime = 0; } }
-    function playMenuMusic() { if (menuMusic) { menuMusic.currentTime = 0; menuMusic.play().catch(e => console.log("menuMusic error:", e)); } }
 
     // ==================== RESET ====================
     function performReset() {
@@ -475,7 +501,18 @@
         if (menuMusic) menuMusic.pause();
         tvAnimal.src = 'Thanks.png';
       }
-      iniciarJuego();
+      // Al cargar, mostrar la pantalla de inicio
+      document.getElementById('startScreen').style.display = 'flex';
+      document.getElementById('gameScreen').style.display = 'none';
+      
+      // Botón Jugar
+      const bananaPlay = document.getElementById("bananaPlay");
+      bananaPlay.addEventListener("click", function iniciarPartida(e) {
+        e.preventDefault();
+        document.getElementById('startScreen').style.display = 'none';
+        // Iniciar transición con Door.mp3 y DoorC.mp3
+        enterRoom();
+      });
     }
 
     // ==================== POLLING ====================
@@ -579,16 +616,14 @@
       });
     }
 
-    // ==================== JUEGO PRINCIPAL ====================
+    // ==================== JUEGO PRINCIPAL (se ejecuta después de entrar a Room.png) ====================
     function iniciarJuego() {
-      const bananaPlay = document.getElementById("bananaPlay");
       const howBtn = document.getElementById("howBtn");
       const shopBtn = document.getElementById("shopBtn");
       const exitBtn = document.getElementById("exitBtn");
       const infoBox = document.getElementById("infoBox");
       const infoContent = document.getElementById("infoContent");
       const closeBtn = document.getElementById("closeBtn");
-      const startScreen = document.getElementById("startScreen");
       const gameScreen = document.getElementById("gameScreen");
       const animalImg = document.getElementById("animal");
       const dialogueBox = document.getElementById("dialogueBox");
@@ -604,6 +639,44 @@
       
       window.chaseMusic = chaseMusic;
       window.heartbeatSound = heartbeatSound;
+      
+      // ==================== FILTRO EQ PARA CHASE.MP3 ====================
+      let audioContext = null;
+      let eqFilter = null;
+      
+      function setupChaseAudio() {
+        if (!chaseMusic) return;
+        try {
+          audioContext = new (window.AudioContext || window.webkitAudioContext)();
+          const source = audioContext.createMediaElementSource(chaseMusic);
+          eqFilter = audioContext.createBiquadFilter();
+          eqFilter.type = 'lowshelf';
+          eqFilter.frequency.value = 200;
+          eqFilter.gain.value = 0;
+          source.connect(eqFilter);
+          eqFilter.connect(audioContext.destination);
+          console.log("🔊 Filtro EQ configurado para chase.mp3");
+        } catch(e) {
+          console.log("⚠️ No se pudo configurar filtro EQ:", e);
+        }
+      }
+      
+      function updateChaseEQ(distance) {
+        if (!eqFilter) return;
+        if (distance > 15) {
+          // Lejos → graves (boost)
+          eqFilter.gain.value = 12;
+          eqFilter.frequency.value = 150;
+        } else if (distance > 8) {
+          // Media distancia → menos graves
+          const t = (distance - 8) / 7;
+          eqFilter.gain.value = 6 * (1 - t);
+          eqFilter.frequency.value = 200;
+        } else {
+          // Cerca → normal (sin boost)
+          eqFilter.gain.value = 0;
+        }
+      }
 
       const animals = [
         { name: "Seal", file: "https://raw.githubusercontent.com/Raphapro900/Ms.BananaS/refs/heads/main/Seal.webp" },
@@ -671,7 +744,7 @@
         saveProgress(day, rage, totalErrors);
         gameActive = false;
         gameScreen.style.display = "none";
-        startScreen.style.display = "flex";
+        document.getElementById('startScreen').style.display = "flex";
         if (roomMusic) roomMusic.pause();
         playMenuMusic();
       }
@@ -696,7 +769,7 @@
         setTimeout(() => { sceneOverlay.classList.remove('active'); setTimeout(() => { sceneOverlay.style.display = 'none'; if (callback) callback(); }, 600); }, 1500);
       }
 
-      // ==================== BOSSFIGHT 2D CON COUNTDOWN ====================
+      // ==================== BOSSFIGHT 2D ====================
       function startBossFight() {
         bossFightActive = true;
         bossTriggered = true;
@@ -706,8 +779,6 @@
         
         showDialogue("💡 Preparando el combate...", null, 1000);
         
-        // bana.wav ya se reprodujo en eatBurger() (16 segundos antes)
-        // Ahora continuar con el boss
         const luzAudio = new Audio('luz.mp3');
         luzAudio.volume = 0.8;
         luzAudio.play().catch(e => console.log("luz.mp3 error:", e));
@@ -781,7 +852,6 @@
         const bossX = canvas.width / 2;
         const bossY = canvas.height / 2 - 50;
         
-        // Banana2.png (el boss)
         const bossImg = new Image();
         bossImg.src = "https://raw.githubusercontent.com/Raphapro900/Ms.BananaS/refs/heads/main/banana2.png";
         bossImg.onload = () => { console.log("Boss image (banana2.png) loaded"); };
@@ -868,7 +938,6 @@
           window.currentAttackInterval = attackInterval;
         }
         
-        // ==================== ATAQUE DEL JUGADOR (PRESIONA E) ====================
         document.addEventListener('keydown', (e) => {
           if (e.key === 'e' || e.key === 'E') {
             if (!bossFightActive || deathSequenceStarted) return;
@@ -1146,9 +1215,17 @@
       
       function updateChaseAudio(distance) {
         if (!chaseMusic) return;
-        if (distance < 8) { chaseMusic.playbackRate = 1.2; chaseMusic.volume = 0.9; }
-        else if (distance < 15) { chaseMusic.playbackRate = 1.0; chaseMusic.volume = 0.7; }
-        else { chaseMusic.playbackRate = 0.7; chaseMusic.volume = 0.5; }
+        // Actualizar filtro EQ según distancia
+        updateChaseEQ(distance);
+        
+        // Volumen normal
+        if (distance < 8) {
+          chaseMusic.volume = 0.9;
+        } else if (distance < 15) {
+          chaseMusic.volume = 0.7;
+        } else {
+          chaseMusic.volume = 0.5;
+        }
       }
 
       function initChaseGame() {
@@ -1340,6 +1417,9 @@
       
       function startChaseMinigame() {
         if (chaseActive) return;
+        // Configurar filtro EQ antes de iniciar
+        setupChaseAudio();
+        
         playGlitchTransition(() => {
           chaseActive = true;
           chaseContainer.style.display = "flex";
@@ -1421,38 +1501,6 @@
         nextAnimal();
       }
       
-      updateUI();
-      nextAnimal();
-      
-      // ============================================
-      // EVENTO PRINCIPAL - BOTÓN JUGAR
-      // ============================================
-      bananaPlay.addEventListener("click", function iniciarPartida(e) {
-        e.preventDefault();
-        
-        if (isGameCompleted()) {
-          tvAnimal.src = 'Thanks.png';
-          return;
-        }
-        
-        startScreen.style.display = "none";
-        gameScreen.style.display = "block";
-        if (menuMusic) menuMusic.pause();
-        if (roomMusic) { 
-          roomMusic.currentTime = 0; 
-          roomMusic.play().catch(err => console.log("roomMusic error:", err)); 
-        }
-        resetGameScreenState();
-        
-        let welcomeSound = "Primer dia.mp3";
-        if (day >= 2 && day <= 5) {
-          welcomeSound = "Dias.mp3";
-        }
-        showDialogue(`🍌 DÍA ${day} - ¡Continúa la aventura! Elige el animal correcto.`, welcomeSound, 3500);
-        
-        startDayTransition(() => {});
-      });
-      
       // ============================================
       // BOTÓN HOW TO PLAY
       // ============================================
@@ -1503,10 +1551,15 @@
       });
       
       // ============================================
-      // BOTÓN EXIT
+      // BOTÓN EXIT (CORREGIDO)
       // ============================================
       exitBtn.addEventListener("click", function() {
+        // Intentar cerrar la ventana
         window.close();
+        // Fallback: si no se puede cerrar, redirigir a una página en blanco
+        setTimeout(() => {
+          window.location.href = "about:blank";
+        }, 100);
       });
       
       // ============================================
@@ -1520,6 +1573,10 @@
       // BOTÓN RESET
       // ============================================
       document.getElementById('resetBtn').addEventListener('click', performReset);
+      
+      // Inicializar animales
+      updateUI();
+      nextAnimal();
     }
   </script>
 </body>
