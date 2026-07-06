@@ -514,7 +514,6 @@
       display: none;
     }
     
-    /* Badge de polling - opcional y muy sutil */
     .reset-polling-badge {
       position: fixed;
       bottom: 10px;
@@ -526,11 +525,77 @@
       opacity: 0.15;
       pointer-events: none;
     }
+    
+    /* Pantalla de overlay para escenas */
+    .scene-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 9996;
+      background: black;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+    
+    .scene-overlay img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+    
+    .scene-overlay .scene-text {
+      color: #00ff88;
+      font-size: 2rem;
+      font-family: 'Indie Flower', cursive;
+      text-shadow: 0 0 20px #00ff88;
+      text-align: center;
+      padding: 20px;
+    }
+    
+    .scene-overlay .spider-shake {
+      animation: spiderShake 0.1s infinite;
+    }
+    
+    @keyframes spiderShake {
+      0% { transform: translate(0, 0) rotate(0deg); }
+      25% { transform: translate(-10px, 5px) rotate(-2deg); }
+      50% { transform: translate(10px, -5px) rotate(2deg); }
+      75% { transform: translate(-5px, 10px) rotate(-1deg); }
+      100% { transform: translate(5px, -10px) rotate(1deg); }
+    }
+    
+    .fade-out {
+      animation: fadeOut 0.5s ease-out forwards;
+    }
+    
+    .fade-in {
+      animation: fadeIn 0.5s ease-out forwards;
+    }
+    
+    @keyframes fadeOut {
+      0% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+    
+    @keyframes fadeIn {
+      0% { opacity: 0; }
+      100% { opacity: 1; }
+    }
   </style>
 </head>
 <body>
 
   <div class="reset-polling-badge" id="pollingBadge">🔄</div>
+
+  <!-- Pantallas de escena (para House.png, Inside.png, Spider.png) -->
+  <div id="sceneOverlay" class="scene-overlay">
+    <img id="sceneImage" src="" alt="Scene">
+    <div id="sceneText" class="scene-text"></div>
+  </div>
 
   <div id="waitingScreen" class="waiting-screen">
     <h1>🍌 Ms. BananaS 🍌</h1>
@@ -652,6 +717,9 @@
     const GLITCH_RED_KEY = "glitchRedMode";
     const TOTAL_ERRORS_KEY = "totalErrors";
     const FINAL_MODE_KEY = "finalMode";
+    const HOUSE_VISITED_KEY = "houseVisited";
+    const INSIDE_VISITED_KEY = "insideVisited";
+    const BANANA_TRIGGERED_KEY = "bananaTriggered";
     
     function saveProgress(day, rage, totalErrors) {
       localStorage.setItem(DAY_PROGRESS_KEY, day);
@@ -680,6 +748,9 @@
       localStorage.removeItem(TOTAL_ERRORS_KEY);
       localStorage.removeItem(FINAL_MODE_KEY);
       localStorage.removeItem(LOCK_STORAGE_KEY);
+      localStorage.removeItem(HOUSE_VISITED_KEY);
+      localStorage.removeItem(INSIDE_VISITED_KEY);
+      localStorage.removeItem(BANANA_TRIGGERED_KEY);
     }
     
     function setFinalMode() {
@@ -690,6 +761,30 @@
     
     function isFinalMode() {
       return localStorage.getItem(FINAL_MODE_KEY) === "true";
+    }
+    
+    function setHouseVisited() {
+      localStorage.setItem(HOUSE_VISITED_KEY, "true");
+    }
+    
+    function isHouseVisited() {
+      return localStorage.getItem(HOUSE_VISITED_KEY) === "true";
+    }
+    
+    function setInsideVisited() {
+      localStorage.setItem(INSIDE_VISITED_KEY, "true");
+    }
+    
+    function isInsideVisited() {
+      return localStorage.getItem(INSIDE_VISITED_KEY) === "true";
+    }
+    
+    function setBananaTriggered() {
+      localStorage.setItem(BANANA_TRIGGERED_KEY, "true");
+    }
+    
+    function isBananaTriggered() {
+      return localStorage.getItem(BANANA_TRIGGERED_KEY) === "true";
     }
     
     function setGameCompleted() {
@@ -768,6 +863,273 @@
     const gameScreen = document.getElementById('gameScreen');
     const bananaGameImg = document.getElementById('bananaGame');
     const pollingBadge = document.getElementById('pollingBadge');
+    const sceneOverlay = document.getElementById('sceneOverlay');
+    const sceneImage = document.getElementById('sceneImage');
+    const sceneText = document.getElementById('sceneText');
+
+    // ==================== FUNCIONES DE ESCENA ====================
+    function showScene(imageSrc, text = '', className = '') {
+      sceneOverlay.style.display = 'flex';
+      sceneImage.src = imageSrc;
+      sceneImage.className = className;
+      sceneText.textContent = text;
+      sceneText.style.display = text ? 'block' : 'none';
+    }
+    
+    function hideScene() {
+      sceneOverlay.style.display = 'none';
+    }
+    
+    function playSoundFile(src, volume = 0.8) {
+      const audio = new Audio(src);
+      audio.volume = volume;
+      audio.play().catch(e => console.log("Audio error:", e));
+      return audio;
+    }
+
+    // ==================== FUNCIÓN DE CRÉDITOS CON CONTADOR ====================
+    function showCreditsWithTimer() {
+      const dialogueBox = document.getElementById('dialogueBox');
+      
+      dialogueBox.innerText = "🎉 ¡GRACIAS POR JUGAR! 🎉";
+      dialogueBox.style.display = "block";
+      
+      const thanksAudio = new Audio('Thanks.wav');
+      thanksAudio.volume = 0.9;
+      
+      stopAllGameMusic();
+      if (window.chaseMusic) { window.chaseMusic.pause(); window.chaseMusic.currentTime = 0; }
+      if (window.heartbeatSound) { window.heartbeatSound.pause(); window.heartbeatSound.currentTime = 0; }
+      
+      thanksAudio.play().catch(e => console.log("Thanks.wav error:", e));
+      
+      // Contador de 1 a 32 segundos
+      let counter = 1;
+      const maxCounter = 32;
+      
+      const counterInterval = setInterval(() => {
+        counter++;
+        dialogueBox.innerText = `🎉 ¡GRACIAS POR JUGAR! 🎉\n⏱️ ${counter}/${maxCounter}`;
+        if (counter >= maxCounter) {
+          clearInterval(counterInterval);
+          dialogueBox.style.display = "none";
+          creditsContainer.style.display = 'flex';
+          creditsVideo.currentTime = 0;
+          creditsVideo.play();
+          
+          creditsVideo.onended = () => {
+            creditsContainer.style.display = 'none';
+            // Reproducir glitch.mp4 para transición a ABananaDraw
+            playGlitchTransition(() => {
+              goToFinalMode();
+            });
+          };
+          
+          setTimeout(() => {
+            if (creditsContainer.style.display === 'flex') {
+              creditsContainer.style.display = 'none';
+              playGlitchTransition(() => {
+                goToFinalMode();
+              });
+            }
+          }, 10000);
+        }
+      }, 1000);
+      
+      // Fallback por si Thanks.wav no termina
+      setTimeout(() => {
+        if (thanksAudio) {
+          // Ya se maneja con el contador
+        }
+      }, 5000);
+    }
+
+    // ==================== FUNCIONES DE LA CASA ====================
+    let insideVisited = false;
+    let isInHouse = false;
+    let isInside = false;
+    let houseTimer = null;
+    
+    function enterHouse() {
+      if (isInHouse) return;
+      isInHouse = true;
+      setHouseVisited();
+      
+      // Access.mp3
+      playSoundFile('Access.mp3');
+      
+      // Fade out a pantalla negra
+      sceneOverlay.style.display = 'flex';
+      sceneOverlay.style.background = 'black';
+      sceneImage.style.display = 'none';
+      sceneText.textContent = '';
+      
+      // Después de 1.5 segundos, mostrar House.png
+      setTimeout(() => {
+        showScene('House.png', '🏠 Casa de Ms. BananaS');
+        sceneOverlay.style.background = 'rgba(0,0,0,0.8)';
+        
+        // Escuchar comandos en la casa
+        document.addEventListener('keydown', houseKeyHandler);
+      }, 1500);
+    }
+    
+    function houseKeyHandler(e) {
+      if (e.key === 'Enter') {
+        // Entrar a la casa
+        enterInside();
+      } else if (e.key.toLowerCase() === 'leave') {
+        // Salir de la casa
+        leaveHouse();
+      }
+    }
+    
+    function enterInside() {
+      if (isInside) return;
+      isInside = true;
+      setInsideVisited();
+      
+      // Door.mp3
+      playSoundFile('Door.mp3');
+      
+      // Esperar 4 segundos
+      setTimeout(() => {
+        // DoorC.mp3
+        playSoundFile('DoorC.mp3');
+        
+        // Mostrar Inside.png con Ms. BananaS
+        showScene('Inside.png', '🍌 ¡Dentro de la casa!');
+        
+        if (!insideVisited) {
+          insideVisited = true;
+          
+          // huh.wav después de 1 segundo
+          setTimeout(() => {
+            playSoundFile('huh.wav');
+            
+            // Contador de 16 segundos
+            let counter = 0;
+            const maxCounter = 16;
+            sceneText.textContent = `🍌 ¡Dentro de la casa! ⏱️ ${counter}/${maxCounter}`;
+            
+            const insideTimer = setInterval(() => {
+              counter++;
+              sceneText.textContent = `🍌 ¡Dentro de la casa! ⏱️ ${counter}/${maxCounter}`;
+              if (counter >= maxCounter) {
+                clearInterval(insideTimer);
+                // Salir de la casa con DoorC.mp3
+                playSoundFile('DoorC.mp3');
+                setTimeout(() => {
+                  hideScene();
+                  isInside = false;
+                  isInHouse = false;
+                  showScene('House.png', '🏠 Casa de Ms. BananaS');
+                  // Volver a escuchar comandos
+                  document.removeEventListener('keydown', houseKeyHandler);
+                  document.addEventListener('keydown', houseKeyHandler);
+                }, 500);
+              }
+            }, 1000);
+          }, 1000);
+        } else {
+          // Segunda entrada - sin Ms. BananaS
+          // Contador de 5 segundos
+          let counter = 0;
+          const maxCounter = 5;
+          sceneText.textContent = `⏱️ ${counter}/${maxCounter}`;
+          
+          const secondTimer = setInterval(() => {
+            counter++;
+            sceneText.textContent = `⏱️ ${counter}/${maxCounter}`;
+            if (counter >= maxCounter) {
+              clearInterval(secondTimer);
+              // Mostrar Spider.png temblando
+              showScene('Spider.png', '🕷️', 'spider-shake');
+              // Spider.mp3
+              playSoundFile('Spider.mp3');
+              
+              setTimeout(() => {
+                // Game Not Found
+                hideScene();
+                setGameLocked();
+                setGlitchRedMode();
+                glitchRedScreen.style.display = 'flex';
+                startGlitchRedPolling();
+              }, 2000);
+            }
+          }, 1000);
+        }
+      }, 4000);
+    }
+    
+    function leaveHouse() {
+      // Access.mp3
+      playSoundFile('Access.mp3');
+      
+      // Fade out a pantalla negra
+      sceneOverlay.style.display = 'flex';
+      sceneOverlay.style.background = 'black';
+      sceneImage.style.display = 'none';
+      sceneText.textContent = '';
+      
+      // Después de 1.5 segundos, volver a la habitación final
+      setTimeout(() => {
+        hideScene();
+        isInHouse = false;
+        isInside = false;
+        document.removeEventListener('keydown', houseKeyHandler);
+        
+        // Mostrar habitación final con cartel, mesa y hamburguesa
+        gameScreen.classList.add('final-mode');
+        tvMessage.style.display = 'flex';
+        tvAnimal.style.display = 'none';
+        bananaGameImg.style.display = 'none';
+        document.querySelector('.options').style.display = 'none';
+        document.getElementById('rageText').style.display = 'none';
+        document.getElementById('dayText').style.display = 'none';
+        document.getElementById('gameScreen').style.display = 'block';
+        
+        // Mostrar hamburguesa en la mesa (simulado con mensaje)
+        showDialogue("🍔 Hay una hamburguesa en la mesa. ¿Quieres comerla?", null, 5000);
+        
+        // Escuchar si escribe "eat" o "comer"
+        document.addEventListener('keydown', eatHandler);
+      }, 1500);
+    }
+    
+    function eatHandler(e) {
+      const key = e.key.toLowerCase();
+      if (key === 'e' || key === 'enter') {
+        document.removeEventListener('keydown', eatHandler);
+        eatBurger();
+      }
+    }
+    
+    function eatBurger() {
+      const rage = parseInt(localStorage.getItem(RAGE_PROGRESS_KEY)) || 0;
+      
+      if (rage >= 1 && rage <= 9) {
+        // bana.wav
+        playSoundFile('bana.wav');
+        
+        // Contador de 13 segundos
+        let counter = 0;
+        const maxCounter = 13;
+        showDialogue(`🍌 ¡Has comido la hamburguesa! ⏱️ ${counter}/${maxCounter}`, null, 1000);
+        
+        const burgerTimer = setInterval(() => {
+          counter++;
+          showDialogue(`🍌 ¡Has comido la hamburguesa! ⏱️ ${counter}/${maxCounter}`, null, 1000);
+          if (counter >= maxCounter) {
+            clearInterval(burgerTimer);
+            // Iniciar bossfight
+            startBossFight();
+          }
+        }, 1000);
+      } else {
+        showDialogue("🍔 La hamburguesa está deliciosa. No pasa nada.", null, 2000);
+      }
+    }
 
     function stopAllGameMusic() { 
       if (menuMusic) { menuMusic.pause(); menuMusic.currentTime = 0; } 
@@ -785,35 +1147,29 @@
     function performReset() {
       console.log("🔄 RESET ACTIVADO - Reproduciendo glitch.mp4");
       
-      // Detener todos los sonidos
       stopAllGameMusic();
       if (window.chaseMusic) window.chaseMusic.pause();
       if (window.heartbeatSound) window.heartbeatSound.pause();
       if (window.bossMusic) window.bossMusic.pause();
       
-      // Mostrar glitch.mp4
       glitchVideo.style.display = 'flex';
       glitchVideoPlayer.currentTime = 0;
       
-      // Intentar reproducir el video
       const playPromise = glitchVideoPlayer.play();
       if (playPromise !== undefined) {
         playPromise.then(() => {
           console.log("▶️ glitch.mp4 reproduciendo");
         }).catch(error => {
           console.warn("⚠️ No se pudo reproducir glitch.mp4:", error);
-          // Fallback: recargar directamente
           window.location.reload();
         });
       }
       
-      // Cuando termina el video, recargar
       glitchVideoPlayer.onended = () => {
         console.log("⏹️ glitch.mp4 terminado - Recargando");
         window.location.reload();
       };
       
-      // Fallback por si el video no termina o no se reproduce
       setTimeout(() => {
         if (glitchVideo.style.display === 'flex') {
           console.log("⏰ Fallback: recargando después de 3 segundos");
@@ -837,8 +1193,6 @@
           localStorage.removeItem(RESET_SIGNAL_KEY);
           clearInterval(resetPollInterval);
           resetPollInterval = null;
-          
-          // Ejecutar reset
           performReset();
         }
       }, 1500);
@@ -846,7 +1200,6 @@
       console.log("🔄 Polling de reset universal activado (cada 1.5s)");
     }
 
-    // Iniciar el polling universal al cargar la página
     startUniversalResetPolling();
 
     // ============================================
@@ -862,7 +1215,6 @@
       startGlitchRedPolling();
     }
     else if (isFinalMode()) {
-      // MODO FINAL FELIZ
       gameContent.style.display = 'block';
       lockScreen.style.display = 'none';
       waitingScreen.style.display = 'none';
@@ -916,7 +1268,7 @@
       iniciarJuego(); 
     }
 
-    // ==================== POLLING ADICIONAL (para modos específicos) ====================
+    // ==================== POLLING ADICIONAL ====================
     function startWaitingPolling() {
       let pollInterval, attempts = 0;
       function checkLocalStorageSignal() {
@@ -998,42 +1350,6 @@
       }, 3000);
     }
 
-    // ==================== FUNCIÓN DE CRÉDITOS CON ESPERA DE 20 SEGUNDOS ====================
-    function showCredits() {
-      const dialogueBox = document.getElementById('dialogueBox');
-      
-      dialogueBox.innerText = "🎉 ¡GRACIAS POR JUGAR! 🎉";
-      dialogueBox.style.display = "block";
-      
-      const thanksAudio = new Audio('Thanks.wav');
-      thanksAudio.volume = 0.9;
-      
-      stopAllGameMusic();
-      if (window.chaseMusic) { window.chaseMusic.pause(); window.chaseMusic.currentTime = 0; }
-      if (window.heartbeatSound) { window.heartbeatSound.pause(); window.heartbeatSound.currentTime = 0; }
-      
-      thanksAudio.play().catch(e => console.log("Thanks.wav error:", e));
-      
-      setTimeout(() => {
-        dialogueBox.style.display = "none";
-        creditsContainer.style.display = 'flex';
-        creditsVideo.currentTime = 0;
-        creditsVideo.play();
-        
-        creditsVideo.onended = () => {
-          creditsContainer.style.display = 'none';
-          goToFinalMode();
-        };
-        
-        setTimeout(() => {
-          if (creditsContainer.style.display === 'flex') {
-            creditsContainer.style.display = 'none';
-            goToFinalMode();
-          }
-        }, 10000);
-      }, 20000);
-    }
-
     // ==================== IR AL MODO FINAL FELIZ ====================
     function goToFinalMode() {
       setFinalMode();
@@ -1074,7 +1390,34 @@
         document.getElementById('dayText').style.display = 'none';
         
         if (roomMusic) roomMusic.pause();
+        
+        // Escuchar comandos en la habitación final
+        document.addEventListener('keydown', finalRoomKeyHandler);
       });
+    }
+    
+    function finalRoomKeyHandler(e) {
+      const key = e.key.toLowerCase();
+      if (key === 'b' || key === 'banana') {
+        // Escribir "Banana" - activar Access.mp3 y fade out
+        document.removeEventListener('keydown', finalRoomKeyHandler);
+        playSoundFile('Access.mp3');
+        
+        // Fade out a pantalla negra
+        sceneOverlay.style.display = 'flex';
+        sceneOverlay.style.background = 'black';
+        sceneImage.style.display = 'none';
+        sceneText.textContent = '';
+        
+        // Después de 1.5 segundos, mostrar House.png
+        setTimeout(() => {
+          showScene('House.png', '🏠 Casa de Ms. BananaS');
+          sceneOverlay.style.background = 'rgba(0,0,0,0.8)';
+          
+          // Escuchar comandos en la casa
+          document.addEventListener('keydown', houseKeyHandler);
+        }, 1500);
+      }
     }
 
     // ==================== JUEGO PRINCIPAL ====================
@@ -1484,7 +1827,7 @@
       function completeGame(hasErrors) {
         gameActive = false;
         if (!hasErrors) {
-          showCredits();
+          showCreditsWithTimer();
         } else {
           startBossFight();
         }
@@ -1938,7 +2281,7 @@
       });
       
       // ============================================
-      // BOTÓN RESET (con glitch.mp4)
+      // BOTÓN RESET
       // ============================================
       document.getElementById('resetBtn').addEventListener('click', performReset);
     }
