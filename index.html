@@ -231,7 +231,6 @@
       display: none;
     }
     
-    /* Input de texto en la parte inferior */
     #text-input-display {
       position: fixed;
       bottom: 30px;
@@ -403,6 +402,7 @@
     .lock-screen p { font-size: 1.5rem; max-width: 80%; line-height: 1.4; }
     .lock-screen .reset-signal { margin-top: 2rem; font-size: 0.9rem; opacity: 0.8; background: rgba(0,0,0,0.5); padding: 10px 20px; border-radius: 8px; max-width: 80%; word-break: break-all; }
     
+    /* GAME NOT FOUND ROJO - NORMAL (sin mensajes secretos) */
     .glitch-red-screen {
       position: fixed;
       top: 0;
@@ -427,16 +427,6 @@
       animation: glitchText 0.1s infinite;
       color: #ff0000;
       font-family: 'Share Tech Mono', monospace !important;
-    }
-    
-    .glitch-red-screen .glitch-line {
-      font-size: 2rem;
-      text-shadow: 0 0 20px #ff0000;
-      animation: glitchText 0.15s infinite;
-      color: #ff2200;
-      font-family: 'Share Tech Mono', monospace !important;
-      opacity: 0.9;
-      margin: 5px 0;
     }
     
     @keyframes glitchText {
@@ -575,7 +565,6 @@
       pointer-events: none;
     }
     
-    /* Scene overlay */
     .scene-overlay {
       position: fixed;
       top: 0;
@@ -617,45 +606,24 @@
       100% { transform: translate(8px, -15px) rotate(2deg) scale(0.95); }
     }
     
-    .fade-out {
-      animation: fadeOut 0.5s ease-out forwards;
-    }
+    .fade-out { animation: fadeOut 0.5s ease-out forwards; }
+    .fade-in { animation: fadeIn 0.5s ease-out forwards; }
     
-    .fade-in {
-      animation: fadeIn 0.5s ease-out forwards;
-    }
-    
-    @keyframes fadeOut {
-      0% { opacity: 1; }
-      100% { opacity: 0; }
-    }
-    
-    @keyframes fadeIn {
-      0% { opacity: 0; }
-      100% { opacity: 1; }
-    }
-    
-    .heart-icon {
-      color: #ff0044;
-      font-size: 1.5rem;
-      text-shadow: 0 0 10px #ff0044;
-    }
+    @keyframes fadeOut { 0% { opacity: 1; } 100% { opacity: 0; } }
+    @keyframes fadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }
   </style>
 </head>
 <body>
 
   <div class="reset-polling-badge" id="pollingBadge">🔄</div>
 
-  <!-- Input display -->
   <div id="text-input-display"><span id="inputText"></span><span class="cursor">|</span></div>
 
-  <!-- Scene overlay -->
   <div id="sceneOverlay" class="scene-overlay">
     <img id="sceneImage" src="" alt="Scene">
     <div id="sceneText" class="scene-text"></div>
   </div>
 
-  <!-- Boss Attack Indicator -->
   <div id="bossAttackIndicator" class="boss-attack-indicator">⚡ ¡ATACANDO! ⚡</div>
 
   <div id="waitingScreen" class="waiting-screen">
@@ -674,7 +642,6 @@
     <div class="reset-signal" id="resetSignal">🔄 Buscando señal...</div>
   </div>
 
-  <!-- GAME NOT FOUND ROJO (normal, sin mensajes secretos) -->
   <div id="glitchRedScreen" class="glitch-red-screen">
     <h1>GAME NOT FOUND.</h1>
     <div class="reset-signal-red" id="glitchResetSignal">🔄 Buscando señal de reseteo...</div>
@@ -684,12 +651,10 @@
     <video id="glitchVideoPlayer" src="glitch.mp4"></video>
   </div>
 
-  <!-- Creditss.mp4 -->
   <div id="creditssContainer" class="credits-container" style="z-index: 9998;">
     <video id="creditssVideo" src="Creditss.mp4"></video>
   </div>
 
-  <!-- Créditos normales -->
   <div id="creditsContainer" class="credits-container">
     <video id="creditsVideo" src="Creditos Ms.BananaS.mp4"></video>
   </div>
@@ -760,15 +725,12 @@
   <script type="module">
     import * as THREE from 'three';
 
-    // ==================== CÓDIGO BINARIO ====================
     const binaryCode = "01101000 01110100 01110100 01110000 01110011 00111010 00101111 00101111 01110010 01100001 01110000 01101000 01100001 01110000 01110010 01101111 00111001 00110000 00110000 00101110 01100111 01101001 01110100 01101000 01110101 01100010 00101110 01101001 01101111 00101111 01110010 01100101 01110011 01100101 01110100 00101111";
     const resetUrl = "https://raphapro900.github.io/reset/";
     
-    function openResetPage() {
-      window.open(resetUrl, '_blank');
-    }
+    function openResetPage() { window.open(resetUrl, '_blank'); }
 
-    // ==================== SISTEMA DE BLOQUEO Y PROGRESO ====================
+    // ==================== SISTEMA DE BLOQUEO ====================
     const LOCK_STORAGE_KEY = "gameLocked_V5";
     const RESET_SIGNAL_KEY = "resetSignal";
     const DAY_PROGRESS_KEY = "gameDayProgress";
@@ -793,116 +755,30 @@
       const savedDay = localStorage.getItem(DAY_PROGRESS_KEY);
       const savedRage = localStorage.getItem(RAGE_PROGRESS_KEY);
       const savedErrors = localStorage.getItem(TOTAL_ERRORS_KEY);
-      return {
-        day: savedDay ? parseInt(savedDay) : 1,
-        rage: savedRage ? parseInt(savedRage) : 0,
-        totalErrors: savedErrors ? parseInt(savedErrors) : 0
-      };
+      return { day: savedDay ? parseInt(savedDay) : 1, rage: savedRage ? parseInt(savedRage) : 0, totalErrors: savedErrors ? parseInt(savedErrors) : 0 };
     }
     
     function clearProgress() {
-      localStorage.removeItem(DAY_PROGRESS_KEY);
-      localStorage.removeItem(RAGE_PROGRESS_KEY);
-      localStorage.removeItem(COMPLETED_KEY);
-      localStorage.removeItem(BOSS_DEFEATED_KEY);
-      localStorage.removeItem(WAITING_MODE_KEY);
-      localStorage.removeItem(GLITCH_RED_KEY);
-      localStorage.removeItem(TOTAL_ERRORS_KEY);
-      localStorage.removeItem(FINAL_MODE_KEY);
-      localStorage.removeItem(LOCK_STORAGE_KEY);
-      localStorage.removeItem(HOUSE_VISITED_KEY);
-      localStorage.removeItem(INSIDE_VISITED_KEY);
-      localStorage.removeItem(BANANA_TRIGGERED_KEY);
+      localStorage.removeItem(DAY_PROGRESS_KEY, RAGE_PROGRESS_KEY, COMPLETED_KEY, BOSS_DEFEATED_KEY, WAITING_MODE_KEY, GLITCH_RED_KEY, TOTAL_ERRORS_KEY, FINAL_MODE_KEY, LOCK_STORAGE_KEY, HOUSE_VISITED_KEY, INSIDE_VISITED_KEY, BANANA_TRIGGERED_KEY);
     }
     
-    function setFinalMode() {
-      localStorage.setItem(FINAL_MODE_KEY, "true");
-      localStorage.setItem(COMPLETED_KEY, "true");
-      console.log("🎮 Final feliz activado");
-    }
-    
-    function isFinalMode() {
-      return localStorage.getItem(FINAL_MODE_KEY) === "true";
-    }
-    
-    function setHouseVisited() {
-      localStorage.setItem(HOUSE_VISITED_KEY, "true");
-    }
-    
-    function isHouseVisited() {
-      return localStorage.getItem(HOUSE_VISITED_KEY) === "true";
-    }
-    
-    function setInsideVisited() {
-      localStorage.setItem(INSIDE_VISITED_KEY, "true");
-    }
-    
-    function isInsideVisited() {
-      return localStorage.getItem(INSIDE_VISITED_KEY) === "true";
-    }
-    
-    function setBananaTriggered() {
-      localStorage.setItem(BANANA_TRIGGERED_KEY, "true");
-    }
-    
-    function isBananaTriggered() {
-      return localStorage.getItem(BANANA_TRIGGERED_KEY) === "true";
-    }
-    
-    function setGameCompleted() {
-      localStorage.setItem(COMPLETED_KEY, "true");
-      localStorage.setItem(WAITING_MODE_KEY, "true");
-      console.log("🎮 Juego completado - Modo espera activado");
-    }
-    
-    function isGameCompleted() {
-      return localStorage.getItem(COMPLETED_KEY) === "true";
-    }
-    
-    function isWaitingMode() {
-      return localStorage.getItem(WAITING_MODE_KEY) === "true";
-    }
-    
-    function setBossDefeated() {
-      localStorage.setItem(BOSS_DEFEATED_KEY, "true");
-    }
-    
-    function isBossDefeated() {
-      return localStorage.getItem(BOSS_DEFEATED_KEY) === "true";
-    }
-    
-    function setGlitchRedMode() {
-      localStorage.setItem(GLITCH_RED_KEY, "true");
-    }
-    
-    function isGlitchRedMode() {
-      return localStorage.getItem(GLITCH_RED_KEY) === "true";
-    }
-    
-    function setGameLocked() { 
-      localStorage.setItem(LOCK_STORAGE_KEY, "true"); 
-      localStorage.removeItem(RESET_SIGNAL_KEY); 
-      console.log("🔒 Juego bloqueado"); 
-    }
-    
-    function isGameLocked() { 
-      return localStorage.getItem(LOCK_STORAGE_KEY) === "true"; 
-    }
-    
-    function clearGameLocked() { 
-      clearProgress();
-      console.log("🔓 Juego desbloqueado - Todo reiniciado"); 
-    }
-    
-    function checkForResetSignal() { 
-      const signal = localStorage.getItem(RESET_SIGNAL_KEY); 
-      if (signal === "reset") { 
-        localStorage.removeItem(RESET_SIGNAL_KEY); 
-        clearGameLocked(); 
-        return true; 
-      } 
-      return false; 
-    }
+    function setFinalMode() { localStorage.setItem(FINAL_MODE_KEY, "true"); localStorage.setItem(COMPLETED_KEY, "true"); }
+    function isFinalMode() { return localStorage.getItem(FINAL_MODE_KEY) === "true"; }
+    function setHouseVisited() { localStorage.setItem(HOUSE_VISITED_KEY, "true"); }
+    function isHouseVisited() { return localStorage.getItem(HOUSE_VISITED_KEY) === "true"; }
+    function setInsideVisited() { localStorage.setItem(INSIDE_VISITED_KEY, "true"); }
+    function isInsideVisited() { return localStorage.getItem(INSIDE_VISITED_KEY) === "true"; }
+    function setGameCompleted() { localStorage.setItem(COMPLETED_KEY, "true"); localStorage.setItem(WAITING_MODE_KEY, "true"); }
+    function isGameCompleted() { return localStorage.getItem(COMPLETED_KEY) === "true"; }
+    function isWaitingMode() { return localStorage.getItem(WAITING_MODE_KEY) === "true"; }
+    function setBossDefeated() { localStorage.setItem(BOSS_DEFEATED_KEY, "true"); }
+    function isBossDefeated() { return localStorage.getItem(BOSS_DEFEATED_KEY) === "true"; }
+    function setGlitchRedMode() { localStorage.setItem(GLITCH_RED_KEY, "true"); }
+    function isGlitchRedMode() { return localStorage.getItem(GLITCH_RED_KEY) === "true"; }
+    function setGameLocked() { localStorage.setItem(LOCK_STORAGE_KEY, "true"); localStorage.removeItem(RESET_SIGNAL_KEY); }
+    function isGameLocked() { return localStorage.getItem(LOCK_STORAGE_KEY) === "true"; }
+    function clearGameLocked() { clearProgress(); }
+    function checkForResetSignal() { const signal = localStorage.getItem(RESET_SIGNAL_KEY); if (signal === "reset") { localStorage.removeItem(RESET_SIGNAL_KEY); clearGameLocked(); return true; } return false; }
 
     // ==================== ELEMENTOS DOM ====================
     const lockScreen = document.getElementById('lockScreen');
@@ -926,7 +802,6 @@
     const tvMessage = document.getElementById('tv-message');
     const gameScreen = document.getElementById('gameScreen');
     const bananaGameImg = document.getElementById('bananaGame');
-    const pollingBadge = document.getElementById('pollingBadge');
     const sceneOverlay = document.getElementById('sceneOverlay');
     const sceneImage = document.getElementById('sceneImage');
     const sceneText = document.getElementById('sceneText');
@@ -935,24 +810,10 @@
     const inputTextSpan = document.getElementById('inputText');
 
     let currentInput = '';
+    function updateInputDisplay() { inputTextSpan.textContent = currentInput; textInputDisplay.style.display = 'block'; }
+    function hideInputDisplay() { textInputDisplay.style.display = 'none'; currentInput = ''; inputTextSpan.textContent = ''; }
+    function resetInput() { currentInput = ''; inputTextSpan.textContent = ''; }
 
-    function updateInputDisplay() {
-      inputTextSpan.textContent = currentInput;
-      textInputDisplay.style.display = 'block';
-    }
-
-    function hideInputDisplay() {
-      textInputDisplay.style.display = 'none';
-      currentInput = '';
-      inputTextSpan.textContent = '';
-    }
-
-    function resetInput() {
-      currentInput = '';
-      inputTextSpan.textContent = '';
-    }
-
-    // ==================== FUNCIONES DE ESCENA ====================
     function showScene(imageSrc, text = '', className = '') {
       sceneOverlay.style.display = 'flex';
       sceneImage.src = imageSrc;
@@ -960,10 +821,7 @@
       sceneText.textContent = text;
       sceneText.style.display = text ? 'block' : 'none';
     }
-    
-    function hideScene() {
-      sceneOverlay.style.display = 'none';
-    }
+    function hideScene() { sceneOverlay.style.display = 'none'; }
     
     function playSoundFile(src, volume = 0.8) {
       const audio = new Audio(src);
@@ -972,26 +830,21 @@
       return audio;
     }
 
-    // ==================== FUNCIÓN DE CRÉDITOS CON CONTADOR DE 21 SEGUNDOS ====================
+    // ==================== FUNCIÓN DE CRÉDITOS (21 segundos) ====================
     function showCreditsWithTimer() {
       const dialogueBox = document.getElementById('dialogueBox');
-      
       dialogueBox.innerText = "🎉 ¡GRACIAS POR JUGAR! 🎉";
       dialogueBox.style.display = "block";
       
       const thanksAudio = new Audio('Thanks.wav');
       thanksAudio.volume = 0.9;
-      
       stopAllGameMusic();
-      if (window.chaseMusic) { window.chaseMusic.pause(); window.chaseMusic.currentTime = 0; }
-      if (window.heartbeatSound) { window.heartbeatSound.pause(); window.heartbeatSound.currentTime = 0; }
-      
+      if (window.chaseMusic) window.chaseMusic.pause();
+      if (window.heartbeatSound) window.heartbeatSound.pause();
       thanksAudio.play().catch(e => console.log("Thanks.wav error:", e));
       
-      // ⏱️ CONTADOR DE 1 A 21 SEGUNDOS ⏱️
       let counter = 1;
       const maxCounter = 21;
-      
       const counterInterval = setInterval(() => {
         counter++;
         dialogueBox.innerText = `🎉 ¡GRACIAS POR JUGAR! 🎉\n⏱️ ${counter}/${maxCounter}`;
@@ -1001,37 +854,25 @@
           creditsContainer.style.display = 'flex';
           creditsVideo.currentTime = 0;
           creditsVideo.play();
-          
           creditsVideo.onended = () => {
             creditsContainer.style.display = 'none';
-            playGlitchTransition(() => {
-              goToFinalMode();
-            });
+            playGlitchTransition(() => goToFinalMode());
           };
-          
           setTimeout(() => {
             if (creditsContainer.style.display === 'flex') {
               creditsContainer.style.display = 'none';
-              playGlitchTransition(() => {
-                goToFinalMode();
-              });
+              playGlitchTransition(() => goToFinalMode());
             }
           }, 10000);
         }
       }, 1000);
     }
 
-    // ==================== FUNCIÓN DE CRÉDITOS DEL BOSS ====================
     function showCreditssVideo() {
       creditssContainer.style.display = 'flex';
       creditssVideo.currentTime = 0;
       creditssVideo.play();
-      
-      creditssVideo.onended = () => {
-        creditssContainer.style.display = 'none';
-        goToWaitingScreen();
-      };
-      
+      creditssVideo.onended = () => { creditssContainer.style.display = 'none'; goToWaitingScreen(); };
       setTimeout(() => {
         if (creditssContainer.style.display === 'flex') {
           creditssContainer.style.display = 'none';
@@ -1041,84 +882,37 @@
     }
 
     // ==================== FUNCIONES DE LA CASA ====================
-    let insideVisited = false;
-    let isInHouse = false;
-    let isInside = false;
-    let inputBuffer = '';
-    let isListeningForInput = false;
+    let insideVisited = false, isInHouse = false, isInside = false, isListeningForInput = false;
 
-    function startListeningForInput() {
-      isListeningForInput = true;
-      currentInput = '';
-      updateInputDisplay();
-    }
-
-    function stopListeningForInput() {
-      isListeningForInput = false;
-      hideInputDisplay();
-    }
+    function startListeningForInput() { isListeningForInput = true; currentInput = ''; updateInputDisplay(); }
+    function stopListeningForInput() { isListeningForInput = false; hideInputDisplay(); }
 
     function handleTextInput(e) {
       if (!isListeningForInput) return;
-      
       const key = e.key;
-      
       if (key === 'Enter') {
-        // Procesar el comando completo
         const command = currentInput.toLowerCase().trim();
-        
-        if (command === 'banana') {
-          // Activar Banana
-          document.removeEventListener('keydown', handleTextInput);
-          stopListeningForInput();
-          activateBanana();
-        } else if (command === 'enter') {
-          // Activar enter
-          document.removeEventListener('keydown', handleTextInput);
-          stopListeningForInput();
-          enterInside();
-        } else if (command === 'leave') {
-          // Activar leave
-          document.removeEventListener('keydown', handleTextInput);
-          stopListeningForInput();
-          leaveHouse();
-        } else {
-          // Comando no reconocido
-          showDialogue(`❌ Comando "${command}" no reconocido.`, null, 1500);
-          currentInput = '';
-          inputTextSpan.textContent = '';
-        }
+        if (command === 'banana') { document.removeEventListener('keydown', handleTextInput); stopListeningForInput(); activateBanana(); }
+        else if (command === 'enter') { document.removeEventListener('keydown', handleTextInput); stopListeningForInput(); enterInside(); }
+        else if (command === 'leave') { document.removeEventListener('keydown', handleTextInput); stopListeningForInput(); leaveHouse(); }
+        else { showDialogue(`❌ Comando "${command}" no reconocido.`, null, 1500); currentInput = ''; inputTextSpan.textContent = ''; }
         return;
       }
-      
-      if (key === 'Backspace') {
-        currentInput = currentInput.slice(0, -1);
-        inputTextSpan.textContent = currentInput;
-        return;
-      }
-      
-      if (key.length === 1 && key.match(/[a-zA-Z]/)) {
-        currentInput += key;
-        inputTextSpan.textContent = currentInput;
-      }
+      if (key === 'Backspace') { currentInput = currentInput.slice(0, -1); inputTextSpan.textContent = currentInput; return; }
+      if (key.length === 1 && key.match(/[a-zA-Z]/)) { currentInput += key; inputTextSpan.textContent = currentInput; }
     }
 
     function enterHouse() {
       if (isInHouse) return;
-      isInHouse = true;
-      setHouseVisited();
-      
+      isInHouse = true; setHouseVisited();
       playSoundFile('Access.mp3');
-      
       sceneOverlay.style.display = 'flex';
       sceneOverlay.style.background = 'black';
       sceneImage.style.display = 'none';
       sceneText.textContent = '';
-      
       setTimeout(() => {
         showScene('House.png', '🏠 Casa de Ms. BananaS');
         sceneOverlay.style.background = 'rgba(0,0,0,0.8)';
-        // Empezar a escuchar comandos
         startListeningForInput();
         document.addEventListener('keydown', handleTextInput);
       }, 1500);
@@ -1126,51 +920,32 @@
     
     function enterInside() {
       if (isInside) return;
-      isInside = true;
-      setInsideVisited();
-      
-      // Reproducir Door.mp3
-      const doorAudio = playSoundFile('Door.mp3');
-      
-      // Contador de 3 segundos
+      isInside = true; setInsideVisited();
+      playSoundFile('Door.mp3');
       let counter = 0;
       const maxCounter = 3;
-      showDialogue(`🚪 Abriendo puerta... ${counter}/${maxCounter}`, null, 1000);
-      
+      showDialogue(`🚪 Abriendo puerta...`, null, 1000);
       const doorTimer = setInterval(() => {
         counter++;
-        showDialogue(`🚪 Abriendo puerta... ${counter}/${maxCounter}`, null, 1000);
         if (counter >= maxCounter) {
           clearInterval(doorTimer);
-          // DoorC.mp3
           playSoundFile('DoorC.mp3');
-          
-          // Mostrar Inside.png con Ms. BananaS
           showScene('Inside.png', '🍌 ¡Dentro de la casa!');
-          
           if (!insideVisited) {
             insideVisited = true;
-            
-            // huh.wav después de 1 segundo
             setTimeout(() => {
               playSoundFile('huh.wav');
-              
-              // Contador de 16 segundos (sin mostrar)
               let silentCounter = 0;
               const maxSilent = 16;
-              
               const insideTimer = setInterval(() => {
                 silentCounter++;
                 if (silentCounter >= maxSilent) {
                   clearInterval(insideTimer);
-                  // Salir de la casa con DoorC.mp3
                   playSoundFile('DoorC.mp3');
                   setTimeout(() => {
                     hideScene();
-                    isInside = false;
-                    isInHouse = false;
+                    isInside = false; isInHouse = false;
                     showScene('House.png', '🏠 Casa de Ms. BananaS');
-                    // Volver a escuchar comandos
                     startListeningForInput();
                     document.addEventListener('keydown', handleTextInput);
                   }, 500);
@@ -1178,23 +953,16 @@
               }, 1000);
             }, 1000);
           } else {
-            // Segunda entrada - sin Ms. BananaS
-            // Contador de 5 segundos (sin mostrar)
             let silentCounter = 0;
             const maxSilent = 5;
-            
             const secondTimer = setInterval(() => {
               silentCounter++;
               if (silentCounter >= maxSilent) {
                 clearInterval(secondTimer);
-                // Mostrar Spider.png temblando
                 showScene('Spider.png', '🕷️', 'spider-shake');
-                // Spider.mp3 FUERTE
                 const spiderAudio = playSoundFile('Spider.mp3', 1.0);
                 spiderAudio.volume = 1.0;
-                
                 setTimeout(() => {
-                  // Game Not Found NORMAL (sin mensajes secretos)
                   hideScene();
                   setGameLocked();
                   setGlitchRedMode();
@@ -1210,19 +978,15 @@
     
     function leaveHouse() {
       playSoundFile('Access.mp3');
-      
       sceneOverlay.style.display = 'flex';
       sceneOverlay.style.background = 'black';
       sceneImage.style.display = 'none';
       sceneText.textContent = '';
-      
       setTimeout(() => {
         hideScene();
-        isInHouse = false;
-        isInside = false;
+        isInHouse = false; isInside = false;
         document.removeEventListener('keydown', handleTextInput);
         stopListeningForInput();
-        
         gameScreen.classList.add('final-mode');
         tvMessage.style.display = 'flex';
         tvAnimal.style.display = 'none';
@@ -1231,7 +995,6 @@
         document.getElementById('rageText').style.display = 'none';
         document.getElementById('dayText').style.display = 'none';
         document.getElementById('gameScreen').style.display = 'block';
-        
         showDialogue("🍔 Hay una hamburguesa en la mesa. ¿Quieres comerla?", null, 5000);
         document.addEventListener('keydown', eatHandler);
       }, 1500);
@@ -1239,16 +1002,13 @@
     
     function activateBanana() {
       playSoundFile('Access.mp3');
-      
       sceneOverlay.style.display = 'flex';
       sceneOverlay.style.background = 'black';
       sceneImage.style.display = 'none';
       sceneText.textContent = '';
-      
       setTimeout(() => {
         showScene('House.png', '🏠 Casa de Ms. BananaS');
         sceneOverlay.style.background = 'rgba(0,0,0,0.8)';
-        // Empezar a escuchar comandos
         startListeningForInput();
         document.addEventListener('keydown', handleTextInput);
       }, 1500);
@@ -1264,16 +1024,12 @@
     
     function eatBurger() {
       const rage = parseInt(localStorage.getItem(RAGE_PROGRESS_KEY)) || 0;
-      
       if (rage >= 1 && rage <= 9) {
+        // Bana.wav con REVERB antes del boss
         playSoundFile('bana.wav');
-        
-        // Contador de 13 segundos (sin mostrar)
         let counter = 0;
         const maxCounter = 13;
-        
         showDialogue("🍌 ¡Has comido la hamburguesa!", null, 1000);
-        
         const burgerTimer = setInterval(() => {
           counter++;
           if (counter >= maxCounter) {
@@ -1286,17 +1042,8 @@
       }
     }
 
-    function stopAllGameMusic() { 
-      if (menuMusic) { menuMusic.pause(); menuMusic.currentTime = 0; } 
-      if (roomMusic) { roomMusic.pause(); roomMusic.currentTime = 0; } 
-    }
-    
-    function playMenuMusic() {
-      if (menuMusic) {
-        menuMusic.currentTime = 0;
-        menuMusic.play().catch(e => console.log("menuMusic error:", e));
-      }
-    }
+    function stopAllGameMusic() { if (menuMusic) { menuMusic.pause(); menuMusic.currentTime = 0; } if (roomMusic) { roomMusic.pause(); roomMusic.currentTime = 0; } }
+    function playMenuMusic() { if (menuMusic) { menuMusic.currentTime = 0; menuMusic.play().catch(e => console.log("menuMusic error:", e)); } }
 
     // ==================== FUNCIÓN DE RESET ====================
     function performReset() {
@@ -1305,38 +1052,19 @@
       if (window.chaseMusic) window.chaseMusic.pause();
       if (window.heartbeatSound) window.heartbeatSound.pause();
       if (window.bossMusic) window.bossMusic.pause();
-      
       glitchVideo.style.display = 'flex';
       glitchVideoPlayer.currentTime = 0;
-      
-      glitchVideoPlayer.play().catch(error => {
-        console.warn("⚠️ No se pudo reproducir glitch.mp4:", error);
-        window.location.reload();
-      });
-      
-      glitchVideoPlayer.onended = () => {
-        window.location.reload();
-      };
-      
-      setTimeout(() => {
-        if (glitchVideo.style.display === 'flex') {
-          window.location.reload();
-        }
-      }, 3500);
+      glitchVideoPlayer.play().catch(() => window.location.reload());
+      glitchVideoPlayer.onended = () => window.location.reload();
+      setTimeout(() => { if (glitchVideo.style.display === 'flex') window.location.reload(); }, 3500);
     }
 
-    // ==================== POLLING DE RESET ====================
     let resetPollInterval = null;
-    let resetAttempts = 0;
-
     function startUniversalResetPolling() {
       if (resetPollInterval) return;
-      
       resetPollInterval = setInterval(() => {
-        resetAttempts++;
         const signal = localStorage.getItem(RESET_SIGNAL_KEY);
         if (signal === "reset") {
-          console.log("✅ SEÑAL DE RESET DETECTADA");
           localStorage.removeItem(RESET_SIGNAL_KEY);
           clearInterval(resetPollInterval);
           resetPollInterval = null;
@@ -1344,7 +1072,6 @@
         }
       }, 1500);
     }
-
     startUniversalResetPolling();
 
     // ============================================
@@ -1365,17 +1092,13 @@
       waitingScreen.style.display = 'none';
       glitchRedScreen.style.display = 'none';
       stopAllGameMusic();
-      
       bananaPlayImg.src = 'ABananaDraw.png';
       if (menuMusic) menuMusic.pause();
-      
       gameScreen.classList.add('final-mode');
       tvMessage.style.display = 'flex';
       tvAnimal.style.display = 'none';
-      
       document.getElementById('startScreen').style.display = 'flex';
       document.getElementById('gameScreen').style.display = 'none';
-      
       iniciarJuegoFinalMode();
     }
     else if (isWaitingMode()) {
@@ -1387,30 +1110,27 @@
       startWaitingPolling();
     } 
     else if (isGameLocked()) {
-      if (checkForResetSignal()) { 
-        performReset();
-      } else { 
-        gameContent.style.display = 'none'; 
-        lockScreen.style.display = 'flex'; 
+      if (checkForResetSignal()) { performReset(); }
+      else { 
+        gameContent.style.display = 'none';
+        lockScreen.style.display = 'flex';
         waitingScreen.style.display = 'none';
         glitchRedScreen.style.display = 'none';
-        stopAllGameMusic(); 
-        startPollingForReset(); 
+        stopAllGameMusic();
+        startPollingForReset();
       }
-    } else { 
-      gameContent.style.display = 'block'; 
-      lockScreen.style.display = 'none'; 
+    } else {
+      gameContent.style.display = 'block';
+      lockScreen.style.display = 'none';
       waitingScreen.style.display = 'none';
       glitchRedScreen.style.display = 'none';
       playMenuMusic();
-      
       if (isGameCompleted()) {
         bananaPlayImg.src = 'ABananaDraw.png';
         if (menuMusic) menuMusic.pause();
         tvAnimal.src = 'Thanks.png';
       }
-      
-      iniciarJuego(); 
+      iniciarJuego();
     }
 
     // ==================== POLLING ADICIONAL ====================
@@ -1432,11 +1152,8 @@
       }
       checkLocalStorageSignal();
       pollInterval = setInterval(checkLocalStorageSignal, 2000);
-      
       const waitingBinary = document.getElementById('waitingBinaryClick');
-      if (waitingBinary) {
-        waitingBinary.addEventListener('click', () => { window.open(resetUrl, '_blank'); });
-      }
+      if (waitingBinary) { waitingBinary.addEventListener('click', () => window.open(resetUrl, '_blank')); }
     }
 
     function startGlitchRedPolling() {
@@ -1495,10 +1212,8 @@
       }, 3000);
     }
 
-    // ==================== IR AL MODO FINAL FELIZ ====================
     function goToFinalMode() {
       setFinalMode();
-      
       document.getElementById('startScreen').style.display = 'none';
       document.getElementById('gameScreen').style.display = 'none';
       document.getElementById('gameContent').style.display = 'block';
@@ -1506,12 +1221,9 @@
       glitchRedScreen.style.display = 'none';
       waitingScreen.style.display = 'none';
       creditsContainer.style.display = 'none';
-      
       document.getElementById('startScreen').style.display = 'flex';
-      
       bananaPlayImg.src = 'ABananaDraw.png';
       if (menuMusic) menuMusic.pause();
-      
       window.location.reload();
     }
 
@@ -1521,34 +1233,25 @@
       document.getElementById('gameContent').style.display = 'none';
       lockScreen.style.display = 'none';
       glitchRedScreen.style.display = 'none';
-      
       waitingScreen.style.display = 'flex';
       setGameCompleted();
       startWaitingPolling();
     }
 
-    // ==================== FUNCIÓN PARA EL MODO FINAL ====================
     function iniciarJuegoFinalMode() {
       const bananaPlay = document.getElementById("bananaPlay");
-      
       bananaPlay.addEventListener("click", function iniciarPartidaFinal(e) {
         e.preventDefault();
-        
         document.getElementById('startScreen').style.display = 'none';
         document.getElementById('gameScreen').style.display = 'block';
         gameScreen.classList.add('final-mode');
-        
         tvMessage.style.display = 'flex';
         tvAnimal.style.display = 'none';
         bananaGameImg.style.display = 'none';
-        
         document.querySelector('.options').style.display = 'none';
         document.getElementById('rageText').style.display = 'none';
         document.getElementById('dayText').style.display = 'none';
-        
         if (roomMusic) roomMusic.pause();
-        
-        // Empezar a escuchar "Banana"
         startListeningForInput();
         document.addEventListener('keydown', handleTextInput);
         showDialogue("🔑 Escribe 'Banana' para ir a la casa", null, 3000);
@@ -1577,10 +1280,6 @@
       const chaseContainer = document.getElementById("chaseContainer");
       const chaseMusic = document.getElementById("chaseMusic");
       const heartbeatSound = document.getElementById("heartbeatSound");
-      const gameScreenEl = document.getElementById("gameScreen");
-      const bananaGameImg = document.getElementById("bananaGame");
-      const tvMessage = document.getElementById("tv-message");
-      const tvAnimal = document.getElementById("animal");
       
       window.chaseMusic = chaseMusic;
       window.heartbeatSound = heartbeatSound;
@@ -1595,12 +1294,9 @@
       ];
       
       const dayTargets = { 1: 15, 2: 20, 3: 25, 4: 30, 5: 35 };
-      
       const correctSounds = ['c1.wav', 'c2.wav', 'c3.wav', 'c4.wav'];
       
-      function getRandomSound(soundArray) {
-        return soundArray[Math.floor(Math.random() * soundArray.length)];
-      }
+      function getRandomSound(soundArray) { return soundArray[Math.floor(Math.random() * soundArray.length)]; }
       
       const savedProgress = loadProgress();
       let currentAnimal = animals[0];
@@ -1623,25 +1319,16 @@
         audioElement.volume = volume;
         audioElement.src = src;
         audioElement.currentTime = 0;
-        audioElement.play().catch(error => {
-          console.warn(`⚠️ No se pudo reproducir ${src}:`, error);
-        });
+        audioElement.play().catch(error => console.warn(`⚠️ No se pudo reproducir ${src}:`, error));
       }
 
       function showDialogue(text, audioSrc, duration = 3000) {
         if (!gameActive) return;
         if (dialogueTimeout) clearTimeout(dialogueTimeout);
-        
         dialogueBox.innerText = text;
         dialogueBox.style.display = "block";
-        
-        if (audioSrc) {
-          playSound(dialogueAudio, audioSrc, 0.8);
-        }
-        
-        dialogueTimeout = setTimeout(() => { 
-          if (gameActive) dialogueBox.style.display = "none"; 
-        }, duration);
+        if (audioSrc) playSound(dialogueAudio, audioSrc, 0.8);
+        dialogueTimeout = setTimeout(() => { if (gameActive) dialogueBox.style.display = "none"; }, duration);
       }
 
       function nextAnimal() {
@@ -1678,7 +1365,7 @@
         };
       }
 
-      // ==================== BOSSFIGHT 2D ESTILO UNDERTALE CON CUBITOS ====================
+      // ==================== BOSSFIGHT 2D CON BANA.WAV (REVERB) Y ABANANA.PNG ====================
       function startBossFight() {
         bossFightActive = true;
         bossTriggered = true;
@@ -1686,6 +1373,8 @@
         roomMusic.pause();
         gameScreen.style.display = "none";
         
+        // Bana.wav ya se reprodujo en eatBurger() con reverb
+        // Ahora continuar con el boss
         showDialogue("💡 Apagando luces...", null, 1000);
         
         const luzAudio = new Audio('luz.mp3');
@@ -1744,12 +1433,13 @@
         // ==================== ESTADO DEL BOSS ====================
         let bossHP = 10;
         let bossHits = 0;
-        let phase = 'attack'; // 'attack' o 'player_turn'
+        let phase = 'attack';
         let attackTimer = 5;
         let cubes = [];
-        let isLineStatic = false;
+        let isLineMoving = false;
         let lineX = 0;
         let lineY = 0;
+        let lineDirection = 1;
         let lineWidth = 5;
         let mouseX = 0;
         let mouseY = 0;
@@ -1757,14 +1447,16 @@
         let cubeInterval = null;
         let gameLoopId = null;
         let canAttack = false;
+        let attackLineTime = 0;
         
         const bossX = canvas.width / 2;
         const bossY = canvas.height / 2 - 50;
         
         // ==================== IMÁGENES ====================
+        // BOSS = ABanana.png
         const bossImg = new Image();
-        bossImg.src = "https://raw.githubusercontent.com/Raphapro900/Ms.BananaS/refs/heads/main/banana2.png";
-        bossImg.onload = () => { console.log("Boss image loaded"); };
+        bossImg.src = "https://raw.githubusercontent.com/Raphapro900/Ms.BananaS/refs/heads/main/ABanana.png";
+        bossImg.onload = () => { console.log("Boss image (ABanana.png) loaded"); };
         
         const playerImg = new Image();
         playerImg.src = "https://raw.githubusercontent.com/Raphapro900/Ms.BananaS/refs/heads/main/banana.png";
@@ -1799,7 +1491,6 @@
         // ==================== SISTEMA DE CUBITOS ====================
         function spawnCubes() {
           if (phase !== 'attack' || deathSequenceStarted) return;
-          
           const count = 3 + Math.floor(Math.random() * 3);
           for (let i = 0; i < count; i++) {
             const size = 20 + Math.random() * 20;
@@ -1822,10 +1513,7 @@
         }
         
         function stopCubeAttack() {
-          if (cubeInterval) {
-            clearInterval(cubeInterval);
-            cubeInterval = null;
-          }
+          if (cubeInterval) { clearInterval(cubeInterval); cubeInterval = null; }
           cubes = [];
         }
         
@@ -1848,80 +1536,98 @@
             }
             if (!canAttack) return;
             
-            isLineStatic = true;
-            lineX = mouseX;
-            lineY = mouseY;
+            // Iniciar ataque - línea se mueve de izquierda a derecha por 2 segundos
+            isLineMoving = true;
+            lineX = 0;
+            lineDirection = 1;
+            attackLineTime = 0;
             canAttack = false;
             bossTimer.textContent = '⚡ ¡ATACANDO! ⚡';
             bossAttackIndicator.textContent = '⚡ ¡ATACA! ⚡';
             
-            checkHit();
-            
-            setTimeout(() => {
-              isLineStatic = false;
-              phase = 'attack';
-              attackTimer = 5;
-              bossTimer.textContent = `⏱️ ${attackTimer}`;
-              bossAttackIndicator.textContent = '⚔️ ¡ESQUIVA LOS CUBITOS! ⚔️';
-              canAttack = false;
-              startCubeAttack();
-            }, 1500);
+            // Verificar durante 2 segundos
+            const attackInterval = setInterval(() => {
+              attackLineTime += 0.016;
+              // Mover línea de izquierda a derecha
+              lineX += lineDirection * (canvas.width / 2) * 0.016 * 1.5;
+              if (lineX >= canvas.width) {
+                lineDirection = -1;
+              } else if (lineX <= 0) {
+                lineDirection = 1;
+              }
+              
+              // Verificar si la línea toca a Ms. BananaS
+              const distX = Math.abs(lineX - bossX);
+              const distY = Math.abs(mouseY - bossY);
+              const halfWidth = lineWidth / 2 + 50;
+              const halfHeight = 70;
+              
+              if (distX < halfWidth && distY < halfHeight && attackLineTime < 2) {
+                // GOLPE AL BOSS!
+                clearInterval(attackInterval);
+                for (let i = hearts.length - 1; i >= 0; i--) {
+                  if (hearts[i].alive) {
+                    hearts[i].alive = false;
+                    bossHits++;
+                    bossHPDisplay.textContent = `❤️ ${bossHP - bossHits}/${bossHP}`;
+                    
+                    // Ouch.mp3 cuando el boss recibe daño
+                    const ouchSound = new Audio('Ouch.mp3');
+                    ouchSound.volume = 0.7;
+                    ouchSound.play().catch(e => console.log("Ouch.mp3 error:", e));
+                    
+                    bossImg.style = 'filter: brightness(2) hue-rotate(30deg);';
+                    setTimeout(() => {
+                      bossImg.style = '';
+                    }, 200);
+                    
+                    if (bossHits >= bossHP) {
+                      // BOSS DERROTADO
+                      deathSequenceStarted = true;
+                      bossFightActive = false;
+                      stopCubeAttack();
+                      bossUI.textContent = "🎉 ¡JEFE DERROTADO! 🎉";
+                      bossHPDisplay.textContent = "💀 0/10";
+                      bossTimer.style.display = 'none';
+                      bossAttackIndicator.style.display = 'none';
+                      
+                      if (window.bossMusic) {
+                        window.bossMusic.pause();
+                        window.bossMusic.currentTime = 0;
+                      }
+                      
+                      setBossDefeated();
+                      
+                      setTimeout(() => {
+                        bossUI.style.display = 'none';
+                        bossHPDisplay.style.display = 'none';
+                        bossTimer.style.display = 'none';
+                        bossAttackIndicator.style.display = 'none';
+                        chaseContainer.style.display = "none";
+                        completeBossFight();
+                      }, 2000);
+                    }
+                    break;
+                  }
+                }
+                isLineMoving = false;
+                return;
+              }
+              
+              if (attackLineTime >= 2) {
+                clearInterval(attackInterval);
+                isLineMoving = false;
+                // Volver a fase de ataque
+                phase = 'attack';
+                attackTimer = 5;
+                bossTimer.textContent = `⏱️ ${attackTimer}`;
+                bossAttackIndicator.textContent = '⚔️ ¡ESQUIVA LOS CUBITOS! ⚔️';
+                canAttack = false;
+                startCubeAttack();
+              }
+            }, 16);
           }
         });
-        
-        function checkHit() {
-          const distX = Math.abs(lineX - bossX);
-          const distY = Math.abs(lineY - bossY);
-          const halfWidth = lineWidth / 2 + 50;
-          const halfHeight = 70;
-          
-          if (distX < halfWidth && distY < halfHeight) {
-            for (let i = hearts.length - 1; i >= 0; i--) {
-              if (hearts[i].alive) {
-                hearts[i].alive = false;
-                bossHits++;
-                bossHPDisplay.textContent = `❤️ ${bossHP - bossHits}/${bossHP}`;
-                
-                const ouchSound = new Audio('Ouch.wav');
-                ouchSound.volume = 0.7;
-                ouchSound.play().catch(e => console.log("Ouch.wav error:", e));
-                
-                bossImg.style = 'filter: brightness(2) hue-rotate(30deg);';
-                setTimeout(() => {
-                  bossImg.style = '';
-                }, 200);
-                
-                break;
-              }
-            }
-            
-            if (bossHits >= bossHP) {
-              deathSequenceStarted = true;
-              bossFightActive = false;
-              stopCubeAttack();
-              bossUI.textContent = "🎉 ¡JEFE DERROTADO! 🎉";
-              bossHPDisplay.textContent = "💀 0/10";
-              bossTimer.style.display = 'none';
-              bossAttackIndicator.style.display = 'none';
-              
-              if (window.bossMusic) {
-                window.bossMusic.pause();
-                window.bossMusic.currentTime = 0;
-              }
-              
-              setBossDefeated();
-              
-              setTimeout(() => {
-                bossUI.style.display = 'none';
-                bossHPDisplay.style.display = 'none';
-                bossTimer.style.display = 'none';
-                bossAttackIndicator.style.display = 'none';
-                chaseContainer.style.display = "none";
-                completeBossFight();
-              }, 2000);
-            }
-          }
-        }
         
         function completeBossFight() {
           if (window.cleanupBoss2D) window.cleanupBoss2D();
@@ -1989,9 +1695,10 @@
                     bossHits++;
                     bossHPDisplay.textContent = `❤️ ${bossHP - bossHits}/${bossHP}`;
                     
-                    const damageSound = new Audio('f' + (Math.floor(Math.random() * 4) + 1) + '.wav');
-                    damageSound.volume = 0.5;
-                    damageSound.play().catch(e => {});
+                    // under.mp3 cuando el jugador recibe daño
+                    const underSound = new Audio('under.mp3');
+                    underSound.volume = 0.6;
+                    underSound.play().catch(e => console.log("under.mp3 error:", e));
                     
                     document.querySelector('.chaseUI').style.color = '#ff0000';
                     setTimeout(() => {
@@ -2021,7 +1728,7 @@
             }
           }
           
-          // Dibujar Ms. BananaS
+          // Dibujar Ms. BananaS (ABanana.png)
           if (bossImg.complete && bossImg.naturalWidth > 0) {
             const size = 120;
             ctx.drawImage(bossImg, bossX - size/2, bossY - size/2, size, size);
@@ -2042,8 +1749,8 @@
           ctx.fillText('❤️', mouseX, mouseY);
           ctx.shadowBlur = 0;
           
-          // Línea de ataque
-          if (isLineStatic) {
+          // Línea de ataque (se mueve de izquierda a derecha)
+          if (isLineMoving) {
             ctx.fillStyle = 'rgba(255, 0, 0, 0.8)';
             ctx.shadowColor = '#ff0000';
             ctx.shadowBlur = 30;
@@ -2114,36 +1821,24 @@
               const bufferSize = audioCtx.sampleRate * 0.3;
               const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
               const data = buffer.getChannelData(0);
-              
               for (let i = 0; i < bufferSize; i++) {
                 const t = i / bufferSize;
                 const envelope = Math.exp(-t * 8);
                 data[i] = (Math.random() * 2 - 1) * envelope * 0.5;
-                if (i % 500 < 10) {
-                  data[i] = (Math.random() > 0.5 ? 1 : -1) * 0.8;
-                }
-                if (i % 1200 < 20) {
-                  data[i] = 0;
-                }
+                if (i % 500 < 10) data[i] = (Math.random() > 0.5 ? 1 : -1) * 0.8;
+                if (i % 1200 < 20) data[i] = 0;
               }
-              
               const source = audioCtx.createBufferSource();
               source.buffer = buffer;
               source.connect(audioCtx.destination);
               source.start();
-              
-              setTimeout(() => {
-                try { audioCtx.close(); } catch(e) {}
-              }, 500);
-            } catch(e) {
-              console.log("Broken sound fallback");
-            }
+              setTimeout(() => { try { audioCtx.close(); } catch(e) {} }, 500);
+            } catch(e) { console.log("Broken sound fallback"); }
           }
           
           function activateGlitchRedScreen() {
             setGlitchRedMode();
             setGameLocked();
-            
             document.getElementById('startScreen').style.display = 'none';
             document.getElementById('gameScreen').style.display = 'none';
             document.getElementById('gameContent').style.display = 'none';
@@ -2151,7 +1846,6 @@
             waitingScreen.style.display = 'none';
             creditsContainer.style.display = 'none';
             chaseContainer.style.display = 'none';
-            
             glitchRedScreen.style.display = 'flex';
             startGlitchRedPolling();
           }
@@ -2593,7 +2287,7 @@
           • Ms. BananaS te ataca con CUBITOS durante 5 segundos<br>
           • Esquívalos moviendo el MOUSE<br>
           • Después de 5 segundos, puedes ATACAR con <strong>E</strong><br>
-          • La línea roja se queda estática donde está el mouse<br>
+          • La línea roja se mueve de IZQUIERDA a DERECHA por 2 segundos<br>
           • Si la línea toca a Ms. BananaS → le quita un corazón<br>
           • Tienes 10 corazones. ¡No los pierdas todos!</p>
           <br>
