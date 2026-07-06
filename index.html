@@ -591,6 +591,7 @@
       text-shadow: 0 0 20px #00ff88;
       text-align: center;
       padding: 20px;
+      display: none;
     }
     
     .spider-shake {
@@ -745,7 +746,6 @@
     const BANANA_TRIGGERED_KEY = "bananaTriggered";
     
     function clearAllCookies() {
-      // Borrar TODAS las cookies
       document.cookie.split(";").forEach(function(c) {
         document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
       });
@@ -766,7 +766,18 @@
     }
     
     function clearProgress() {
-      localStorage.removeItem(DAY_PROGRESS_KEY, RAGE_PROGRESS_KEY, COMPLETED_KEY, BOSS_DEFEATED_KEY, WAITING_MODE_KEY, GLITCH_RED_KEY, TOTAL_ERRORS_KEY, FINAL_MODE_KEY, LOCK_STORAGE_KEY, HOUSE_VISITED_KEY, INSIDE_VISITED_KEY, BANANA_TRIGGERED_KEY);
+      localStorage.removeItem(DAY_PROGRESS_KEY);
+      localStorage.removeItem(RAGE_PROGRESS_KEY);
+      localStorage.removeItem(COMPLETED_KEY);
+      localStorage.removeItem(BOSS_DEFEATED_KEY);
+      localStorage.removeItem(WAITING_MODE_KEY);
+      localStorage.removeItem(GLITCH_RED_KEY);
+      localStorage.removeItem(TOTAL_ERRORS_KEY);
+      localStorage.removeItem(FINAL_MODE_KEY);
+      localStorage.removeItem(LOCK_STORAGE_KEY);
+      localStorage.removeItem(HOUSE_VISITED_KEY);
+      localStorage.removeItem(INSIDE_VISITED_KEY);
+      localStorage.removeItem(BANANA_TRIGGERED_KEY);
       clearAllCookies();
     }
     
@@ -822,12 +833,11 @@
     function hideInputDisplay() { textInputDisplay.style.display = 'none'; currentInput = ''; inputTextSpan.textContent = ''; }
     function resetInput() { currentInput = ''; inputTextSpan.textContent = ''; }
 
-    function showScene(imageSrc, text = '', className = '') {
+    function showScene(imageSrc) {
       sceneOverlay.style.display = 'flex';
       sceneImage.src = imageSrc;
-      sceneImage.className = className;
-      sceneText.textContent = text;
-      sceneText.style.display = text ? 'block' : 'none';
+      sceneImage.className = '';
+      sceneText.style.display = 'none';
     }
     function hideScene() { sceneOverlay.style.display = 'none'; }
     
@@ -838,9 +848,11 @@
       return audio;
     }
 
-    // ==================== FUNCIÓN DE CRÉDITOS (79 SEGUNDOS = 1m 19s) ====================
-    function showCreditsWithTimer() {
+    // ==================== FUNCIÓN DE CRÉDITOS ====================
+    function showThanksAndCredits() {
       const dialogueBox = document.getElementById('dialogueBox');
+      
+      // Thanks.wav (21 segundos, sin contador visible)
       dialogueBox.innerText = "🎉 ¡GRACIAS POR JUGAR! 🎉";
       dialogueBox.style.display = "block";
       
@@ -851,29 +863,42 @@
       if (window.heartbeatSound) window.heartbeatSound.pause();
       thanksAudio.play().catch(e => console.log("Thanks.wav error:", e));
       
-      let counter = 1;
-      const maxCounter = 79; // 1 minuto y 19 segundos
-      const counterInterval = setInterval(() => {
-        counter++;
-        dialogueBox.innerText = `🎉 ¡GRACIAS POR JUGAR! 🎉\n⏱️ ${counter}/${maxCounter}`;
-        if (counter >= maxCounter) {
-          clearInterval(counterInterval);
+      setTimeout(() => {
+        dialogueBox.style.display = "none";
+        // Mostrar créditos
+        showCreditsVideo();
+      }, 21000);
+    }
+
+    function showCreditsVideo() {
+      const dialogueBox = document.getElementById('dialogueBox');
+      dialogueBox.innerText = "🎬 CRÉDITOS";
+      dialogueBox.style.display = "block";
+      
+      creditsContainer.style.display = 'flex';
+      creditsVideo.currentTime = 0;
+      creditsVideo.play();
+      
+      // Después de 79 segundos (1m 19s)
+      setTimeout(() => {
+        dialogueBox.style.display = "none";
+        creditsContainer.style.display = 'none';
+        playGlitchTransition(() => goToFinalMode());
+      }, 79000);
+      
+      creditsVideo.onended = () => {
+        dialogueBox.style.display = "none";
+        creditsContainer.style.display = 'none';
+        playGlitchTransition(() => goToFinalMode());
+      };
+      
+      setTimeout(() => {
+        if (creditsContainer.style.display === 'flex') {
+          creditsContainer.style.display = 'none';
           dialogueBox.style.display = "none";
-          creditsContainer.style.display = 'flex';
-          creditsVideo.currentTime = 0;
-          creditsVideo.play();
-          creditsVideo.onended = () => {
-            creditsContainer.style.display = 'none';
-            playGlitchTransition(() => goToFinalMode());
-          };
-          setTimeout(() => {
-            if (creditsContainer.style.display === 'flex') {
-              creditsContainer.style.display = 'none';
-              playGlitchTransition(() => goToFinalMode());
-            }
-          }, 10000);
+          playGlitchTransition(() => goToFinalMode());
         }
-      }, 1000);
+      }, 80000);
     }
 
     function showCreditssVideo() {
@@ -900,29 +925,42 @@
       const key = e.key;
       if (key === 'Enter') {
         const command = currentInput.toLowerCase().trim();
-        if (command === 'banana') { document.removeEventListener('keydown', handleTextInput); stopListeningForInput(); activateBanana(); }
-        else if (command === 'enter') { document.removeEventListener('keydown', handleTextInput); stopListeningForInput(); enterInside(); }
-        else if (command === 'leave') { document.removeEventListener('keydown', handleTextInput); stopListeningForInput(); leaveHouse(); }
-        else { showDialogue(`❌ Comando "${command}" no reconocido.`, null, 1500); currentInput = ''; inputTextSpan.textContent = ''; }
+        if (command === 'banana' || command === 'ms.bananas' || command === 'inside') {
+          document.removeEventListener('keydown', handleTextInput);
+          stopListeningForInput();
+          enterHouse();
+        } else if (command === 'leave') {
+          document.removeEventListener('keydown', handleTextInput);
+          stopListeningForInput();
+          leaveHouse();
+        } else {
+          showDialogue(`❌ Comando "${command}" no reconocido.`, null, 1500);
+          currentInput = '';
+          inputTextSpan.textContent = '';
+        }
         return;
       }
       if (key === 'Backspace') { currentInput = currentInput.slice(0, -1); inputTextSpan.textContent = currentInput; return; }
-      if (key.length === 1 && key.match(/[a-zA-Z]/)) { currentInput += key; inputTextSpan.textContent = currentInput; }
+      if (key.length === 1 && key.match(/[a-zA-Z.]/)) { currentInput += key; inputTextSpan.textContent = currentInput; }
     }
 
     function enterHouse() {
       if (isInHouse) return;
       isInHouse = true; setHouseVisited();
       playSoundFile('Access.mp3');
+      
+      // Pantalla negra y mostrar House.png
       sceneOverlay.style.display = 'flex';
       sceneOverlay.style.background = 'black';
       sceneImage.style.display = 'none';
-      sceneText.textContent = '';
+      sceneText.style.display = 'none';
+      
       setTimeout(() => {
-        showScene('House.png', ''); // <-- House.png es la imagen, sin texto extra
+        showScene('House.png');
         sceneOverlay.style.background = 'rgba(0,0,0,0.8)';
         startListeningForInput();
         document.addEventListener('keydown', handleTextInput);
+        showDialogue("🔑 Escribe 'Inside' para entrar o 'Leave' para salir", null, 3000);
       }, 1500);
     }
     
@@ -933,66 +971,62 @@
       // Door.mp3
       playSoundFile('Door.mp3');
       
-      // Después de 2 segundos suena DoorC.mp3
+      // Pantalla negra por 3 segundos
+      sceneOverlay.style.display = 'flex';
+      sceneOverlay.style.background = 'black';
+      sceneImage.style.display = 'none';
+      
       setTimeout(() => {
+        // DoorC.mp3
         playSoundFile('DoorC.mp3');
         
-        // Después de 0.5 segundos, mostrar Inside.png con Ms.BananaS
         setTimeout(() => {
-          showScene('Inside.png', '🍌 ¡Dentro de la casa!');
+          showScene('Inside.png');
           
           if (!insideVisited) {
             insideVisited = true;
             setTimeout(() => {
               playSoundFile('huh.wav');
-              let silentCounter = 0;
-              const maxSilent = 16;
-              const insideTimer = setInterval(() => {
-                silentCounter++;
-                if (silentCounter >= maxSilent) {
-                  clearInterval(insideTimer);
-                  playSoundFile('DoorC.mp3');
-                  setTimeout(() => {
-                    hideScene();
-                    isInside = false; isInHouse = false;
-                    showScene('House.png', '');
-                    startListeningForInput();
-                    document.addEventListener('keydown', handleTextInput);
-                  }, 500);
-                }
-              }, 1000);
+              // 16 segundos de espera (sin contador)
+              setTimeout(() => {
+                playSoundFile('DoorC.mp3');
+                setTimeout(() => {
+                  hideScene();
+                  isInside = false; isInHouse = false;
+                  showScene('House.png');
+                  startListeningForInput();
+                  document.addEventListener('keydown', handleTextInput);
+                }, 500);
+              }, 16000);
             }, 1000);
           } else {
             // Segunda entrada - Spider.png
-            let silentCounter = 0;
-            const maxSilent = 5;
-            const secondTimer = setInterval(() => {
-              silentCounter++;
-              if (silentCounter >= maxSilent) {
-                clearInterval(secondTimer);
-                showScene('Spider.png', '🕷️', 'spider-shake');
-                const spiderAudio = playSoundFile('Spider.mp3', 1.0);
-                spiderAudio.volume = 1.0;
-                setTimeout(() => {
-                  hideScene();
-                  setGameLocked();
-                  setGlitchRedMode();
-                  glitchRedScreen.style.display = 'flex';
-                  startGlitchRedPolling();
-                }, 2500);
-              }
-            }, 1000);
+            setTimeout(() => {
+              showScene('Spider.png');
+              sceneImage.className = 'spider-shake';
+              const spiderAudio = playSoundFile('Spider.mp3', 1.0);
+              spiderAudio.volume = 1.0;
+              setTimeout(() => {
+                hideScene();
+                setGameLocked();
+                setGlitchRedMode();
+                glitchRedScreen.style.display = 'flex';
+                startGlitchRedPolling();
+              }, 2500);
+            }, 5000);
           }
         }, 500);
-      }, 2000);
+      }, 3000);
     }
     
     function leaveHouse() {
       playSoundFile('Access.mp3');
+      
       sceneOverlay.style.display = 'flex';
       sceneOverlay.style.background = 'black';
       sceneImage.style.display = 'none';
-      sceneText.textContent = '';
+      sceneText.style.display = 'none';
+      
       setTimeout(() => {
         hideScene();
         isInHouse = false; isInside = false;
@@ -1006,22 +1040,8 @@
         document.getElementById('rageText').style.display = 'none';
         document.getElementById('dayText').style.display = 'none';
         document.getElementById('gameScreen').style.display = 'block';
-        showDialogue("🍔 Hay una hamburguesa en la mesa. ¿Quieres comerla?", null, 5000);
+        showDialogue("🍔 Hay una hamburguesa en la mesa. ¿Quieres comerla? (E)", null, 5000);
         document.addEventListener('keydown', eatHandler);
-      }, 1500);
-    }
-    
-    function activateBanana() {
-      playSoundFile('Access.mp3');
-      sceneOverlay.style.display = 'flex';
-      sceneOverlay.style.background = 'black';
-      sceneImage.style.display = 'none';
-      sceneText.textContent = '';
-      setTimeout(() => {
-        showScene('House.png', '');
-        sceneOverlay.style.background = 'rgba(0,0,0,0.8)';
-        startListeningForInput();
-        document.addEventListener('keydown', handleTextInput);
       }, 1500);
     }
     
@@ -1036,18 +1056,11 @@
     function eatBurger() {
       const rage = parseInt(localStorage.getItem(RAGE_PROGRESS_KEY)) || 0;
       if (rage >= 1 && rage <= 9) {
-        // Bana.wav con reverb
         playSoundFile('bana.wav');
-        let counter = 0;
-        const maxCounter = 13;
-        showDialogue("🍌 ¡Has comido la hamburguesa!", null, 1000);
-        const burgerTimer = setInterval(() => {
-          counter++;
-          if (counter >= maxCounter) {
-            clearInterval(burgerTimer);
-            startBossFight();
-          }
-        }, 1000);
+        // 13 segundos sin contador
+        setTimeout(() => {
+          startBossFight();
+        }, 13000);
       } else {
         showDialogue("🍔 La hamburguesa está deliciosa. No pasa nada.", null, 2000);
       }
@@ -1058,9 +1071,8 @@
 
     // ==================== FUNCIÓN DE RESET ====================
     function performReset() {
-      console.log("🔄 RESET ACTIVADO - Borrando cookies y localStorage");
-      clearProgress(); // Esto borra localStorage y TODAS las cookies
-      
+      console.log("🔄 RESET ACTIVADO");
+      clearProgress();
       stopAllGameMusic();
       if (window.chaseMusic) window.chaseMusic.pause();
       if (window.heartbeatSound) window.heartbeatSound.pause();
@@ -1268,7 +1280,7 @@
         if (roomMusic) roomMusic.pause();
         startListeningForInput();
         document.addEventListener('keydown', handleTextInput);
-        showDialogue("🔑 Escribe 'Banana' para ir a la casa", null, 3000);
+        showDialogue("🔑 Escribe 'Inside' para entrar", null, 3000);
       });
     }
 
@@ -1377,6 +1389,19 @@
         jumpscareVideo.onended = () => {
           window.location.href = "https://raw.githubusercontent.com/Raphapro900/Ms.BananaS/refs/heads/main/You%20know%20nothing%2C%20IDIOT.png";
         };
+      }
+
+      // ==================== TRANSICIÓN DE PANTALLA NEGRA AL EMPEZAR UN DÍA ====================
+      function startDayTransition(callback) {
+        sceneOverlay.style.display = 'flex';
+        sceneOverlay.style.background = 'black';
+        sceneImage.style.display = 'none';
+        sceneText.style.display = 'none';
+        
+        setTimeout(() => {
+          hideScene();
+          if (callback) callback();
+        }, 1500);
       }
 
       // ==================== BOSSFIGHT 2D ====================
@@ -1566,7 +1591,6 @@
                     bossHits++;
                     bossHPDisplay.textContent = `❤️ ${bossHP - bossHits}/${bossHP}`;
                     
-                    // Ouch.mp3 cuando el boss recibe daño
                     const ouchSound = new Audio('Ouch.mp3');
                     ouchSound.volume = 0.7;
                     ouchSound.play().catch(e => console.log("Ouch.mp3 error:", e));
@@ -1681,7 +1705,6 @@
                     bossHits++;
                     bossHPDisplay.textContent = `❤️ ${bossHP - bossHits}/${bossHP}`;
                     
-                    // under.mp3 cuando el jugador recibe daño
                     const underSound = new Audio('under.mp3');
                     underSound.volume = 0.6;
                     underSound.play().catch(e => console.log("under.mp3 error:", e));
@@ -1710,7 +1733,6 @@
             }
           }
           
-          // Dibujar Ms. BananaS (ABanana.png)
           if (bossImg.complete && bossImg.naturalWidth > 0) {
             const size = 120;
             ctx.drawImage(bossImg, bossX - size/2, bossY - size/2, size, size);
@@ -1837,7 +1859,7 @@
       function completeGame(hasErrors) {
         gameActive = false;
         if (!hasErrors) {
-          showCreditsWithTimer();
+          showThanksAndCredits();
         } else {
           startBossFight();
         }
@@ -2158,9 +2180,11 @@
                 saveProgress(day, rage, totalErrors);
                 updateUI();
                 gameActive = false;
-                setTimeout(() => {
+                // Transición de pantalla negra al empezar el nuevo día
+                startDayTransition(() => {
                   returnToMenu();
-                }, 2500);
+                });
+                return;
               } else {
                 const hasErrors = totalErrors > 0;
                 completeGame(hasErrors);
@@ -2225,6 +2249,9 @@
           welcomeSound = "Dias.mp3";
         }
         showDialogue(`🍌 DÍA ${day} - ¡Continúa la aventura! Elige el animal correcto.`, welcomeSound, 3500);
+        
+        // Transición de pantalla negra al empezar el día
+        startDayTransition(() => {});
       });
       
       // ============================================
