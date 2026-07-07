@@ -284,6 +284,12 @@
 
     // ==================== TRANSICIÓN DE ENTRADA A LA HABITACIÓN ====================
     function enterRoom() {
+      // 🛑 Asegurarse de que la música del menú esté detenida
+      if (menuMusic) {
+        menuMusic.pause();
+        menuMusic.currentTime = 0;
+      }
+      
       // Door.mp3 suena primero
       playSoundFile('Door.mp3');
       
@@ -291,7 +297,7 @@
       setTimeout(() => {
         playSoundFile('DoorC.mp3');
         
-        // Después de 0.5 segundos, mostrar Room.png y empezar el juego
+        // Después de 0.5 segundos, mostrar Room.png
         setTimeout(() => {
           document.getElementById('gameScreen').style.display = 'block';
           
@@ -501,14 +507,20 @@
         if (menuMusic) menuMusic.pause();
         tvAnimal.src = 'Thanks.png';
       }
-      // Al cargar, mostrar la pantalla de inicio
-      document.getElementById('startScreen').style.display = 'flex';
-      document.getElementById('gameScreen').style.display = 'none';
       
-      // Botón Jugar
+      // ============================================
+      // BOTÓN JUGAR (CORREGIDO - DETIENE LA MÚSICA DEL MENÚ)
+      // ============================================
       const bananaPlay = document.getElementById("bananaPlay");
       bananaPlay.addEventListener("click", function iniciarPartida(e) {
         e.preventDefault();
+        
+        // 🛑 DETENER LA MÚSICA DEL MENÚ ANTES DE TODO
+        if (menuMusic) {
+          menuMusic.pause();
+          menuMusic.currentTime = 0;
+        }
+        
         document.getElementById('startScreen').style.display = 'none';
         // Iniciar transición con Door.mp3 y DoorC.mp3
         enterRoom();
@@ -616,7 +628,7 @@
       });
     }
 
-    // ==================== JUEGO PRINCIPAL (se ejecuta después de entrar a Room.png) ====================
+    // ==================== JUEGO PRINCIPAL ====================
     function iniciarJuego() {
       const howBtn = document.getElementById("howBtn");
       const shopBtn = document.getElementById("shopBtn");
@@ -664,16 +676,13 @@
       function updateChaseEQ(distance) {
         if (!eqFilter) return;
         if (distance > 15) {
-          // Lejos → graves (boost)
           eqFilter.gain.value = 12;
           eqFilter.frequency.value = 150;
         } else if (distance > 8) {
-          // Media distancia → menos graves
           const t = (distance - 8) / 7;
           eqFilter.gain.value = 6 * (1 - t);
           eqFilter.frequency.value = 200;
         } else {
-          // Cerca → normal (sin boost)
           eqFilter.gain.value = 0;
         }
       }
@@ -1215,10 +1224,7 @@
       
       function updateChaseAudio(distance) {
         if (!chaseMusic) return;
-        // Actualizar filtro EQ según distancia
         updateChaseEQ(distance);
-        
-        // Volumen normal
         if (distance < 8) {
           chaseMusic.volume = 0.9;
         } else if (distance < 15) {
@@ -1417,7 +1423,6 @@
       
       function startChaseMinigame() {
         if (chaseActive) return;
-        // Configurar filtro EQ antes de iniciar
         setupChaseAudio();
         
         playGlitchTransition(() => {
@@ -1551,12 +1556,10 @@
       });
       
       // ============================================
-      // BOTÓN EXIT (CORREGIDO)
+      // BOTÓN EXIT
       // ============================================
       exitBtn.addEventListener("click", function() {
-        // Intentar cerrar la ventana
         window.close();
-        // Fallback: si no se puede cerrar, redirigir a una página en blanco
         setTimeout(() => {
           window.location.href = "about:blank";
         }, 100);
@@ -1574,7 +1577,6 @@
       // ============================================
       document.getElementById('resetBtn').addEventListener('click', performReset);
       
-      // Inicializar animales
       updateUI();
       nextAnimal();
     }
