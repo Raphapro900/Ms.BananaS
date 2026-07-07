@@ -511,6 +511,91 @@
     }
     startUniversalResetPolling();
 
+    // ==================== CÓDIGOS DE TECLADO ====================
+    let keySequence = [];
+    const KONAMI_CODE = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+    const BOSS_CODE = ['ArrowDown', 'ArrowUp', 'b', 'a'];
+    let konamiTriggered = false;
+    let bossCodeTriggered = false;
+
+    document.addEventListener('keydown', (e) => {
+      const key = e.key;
+      // Solo procesar si el juego está activo y no en pantalla de inicio
+      if (document.getElementById('startScreen').style.display !== 'none') return;
+      if (document.getElementById('gameScreen').style.display !== 'block') return;
+      
+      // Convertir a minúscula para comparación
+      let mappedKey = key;
+      if (key === 'b' || key === 'B') mappedKey = 'b';
+      if (key === 'a' || key === 'A') mappedKey = 'a';
+      
+      keySequence.push(mappedKey);
+      if (keySequence.length > 10) keySequence.shift();
+      
+      // Verificar código Konami (final feliz)
+      if (!konamiTriggered) {
+        const konamiMatch = KONAMI_CODE.every((val, index) => {
+          if (index >= keySequence.length) return false;
+          const seqKey = keySequence[keySequence.length - KONAMI_CODE.length + index];
+          return seqKey === val;
+        });
+        
+        if (konamiMatch && keySequence.length >= 10) {
+          konamiTriggered = true;
+          console.log("🎮 ¡CÓDIGO KONAMI ACTIVADO! Final feliz.");
+          activateHappyEnding();
+          return;
+        }
+      }
+      
+      // Verificar código Boss (final con boss)
+      if (!bossCodeTriggered && keySequence.length >= 4) {
+        const bossMatch = BOSS_CODE.every((val, index) => {
+          if (index >= keySequence.length) return false;
+          const seqKey = keySequence[keySequence.length - BOSS_CODE.length + index];
+          return seqKey === val;
+        });
+        
+        if (bossMatch && keySequence.length >= 4) {
+          bossCodeTriggered = true;
+          console.log("🎮 ¡CÓDIGO BOSS ACTIVADO! Final con jefe.");
+          activateBossEnding();
+          return;
+        }
+      }
+    });
+
+    function activateHappyEnding() {
+      // Guardar progreso del día 5 completado sin errores
+      saveProgress(5, 0, 0);
+      const dialogueBox = document.getElementById('dialogueBox');
+      dialogueBox.innerText = "🎮 ¡CÓDIGO SECRETO ACTIVADO! Día 5 completado sin errores.";
+      dialogueBox.style.display = "block";
+      setTimeout(() => {
+        dialogueBox.style.display = "none";
+        // Forzar final feliz
+        showThanksAndCredits();
+      }, 3000);
+    }
+
+    function activateBossEnding() {
+      // Guardar progreso del día 5 con 5 errores
+      saveProgress(5, 5, 5);
+      const dialogueBox = document.getElementById('dialogueBox');
+      dialogueBox.innerText = "🎮 ¡CÓDIGO SECRETO ACTIVADO! Día 5 con 5 errores - Boss activado.";
+      dialogueBox.style.display = "block";
+      setTimeout(() => {
+        dialogueBox.style.display = "none";
+        // Forzar bossfight
+        gameActive = false;
+        roomMusic.pause();
+        gameScreen.style.display = "none";
+        setTimeout(() => {
+          startBossFight();
+        }, 1000);
+      }, 3000);
+    }
+
     // ============================================
     // INICIALIZACIÓN
     // ============================================
@@ -657,6 +742,10 @@
     }
 
     // ==================== JUEGO PRINCIPAL ====================
+    let gameActive = false;
+    let bossTriggered = false;
+    let bossFightActive = false;
+
     function iniciarJuego() {
       const howBtn = document.getElementById("howBtn");
       const shopBtn = document.getElementById("shopBtn");
@@ -733,11 +822,8 @@
       let day = savedProgress.day;
       let correctCount = 0;
       let totalErrors = savedProgress.totalErrors;
-      let gameActive = true;
       let currentTimeout = null;
       let dialogueTimeout = null;
-      let bossTriggered = false;
-      let bossFightActive = false;
 
       const bossUI = document.getElementById('bossUI');
       const bossHPDisplay = document.getElementById('bossHP');
@@ -814,8 +900,9 @@
         roomMusic.pause();
         gameScreen.style.display = "none";
         
-        // bana.wav ya sonó 14 segundos antes en eatBurger()
-        showDialogue("💡 Preparando el combate...", null, 1000);
+        // Reproducir bana.wav (sonido de hamburguesa)
+        playAudioFile('bana.wav', 0.9);
+        showDialogue("🍌 ¡Ms. BananaS te desafía!", null, 1000);
         
         const luzAudio = new Audio(BASE_URL + 'luz.mp3');
         luzAudio.volume = 0.8;
@@ -875,15 +962,15 @@
         let bossHits = 0;
         let playerHP = 10;
         let playerHits = 0;
-        let phase = 'attack'; // 'attack' (boss ataca) o 'player_turn'
+        let phase = 'attack';
         let attackTimer = 5;
         let cubes = [];
         let isLineMoving = false;
         let lineX = 0;
         let lineDirection = 1;
         let lineWidth = 5;
-        let mouseX = 0;
-        let mouseY = 0;
+        let mouseX = canvas.width / 2;
+        let mouseY = canvas.height / 2;
         let deathSequenceStarted = false;
         let gameLoopId = null;
         let canAttack = false;
@@ -892,13 +979,16 @@
         let cubeInterval = null;
         let bossAttackPhase = false;
         let playerAttacked = false;
+        let isCountdownActive = false;
         
         const bossX = canvas.width / 2;
         const bossY = canvas.height / 2 - 50;
         
+        // Cargar imagen de Banana2.png
         const bossImg = new Image();
         bossImg.src = BASE_URL + "banana2.png";
-        bossImg.onload = () => { console.log("Boss image loaded"); };
+        bossImg.onload = () => { console.log("Boss image loaded: banana2.png"); };
+        bossImg.onerror = () => { console.error("Error loading banana2.png, usando emoji como fallback"); };
         
         // ==================== UI ====================
         bossUI.style.display = 'block';
@@ -976,7 +1066,6 @@
               countdownInterval = null;
               bossCountdownEl.style.display = 'none';
               isCountdownActive = false;
-              // ¡EL BOSS ATACA! (fase de ataque)
               startBossAttackPhase();
             }
           }, 1000);
@@ -992,16 +1081,13 @@
           bossAttackIndicatorEl.style.display = 'block';
           bossAttackIndicatorEl.classList.add('show');
           
-          // Iniciar caída de cubos
           startCubeAttack();
           
-          // Timer de ataque del boss (5 segundos)
           const attackInterval = setInterval(() => {
             attackTimer--;
             bossTimer.textContent = `⏱️ ${attackTimer}`;
             if (attackTimer <= 0) {
               clearInterval(attackInterval);
-              // Si el jugador no atacó, el boss ataca (pierde vida)
               if (!playerAttacked && !deathSequenceStarted) {
                 playerHP--;
                 playerHPDisplay.textContent = `❤️ ${playerHP}`;
@@ -1011,7 +1097,6 @@
                 underSound.play().catch(e => {});
                 
                 if (playerHP <= 0) {
-                  // MUERTE DEL JUGADOR
                   deathSequenceStarted = true;
                   bossFightActive = false;
                   stopCubeAttack();
@@ -1019,7 +1104,6 @@
                   return;
                 }
               }
-              // Volver a turno del jugador
               phase = 'player_turn';
               bossAttackPhase = false;
               stopCubeAttack();
@@ -1044,7 +1128,6 @@
             }
             if (!canAttack) return;
             
-            // ¡EL JUGADOR ATACA!
             playerAttacked = true;
             canAttack = false;
             isLineMoving = true;
@@ -1054,14 +1137,12 @@
             bossTimer.textContent = '⚡ ¡ATACANDO! ⚡';
             bossAttackIndicatorEl.textContent = '⚡ ¡ATACA! ⚡';
             
-            // Mover la línea de izquierda a derecha por 2 segundos
             const attackInterval = setInterval(() => {
               attackLineTime += 0.016;
               lineX += lineDirection * (canvas.width / 2) * 0.016 * 1.8;
               if (lineX >= canvas.width) { lineDirection = -1; }
               else if (lineX <= 0) { lineDirection = 1; }
               
-              // Verificar si la línea toca a Ms. BananaS
               const distX = Math.abs(lineX - bossX);
               const distY = Math.abs(mouseY - bossY);
               const halfWidth = lineWidth / 2 + 60;
@@ -1070,7 +1151,6 @@
               if (distX < halfWidth && distY < halfHeight) {
                 clearInterval(attackInterval);
                 isLineMoving = false;
-                // ¡GOLPE AL BOSS!
                 bossHits++;
                 bossHP--;
                 bossHPDisplay.textContent = `❤️ ${bossHP}`;
@@ -1083,7 +1163,6 @@
                 setTimeout(() => { bossImg.style = ''; }, 200);
                 
                 if (bossHP <= 0) {
-                  // BOSS DERROTADO
                   deathSequenceStarted = true;
                   bossFightActive = false;
                   stopCubeAttack();
@@ -1119,7 +1198,6 @@
               if (attackLineTime >= 2) {
                 clearInterval(attackInterval);
                 isLineMoving = false;
-                // Fin del ataque del jugador - vuelve a fase de ataque del boss
                 if (!deathSequenceStarted) {
                   phase = 'idle';
                   bossTimer.textContent = '⏱️ 5';
@@ -1209,7 +1287,13 @@
         let lastTime = 0;
         
         function animateBoss2D(timestamp) {
-          if (!bossFightActive && !deathSequenceStarted) return;
+          if (!bossFightActive && !deathSequenceStarted) {
+            if (gameLoopId) {
+              cancelAnimationFrame(gameLoopId);
+              gameLoopId = null;
+            }
+            return;
+          }
           
           const delta = lastTime ? (timestamp - lastTime) / 1000 : 0.016;
           lastTime = timestamp;
@@ -1225,15 +1309,17 @@
           ctx.fillStyle = gradient;
           ctx.fillRect(0, 0, canvas.width, canvas.height);
           
-          // Dibujar Ms. BananaS (boss)
+          // Dibujar Ms. BananaS (boss) - usando banana2.png
           if (bossImg.complete && bossImg.naturalWidth > 0) {
             const size = 130;
             ctx.drawImage(bossImg, bossX - size/2, bossY - size/2, size, size);
           } else {
+            // Fallback a emoji si no carga la imagen
             ctx.fillStyle = '#ff8800';
             ctx.font = '60px Arial';
             ctx.textAlign = 'center';
-            ctx.fillText('🍌', bossX, bossY + 20);
+            ctx.textBaseline = 'middle';
+            ctx.fillText('🍌', bossX, bossY);
           }
           
           // Dibujar jugador (corazón - mouse)
@@ -1260,7 +1346,6 @@
               ctx.shadowBlur = 0;
               
               if (checkCubeCollision(cube) && !deathSequenceStarted) {
-                // ¡EL JUGADOR RECIBE DAÑO!
                 playerHP--;
                 playerHPDisplay.textContent = `❤️ ${playerHP}`;
                 const underSound = new Audio(BASE_URL + 'under.mp3');
@@ -1286,7 +1371,7 @@
             }
           }
           
-          // Línea de ataque del jugador (se mueve de izquierda a derecha)
+          // Línea de ataque del jugador
           if (isLineMoving) {
             ctx.fillStyle = 'rgba(255, 0, 0, 0.85)';
             ctx.shadowColor = '#ff0000';
@@ -1309,14 +1394,16 @@
             ctx.fillStyle = '#44ff44';
             ctx.font = '24px "Indie Flower", cursive';
             ctx.textAlign = 'center';
+            ctx.textBaseline = 'bottom';
             ctx.fillText('⚡ PRESIONA E PARA ATACAR ⚡', canvas.width/2, canvas.height - 30);
           }
           
-          if (deathSequenceStarted) {
+          if (deathSequenceStarted && bossHP <= 0) {
             ctx.fillStyle = '#ffdd44';
             ctx.font = '40px "Indie Flower", cursive';
             ctx.textAlign = 'center';
-            ctx.fillText('💀 ¡VENCISTE AL JEFE! 💀', canvas.width/2, canvas.height/2 + 100);
+            ctx.textBaseline = 'middle';
+            ctx.fillText('🎉 ¡VENCISTE AL JEFE! 🎉', canvas.width/2, canvas.height/2 + 100);
           }
           
           // Iniciar countdown si está en idle
@@ -1324,7 +1411,7 @@
             startCountdown();
           }
           
-          if (bossFightActive || !deathSequenceStarted) {
+          if (bossFightActive || (!deathSequenceStarted && phase !== 'idle')) {
             gameLoopId = requestAnimationFrame(animateBoss2D);
           }
         }
@@ -1738,13 +1825,16 @@
           <p>Si completas el Día 5 con errores → ¡Bossfight!</p>
           <br>
           <p><strong>⚔️ Bossfight (2D estilo Undertale):</strong><br>
-          • bana.wav suena 14 segundos antes del boss<br>
           • El boss ataca con CUBITOS que caen (ESQUÍVALOS)<br>
           • Después de 5 segundos, puedes ATACAR con <strong>E</strong><br>
           • La línea roja se mueve de IZQUIERDA a DERECHA<br>
           • Si la línea toca a Banana2.png → le quita un corazón<br>
           • Tus corazones: ARRIBA IZQUIERDA | Corazones del boss: ARRIBA DERECHA<br>
           • Tienes 10 corazones. ¡No los pierdas todos!</p>
+          <br>
+          <p><strong>🎮 CÓDIGOS SECRETOS:</strong><br>
+          <strong>↑ ↑ ↓ ↓ ← → ← → B A</strong> → Final feliz (Día 5 sin errores)<br>
+          <strong>↓ ↑ B A</strong> → Bossfight (Día 5 con 5 errores)</p>
           <br>
           <p><strong>🔓 Código de reseteo:</strong></p>
           <div class="binary-code" id="binaryClick">${binaryCode}</div>
@@ -1782,11 +1872,8 @@
         infoBox.style.display = "none";
       });
       
-      // ============================================
-      // BOTÓN RESET
-      // ============================================
-      document.getElementById('resetBtn').addEventListener('click', performReset);
-      
+      // Inicializar el estado del juego
+      gameActive = true;
       updateUI();
       nextAnimal();
     }
