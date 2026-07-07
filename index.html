@@ -198,9 +198,40 @@
   <script type="module">
     import * as THREE from 'three';
 
-    const binaryCode = "01101000 01110100 01110100 01110000 01110011 00111010 00101111 00101111 01110010 01100001 01110000 01101000 01100001 01110000 01110010 01101111 00111001 00110000 00110000 00101110 01100111 01101001 01110100 01101000 01110101 01100010 00101110 01101001 01101111 00101111 01110010 01100101 01110011 01100101 01110100 00101111";
-    const resetUrl = "https://raphapro900.github.io/reset/";
-    function openResetPage() { window.open(resetUrl, '_blank'); }
+    // ==================== BASE URL DE AUDIOS ====================
+    const AUDIO_BASE = "https://raw.githubusercontent.com/Raphapro900/Ms.BananaS/refs/heads/main/";
+    
+    // ==================== FUNCIÓN PARA REPRODUCIR AUDIO ====================
+    function playAudioFile(filename, volume = 0.8) {
+      const url = AUDIO_BASE + filename;
+      console.log(`🔊 Intentando reproducir: ${url}`);
+      
+      return new Promise((resolve) => {
+        const audio = new Audio();
+        audio.volume = volume;
+        audio.src = url;
+        audio.preload = 'auto';
+        
+        audio.addEventListener('canplaythrough', () => {
+          console.log(`✅ Audio cargado: ${filename}`);
+          audio.play().then(() => {
+            console.log(`▶️ Reproduciendo: ${filename}`);
+            resolve(audio);
+          }).catch(err => {
+            console.error(`❌ Error reproduciendo ${filename}:`, err);
+            resolve(null);
+          });
+        });
+        
+        audio.addEventListener('error', (e) => {
+          console.error(`❌ Error cargando ${filename}:`, e);
+          resolve(null);
+        });
+        
+        // Forzar carga
+        audio.load();
+      });
+    }
 
     // ==================== SISTEMA DE BLOQUEO ====================
     const LOCK_STORAGE_KEY = "gameLocked_V5", RESET_SIGNAL_KEY = "resetSignal";
@@ -254,16 +285,14 @@
 
     function showScene(imageSrc) { sceneOverlay.style.display = 'flex'; sceneImage.src = imageSrc; sceneImage.className = ''; sceneText.style.display = 'none'; setTimeout(() => { sceneOverlay.classList.add('active'); }, 50); }
     function hideScene() { sceneOverlay.classList.remove('active'); setTimeout(() => { sceneOverlay.style.display = 'none'; }, 600); }
-    function playSoundFile(src, volume = 0.8) { const audio = new Audio(src); audio.volume = volume; audio.play().catch(e => console.log("Audio error:", e)); return audio; }
+
+    function stopAllGameMusic() { if (menuMusic) { menuMusic.pause(); menuMusic.currentTime = 0; } if (roomMusic) { roomMusic.pause(); roomMusic.currentTime = 0; } }
+    function playMenuMusic() { if (menuMusic) { menuMusic.currentTime = 0; menuMusic.play().catch(e => console.log("menuMusic error:", e)); } }
 
     function showThanksAndCredits() {
       const dialogueBox = document.getElementById('dialogueBox');
       dialogueBox.innerText = "🎉 ¡GRACIAS POR JUGAR! 🎉"; dialogueBox.style.display = "block";
-      const thanksAudio = new Audio('Thanks.wav'); thanksAudio.volume = 0.9;
-      stopAllGameMusic();
-      if (window.chaseMusic) window.chaseMusic.pause();
-      if (window.heartbeatSound) window.heartbeatSound.pause();
-      thanksAudio.play().catch(e => console.log("Thanks.wav error:", e));
+      playAudioFile('Thanks.wav', 0.9);
       setTimeout(() => { dialogueBox.style.display = "none"; showCreditsVideo(); }, 21000);
     }
 
@@ -284,46 +313,48 @@
 
     // ==================== TRANSICIÓN DE ENTRADA A LA HABITACIÓN ====================
     function enterRoom() {
-      // 🛑 Asegurarse de que la música del menú esté detenida
       if (menuMusic) {
         menuMusic.pause();
         menuMusic.currentTime = 0;
       }
       
-      // Door.mp3 suena primero
-      playSoundFile('Door.mp3');
+      // Door.mp3 con URL completa
+      playAudioFile('Door.mp3');
       
-      // Después de 3 segundos suena DoorC.mp3
       setTimeout(() => {
-        playSoundFile('DoorC.mp3');
+        playAudioFile('DoorC.mp3');
         
-        // Después de 0.5 segundos, mostrar Room.png
         setTimeout(() => {
           document.getElementById('gameScreen').style.display = 'block';
           
-          // Reproducir Room Theme.mp3
           if (roomMusic) {
             roomMusic.currentTime = 0;
             roomMusic.loop = true;
             roomMusic.play().catch(e => console.log("roomMusic error:", e));
           }
           
-          // Mostrar diálogo según el día
           const day = parseInt(localStorage.getItem(DAY_PROGRESS_KEY)) || 1;
-          let welcomeSound = "Primer dia.mp3";
-          if (day >= 2 && day <= 5) {
-            welcomeSound = "Dias.wav";
-          }
-          showDialogue(`🍌 DÍA ${day} - ¡Continúa la aventura! Elige el animal correcto.`, welcomeSound, 3500);
           
-          // Iniciar el juego
+          // ========== AUDIO DE BIENVENIDA CORREGIDO ==========
+          let welcomeFile = "Primer dia.mp3";
+          if (day >= 2 && day <= 5) {
+            welcomeFile = "Dias.mp3";
+          }
+          
+          console.log(`🔊 Reproduciendo bienvenida: ${welcomeFile} (Día ${day})`);
+          
+          // Usar playAudioFile con URL completa
+          playAudioFile(welcomeFile, 0.8).then(() => {
+            // Mostrar diálogo después de que el audio termine o falle
+            setTimeout(() => {
+              showDialogue(`🍌 DÍA ${day} - ¡Continúa la aventura! Elige el animal correcto.`, null, 3500);
+            }, 500);
+          });
+          
           iniciarJuego();
         }, 500);
       }, 3000);
     }
-
-    function stopAllGameMusic() { if (menuMusic) { menuMusic.pause(); menuMusic.currentTime = 0; } if (roomMusic) { roomMusic.pause(); roomMusic.currentTime = 0; } }
-    function playMenuMusic() { if (menuMusic) { menuMusic.currentTime = 0; menuMusic.play().catch(e => console.log("menuMusic error:", e)); } }
 
     // ==================== FUNCIONES DE LA CASA ====================
     let insideVisited = false, isInHouse = false, isInside = false, isListeningForInput = false;
@@ -353,7 +384,7 @@
     function enterHouse() {
       if (isInHouse) return;
       isInHouse = true; setHouseVisited();
-      playSoundFile('Access.mp3');
+      playAudioFile('Access.mp3');
       showScene('https://raw.githubusercontent.com/Raphapro900/Ms.BananaS/refs/heads/main/House.png');
       setTimeout(() => {
         startListeningForInput();
@@ -365,18 +396,18 @@
     function enterInside() {
       if (isInside) return;
       isInside = true; setInsideVisited();
-      playSoundFile('Door.mp3');
+      playAudioFile('Door.mp3');
       
       setTimeout(() => {
-        playSoundFile('DoorC.mp3');
+        playAudioFile('DoorC.mp3');
         showScene('https://raw.githubusercontent.com/Raphapro900/Ms.BananaS/refs/heads/main/Inside.png');
         
         if (!insideVisited) {
           insideVisited = true;
           setTimeout(() => {
-            playSoundFile('huh.wav');
+            playAudioFile('huh.wav');
             setTimeout(() => {
-              playSoundFile('DoorC.mp3');
+              playAudioFile('DoorC.mp3');
               setTimeout(() => {
                 hideScene();
                 isInside = false; isInHouse = false;
@@ -390,8 +421,7 @@
           setTimeout(() => {
             showScene('https://raw.githubusercontent.com/Raphapro900/Ms.BananaS/refs/heads/main/Spider.png');
             sceneImage.className = 'spider-shake';
-            const spiderAudio = playSoundFile('Spider.mp3', 1.0);
-            spiderAudio.volume = 1.0;
+            playAudioFile('Spider.mp3', 1.0);
             setTimeout(() => {
               hideScene();
               setGameLocked(); setGlitchRedMode();
@@ -404,7 +434,7 @@
     }
     
     function leaveHouse() {
-      playSoundFile('Access.mp3');
+      playAudioFile('Access.mp3');
       setTimeout(() => {
         hideScene();
         isInHouse = false; isInside = false;
@@ -434,7 +464,7 @@
     function eatBurger() {
       const rage = parseInt(localStorage.getItem(RAGE_PROGRESS_KEY)) || 0;
       if (rage >= 1 && rage <= 9) {
-        playSoundFile('bana.wav');
+        playAudioFile('bana.wav');
         showDialogue("🍌 ¡Has comido la hamburguesa!", null, 1000);
         setTimeout(() => {
           startBossFight();
@@ -508,21 +538,16 @@
         tvAnimal.src = 'Thanks.png';
       }
       
-      // ============================================
-      // BOTÓN JUGAR (CORREGIDO - DETIENE LA MÚSICA DEL MENÚ)
-      // ============================================
       const bananaPlay = document.getElementById("bananaPlay");
       bananaPlay.addEventListener("click", function iniciarPartida(e) {
         e.preventDefault();
         
-        // 🛑 DETENER LA MÚSICA DEL MENÚ ANTES DE TODO
         if (menuMusic) {
           menuMusic.pause();
           menuMusic.currentTime = 0;
         }
         
         document.getElementById('startScreen').style.display = 'none';
-        // Iniciar transición con Door.mp3 y DoorC.mp3
         enterRoom();
       });
     }
