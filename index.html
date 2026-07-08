@@ -67,28 +67,22 @@
     .waiting-screen h1 { font-size: 3rem; margin-bottom: 1rem; letter-spacing: 2px; color: #FFD700; text-shadow: 0 0 20px #FF6600; }
     .waiting-screen p { font-size: 1.2rem; max-width: 80%; line-height: 1.4; opacity: 0.7; }
     .waiting-screen .reset-signal { margin-top: 2rem; font-size: 0.9rem; opacity: 0.8; background: rgba(0,0,0,0.5); padding: 10px 20px; border-radius: 8px; max-width: 80%; word-break: break-all; }
-    .waiting-screen .reset-btn { margin-top: 1.5rem; padding: 15px 40px; font-size: 1.2rem; background: #FF6600; color: black; border: none; border-radius: 10px; cursor: pointer; transition: transform 0.2s; font-family: 'Indie Flower', cursive !important; }
-    .waiting-screen .reset-btn:hover { transform: scale(1.1); background: #FF8800; }
     
     .lock-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #0000aa; z-index: 10000; display: none; flex-direction: column; align-items: center; justify-content: center; font-family: 'Share Tech Mono', 'Indie Flower', monospace !important; color: white; text-align: center; }
     .lock-screen h1 { font-size: 4rem; margin-bottom: 1rem; letter-spacing: 2px; font-family: 'Share Tech Mono', monospace !important; }
     .lock-screen p { font-size: 1.5rem; max-width: 80%; line-height: 1.4; }
     .lock-screen .reset-signal { margin-top: 2rem; font-size: 0.9rem; opacity: 0.8; background: rgba(0,0,0,0.5); padding: 10px 20px; border-radius: 8px; max-width: 80%; word-break: break-all; }
-    .lock-screen .reset-btn { margin-top: 1.5rem; padding: 15px 40px; font-size: 1.2rem; background: #FF6600; color: black; border: none; border-radius: 10px; cursor: pointer; transition: transform 0.2s; font-family: 'Indie Flower', cursive !important; }
-    .lock-screen .reset-btn:hover { transform: scale(1.1); background: #FF8800; }
     
     .glitch-red-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #8b0000; z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; font-family: 'Share Tech Mono', monospace !important; color: #ff0000; text-align: center; overflow: hidden; }
     .glitch-red-screen h1 { font-size: 6rem; text-shadow: 0 0 30px #ff0000, 0 0 60px #ff0000, 0 0 120px #ff0000; animation: glitchText 0.1s infinite; color: #ff0000; font-family: 'Share Tech Mono', monospace !important; }
     @keyframes glitchText { 0% { transform: translate(0); opacity: 1; } 20% { transform: translate(-5px, 3px); opacity: 0.8; } 40% { transform: translate(5px, -3px); opacity: 1; } 60% { transform: translate(-3px, 5px); opacity: 0.9; } 80% { transform: translate(3px, -5px); opacity: 1; } 100% { transform: translate(0); opacity: 1; } }
     .glitch-red-screen .reset-signal-red { margin-top: 3rem; font-size: 0.8rem; opacity: 0.7; color: #ff6666; font-family: 'Share Tech Mono', monospace !important; }
-    .glitch-red-screen .reset-btn-red { margin-top: 2rem; padding: 15px 40px; font-size: 1.2rem; background: #ff0000; color: black; border: none; border-radius: 10px; cursor: pointer; transition: transform 0.2s; font-family: 'Share Tech Mono', monospace !important; }
-    .glitch-red-screen .reset-btn-red:hover { transform: scale(1.1); background: #ff3333; }
     
     .binary-code { font-family: 'Share Tech Mono', monospace !important; font-size: 0.75rem; color: #88ff88; background: #00000080; padding: 8px; border-radius: 5px; display: inline-block; margin-top: 10px; word-break: break-all; cursor: pointer; transition: all 0.2s; }
     .binary-code:hover { background: #00aa44; color: black; transform: scale(1.02); }
     .controls-mystery { letter-spacing: 2px; }
     
-    button, .menuBtn, .options button, #dialogueBox, #rageText, #dayText, .chaseUI, footer, .reset-signal, .reset-btn, .reset-btn-red { font-family: 'Indie Flower', cursive !important; }
+    button, .menuBtn, .options button, #dialogueBox, #rageText, #dayText, .chaseUI, footer, .reset-signal { font-family: 'Indie Flower', cursive !important; }
     h1, h2, h3 { font-family: 'Indie Flower', cursive !important; }
     
     .credits-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9998; background: black; display: none; align-items: center; justify-content: center; }
@@ -129,7 +123,6 @@
     <h1>🍌 Ms. BananaS 🍌</h1>
     <p>Juego completado. Esperando señal de reseteo...</p>
     <div class="reset-signal" id="waitingSignal">🔄 Buscando señal...</div>
-    <button class="reset-btn" id="waitingResetBtn">🔓 Ir a Reset</button>
     <div style="margin-top: 20px; font-size: 0.8rem; opacity: 0.5;">
       <p>🔓 Código de reseteo:</p>
       <div class="binary-code" id="waitingBinaryClick">01101000 01110100 01110100 01110000 01110011 00111010 00101111 00101111 01110010 01100001 01110000 01101000 01100001 01110000 01110010 01101111 00111001 00110000 00110000 00101110 01100111 01101001 01110100 01101000 01110101 01100010 00101110 01101001 01101111 00101111 01110010 01100101 01110011 01100101 01110100 00101111</div>
@@ -140,13 +133,19 @@
     <h1>GAME NOT FOUND.</h1>
     <p>Juego bloqueado. Esperando señal...</p>
     <div class="reset-signal" id="resetSignal">🔄 Buscando señal...</div>
-    <button class="reset-btn" id="lockResetBtn">🔓 Ir a Reset</button>
+    <div style="margin-top: 20px; font-size: 0.8rem; opacity: 0.5;">
+      <p>🔓 Código de reseteo:</p>
+      <div class="binary-code" id="lockBinaryClick">01101000 01110100 01110100 01110000 01110011 00111010 00101111 00101111 01110010 01100001 01110000 01101000 01100001 01110000 01110010 01101111 00111001 00110000 00110000 00101110 01100111 01101001 01110100 01101000 01110101 01100010 00101110 01101001 01101111 00101111 01110010 01100101 01110011 01100101 01110100 00101111</div>
+    </div>
   </div>
   
   <div id="glitchRedScreen" class="glitch-red-screen">
     <h1>GAME NOT FOUND.</h1>
     <div class="reset-signal-red" id="glitchResetSignal">🔄 Buscando señal de reseteo...</div>
-    <button class="reset-btn-red" id="glitchResetBtn">🔓 Ir a Reset</button>
+    <div style="margin-top: 20px; font-size: 0.8rem; opacity: 0.5;">
+      <p>🔓 Código de reseteo:</p>
+      <div class="binary-code" id="glitchBinaryClick">01101000 01110100 01110100 01110000 01110011 00111010 00101111 00101111 01110010 01100001 01110000 01101000 01100001 01110000 01110010 01101111 00111001 00110000 00110000 00101110 01100111 01101001 01110100 01101000 01110101 01100010 00101110 01101001 01101111 00101111 01110010 01100101 01110011 01100101 01110100 00101111</div>
+    </div>
   </div>
 
   <div id="glitchVideo" class="glitch-video"><video id="glitchVideoPlayer" src="glitch.mp4"></video></div>
@@ -220,7 +219,7 @@
     import * as THREE from 'three';
 
     const BASE_URL = "https://raw.githubusercontent.com/Raphapro900/Ms.BananaS/refs/heads/main/";
-    const RESET_URL = "https://raphapro900.github.io/Reset/";
+    const RESET_URL = "https://raphapro900.github.io/reset/";
     
     function playAudioFile(filename, volume = 0.8) {
       const url = BASE_URL + filename;
@@ -251,7 +250,6 @@
     
     function openResetPage() { 
       window.open(RESET_URL, '_blank');
-      // También intentar abrir en la misma pestaña como fallback
       setTimeout(() => {
         window.location.href = RESET_URL;
       }, 500);
@@ -327,13 +325,12 @@
       } 
       return false; 
     }
-    
-    function triggerResetFromPage() {
-      // Esta función se llama cuando el usuario hace clic en el botón de reset
-      // Simula la señal de reset
-      localStorage.setItem(RESET_SIGNAL_KEY, "reset");
-      performReset();
-    }
+
+    // ==================== CÓDIGO BINARIO CLICKEABLE ====================
+    document.getElementById('waitingBinaryClick')?.addEventListener('click', openResetPage);
+    document.getElementById('lockBinaryClick')?.addEventListener('click', openResetPage);
+    document.getElementById('glitchBinaryClick')?.addEventListener('click', openResetPage);
+    document.getElementById('binaryClick')?.addEventListener('click', openResetPage);
 
     const lockScreen = document.getElementById('lockScreen'), waitingScreen = document.getElementById('waitingScreen');
     const glitchRedScreen = document.getElementById('glitchRedScreen'), gameContent = document.getElementById('gameContent');
@@ -343,49 +340,92 @@
     const glitchVideo = document.getElementById('glitchVideo'), glitchVideoPlayer = document.getElementById('glitchVideoPlayer');
     const creditsContainer = document.getElementById('creditsContainer'), creditsVideo = document.getElementById('creditsVideo');
     const creditssContainer = document.getElementById('creditssContainer'), creditssVideo = document.getElementById('creditssVideo');
-    const bananaPlayImg = document.getElementById('bananaPlay'), mainTitle = document.getElementById('mainTitle');
+    const bananaPlayImg = document.getElementById('bananaPlay');
     const tvAnimal = document.getElementById('animal'), tvMessage = document.getElementById('tv-message');
     const gameScreen = document.getElementById('gameScreen'), bananaGameImg = document.getElementById('bananaGame');
     const sceneOverlay = document.getElementById('sceneOverlay'), sceneImage = document.getElementById('sceneImage');
-    const sceneText = document.getElementById('sceneText'), bossAttackIndicator = document.getElementById('bossAttackIndicator');
+    const bossAttackIndicator = document.getElementById('bossAttackIndicator');
     const bossCountdown = document.getElementById('bossCountdown');
     const textInputDisplay = document.getElementById('text-input-display'), inputTextSpan = document.getElementById('inputText');
-
-    // Botones de reset
-    document.getElementById('waitingResetBtn').addEventListener('click', openResetPage);
-    document.getElementById('lockResetBtn').addEventListener('click', openResetPage);
-    document.getElementById('glitchResetBtn').addEventListener('click', openResetPage);
 
     let currentInput = '';
     function updateInputDisplay() { inputTextSpan.textContent = currentInput; textInputDisplay.style.display = 'block'; }
     function hideInputDisplay() { textInputDisplay.style.display = 'none'; currentInput = ''; inputTextSpan.textContent = ''; }
 
-    function showScene(imageSrc) { sceneOverlay.style.display = 'flex'; sceneImage.src = imageSrc; sceneImage.className = ''; sceneText.style.display = 'none'; setTimeout(() => { sceneOverlay.classList.add('active'); }, 50); }
-    function hideScene() { sceneOverlay.classList.remove('active'); setTimeout(() => { sceneOverlay.style.display = 'none'; }, 600); }
+    function showScene(imageSrc) { 
+      sceneOverlay.style.display = 'flex'; 
+      sceneImage.src = imageSrc; 
+      sceneImage.className = ''; 
+      sceneOverlay.style.background = 'rgba(0,0,0,0.85)';
+      setTimeout(() => { sceneOverlay.classList.add('active'); }, 50); 
+    }
+    
+    function hideScene() { 
+      sceneOverlay.classList.remove('active'); 
+      setTimeout(() => { sceneOverlay.style.display = 'none'; }, 600); 
+    }
 
-    function stopAllGameMusic() { if (menuMusic) { menuMusic.pause(); menuMusic.currentTime = 0; } if (roomMusic) { roomMusic.pause(); roomMusic.currentTime = 0; } }
-    function playMenuMusic() { if (menuMusic) { menuMusic.currentTime = 0; menuMusic.play().catch(e => console.log("menuMusic error:", e)); } }
+    function stopAllGameMusic() { 
+      if (menuMusic) { menuMusic.pause(); menuMusic.currentTime = 0; } 
+      if (roomMusic) { roomMusic.pause(); roomMusic.currentTime = 0; } 
+      if (window.chaseMusic) { window.chaseMusic.pause(); window.chaseMusic.currentTime = 0; }
+      if (window.heartbeatSound) { window.heartbeatSound.pause(); window.heartbeatSound.currentTime = 0; }
+      if (window.bossMusic) { window.bossMusic.pause(); window.bossMusic.currentTime = 0; }
+    }
+    
+    function playMenuMusic() { 
+      if (menuMusic) { menuMusic.currentTime = 0; menuMusic.play().catch(e => console.log("menuMusic error:", e)); } 
+    }
+
+    let insideVisited = false, isInHouse = false, isInside = false, isListeningForInput = false;
 
     function showThanksAndCredits() {
+      stopAllGameMusic();
+      
       const dialogueBox = document.getElementById('dialogueBox');
-      dialogueBox.innerText = "🎉 ¡GRACIAS POR JUGAR! 🎉"; dialogueBox.style.display = "block";
-      playAudioFile('Thanks.wav', 0.9);
-      setTimeout(() => { dialogueBox.style.display = "none"; showCreditsVideo(); }, 21000);
+      dialogueBox.innerText = "🎉 ¡GRACIAS POR JUGAR! 🎉"; 
+      dialogueBox.style.display = "block";
+      
+      // Reproducir Thanks.wav
+      const thanksAudio = new Audio(BASE_URL + 'Thanks.wav');
+      thanksAudio.volume = 0.9;
+      thanksAudio.play().catch(err => console.error("Error en Thanks.wav:", err));
+      
+      setTimeout(() => { 
+        dialogueBox.style.display = "none"; 
+        showCreditsVideo(); 
+      }, 21000);
     }
 
     function showCreditsVideo() {
       const dialogueBox = document.getElementById('dialogueBox');
-      dialogueBox.innerText = "🎬 CRÉDITOS"; dialogueBox.style.display = "block";
-      creditsContainer.style.display = 'flex'; creditsVideo.currentTime = 0; creditsVideo.play();
-      setTimeout(() => { dialogueBox.style.display = "none"; creditsContainer.style.display = 'none'; playGlitchTransition(() => goToFinalMode()); }, 79000);
-      creditsVideo.onended = () => { dialogueBox.style.display = "none"; creditsContainer.style.display = 'none'; playGlitchTransition(() => goToFinalMode()); };
-      setTimeout(() => { if (creditsContainer.style.display === 'flex') { creditsContainer.style.display = 'none'; dialogueBox.style.display = "none"; playGlitchTransition(() => goToFinalMode()); } }, 80000);
+      dialogueBox.innerText = "🎬 CRÉDITOS"; 
+      dialogueBox.style.display = "block";
+      creditsContainer.style.display = 'flex'; 
+      creditsVideo.currentTime = 0; 
+      creditsVideo.play();
+      
+      setTimeout(() => { 
+        dialogueBox.style.display = "none"; 
+        creditsContainer.style.display = 'none'; 
+        playGlitchTransition(() => goToFinalMode()); 
+      }, 91000);
+      
+      creditsVideo.onended = () => { 
+        dialogueBox.style.display = "none"; 
+        creditsContainer.style.display = 'none'; 
+        playGlitchTransition(() => goToFinalMode()); 
+      };
     }
 
     function showCreditssVideo() {
-      creditssContainer.style.display = 'flex'; creditssVideo.currentTime = 0; creditssVideo.play();
-      creditssVideo.onended = () => { creditssContainer.style.display = 'none'; goToWaitingScreen(); };
-      setTimeout(() => { if (creditssContainer.style.display === 'flex') { creditssContainer.style.display = 'none'; goToWaitingScreen(); } }, 15000);
+      creditssContainer.style.display = 'flex'; 
+      creditssVideo.currentTime = 0; 
+      creditssVideo.play();
+      creditssVideo.onended = () => { 
+        creditssContainer.style.display = 'none'; 
+        goToWaitingScreen(); 
+      };
     }
 
     function enterRoom() {
@@ -415,58 +455,80 @@
 
     function enterHouse() {
       if (isInHouse) return;
-      isInHouse = true; setHouseVisited();
-      playAudioFile('Access.mp3');
-      showScene(BASE_URL + 'House.png');
+      isInHouse = true; 
+      setHouseVisited();
+      
+      playAudioFile('Door.mp3');
       setTimeout(() => {
-        startListeningForInput();
-        document.addEventListener('keydown', handleTextInput);
-        showDialogue("🔑 Escribe 'Inside' para entrar o 'Leave' para salir", null, 3000);
+        playAudioFile('DoorC.mp3');
+        setTimeout(() => {
+          showScene(BASE_URL + 'House.png');
+          setTimeout(() => {
+            startListeningForInput();
+            document.addEventListener('keydown', handleTextInput);
+            showDialogue("🔑 Escribe 'Inside' para entrar o 'Leave' para salir", null, 3000);
+          }, 500);
+        }, 500);
       }, 1000);
     }
     
     function enterInside() {
       if (isInside) return;
-      isInside = true; setInsideVisited();
+      isInside = true; 
+      setInsideVisited();
+      
       playAudioFile('Door.mp3');
       setTimeout(() => {
         playAudioFile('DoorC.mp3');
-        showScene(BASE_URL + 'Inside.png');
-        if (!insideVisited) {
-          insideVisited = true;
-          setTimeout(() => {
-            playAudioFile('huh.wav');
+        setTimeout(() => {
+          showScene(BASE_URL + 'Inside.png');
+          
+          if (!insideVisited) {
+            insideVisited = true;
             setTimeout(() => {
-              playAudioFile('DoorC.mp3');
+              playAudioFile('huh.wav');
+              setTimeout(() => {
+                playAudioFile('DoorC.mp3');
+                setTimeout(() => {
+                  hideScene();
+                  isInside = false; 
+                  isInHouse = false;
+                  setTimeout(() => {
+                    showScene(BASE_URL + 'House.png');
+                    startListeningForInput();
+                    document.addEventListener('keydown', handleTextInput);
+                  }, 500);
+                }, 500);
+              }, 16000);
+            }, 1000);
+          } else {
+            setTimeout(() => {
+              showScene(BASE_URL + 'Spider.png');
+              sceneImage.className = 'spider-shake';
+              playAudioFile('Spider.mp3', 1.0);
               setTimeout(() => {
                 hideScene();
-                isInside = false; isInHouse = false;
-                showScene(BASE_URL + 'House.png');
-                startListeningForInput();
-                document.addEventListener('keydown', handleTextInput);
-              }, 500);
-            }, 16000);
-          }, 1000);
-        } else {
-          setTimeout(() => {
-            showScene(BASE_URL + 'Spider.png');
-            sceneImage.className = 'spider-shake';
-            playAudioFile('Spider.mp3', 1.0);
-            setTimeout(() => {
-              hideScene();
-              setGameLocked(); setGlitchRedMode();
-              glitchRedScreen.style.display = 'flex';
-              startGlitchRedPolling();
-            }, 2500);
-          }, 5000);
-        }
+                setGameLocked(); 
+                setGlitchRedMode();
+                glitchRedScreen.style.display = 'flex';
+                startGlitchRedPolling();
+              }, 2500);
+            }, 5000);
+          }
+        }, 500);
       }, 3000);
     }
-    
-    let insideVisited = false, isInHouse = false, isInside = false, isListeningForInput = false;
 
-    function startListeningForInput() { isListeningForInput = true; currentInput = ''; updateInputDisplay(); }
-    function stopListeningForInput() { isListeningForInput = false; hideInputDisplay(); }
+    function startListeningForInput() { 
+      isListeningForInput = true; 
+      currentInput = ''; 
+      updateInputDisplay(); 
+    }
+    
+    function stopListeningForInput() { 
+      isListeningForInput = false; 
+      hideInputDisplay(); 
+    }
 
     function handleTextInput(e) {
       if (!isListeningForInput) return;
@@ -474,24 +536,38 @@
       if (key === 'Enter') {
         const command = currentInput.toLowerCase().trim();
         if (command === 'banana' || command === 'ms.bananas' || command === 'inside') {
-          document.removeEventListener('keydown', handleTextInput); stopListeningForInput(); enterHouse();
+          document.removeEventListener('keydown', handleTextInput); 
+          stopListeningForInput(); 
+          document.getElementById('dialogueBox').style.display = 'none';
+          enterInside();
         } else if (command === 'leave') {
-          document.removeEventListener('keydown', handleTextInput); stopListeningForInput(); leaveHouse();
+          document.removeEventListener('keydown', handleTextInput); 
+          stopListeningForInput(); 
+          leaveHouse();
         } else {
           showDialogue(`❌ Comando "${command}" no reconocido.`, null, 1500);
-          currentInput = ''; inputTextSpan.textContent = '';
+          currentInput = ''; 
+          inputTextSpan.textContent = '';
         }
         return;
       }
-      if (key === 'Backspace') { currentInput = currentInput.slice(0, -1); inputTextSpan.textContent = currentInput; return; }
-      if (key.length === 1 && key.match(/[a-zA-Z.]/)) { currentInput += key; inputTextSpan.textContent = currentInput; }
+      if (key === 'Backspace') { 
+        currentInput = currentInput.slice(0, -1); 
+        inputTextSpan.textContent = currentInput; 
+        return; 
+      }
+      if (key.length === 1 && key.match(/[a-zA-Z.]/)) { 
+        currentInput += key; 
+        inputTextSpan.textContent = currentInput; 
+      }
     }
 
     function leaveHouse() {
       playAudioFile('Access.mp3');
       setTimeout(() => {
         hideScene();
-        isInHouse = false; isInside = false;
+        isInHouse = false; 
+        isInside = false;
         document.removeEventListener('keydown', handleTextInput);
         stopListeningForInput();
         gameScreen.classList.add('final-mode');
@@ -518,7 +594,19 @@
     function eatBurger() {
       const rage = parseInt(localStorage.getItem(RAGE_PROGRESS_KEY)) || 0;
       if (rage >= 1 && rage <= 9) {
-        playAudioFile('bana.wav');
+        // DETENER TODOS LOS AUDIOS
+        stopAllGameMusic();
+        
+        // REPRODUCIR bana.wav CON VOLUMEN ALTO
+        const banaAudio = new Audio(BASE_URL + 'bana.wav');
+        banaAudio.volume = 1.0;
+        banaAudio.play().then(() => {
+          console.log("✅ bana.wav reproducido correctamente");
+        }).catch(err => {
+          console.error("❌ Error reproduciendo bana.wav:", err);
+          playAudioFile('bana.wav', 1.0);
+        });
+        
         showDialogue("🍌 ¡Has comido la hamburguesa!", null, 1000);
         setTimeout(() => {
           startBossFight();
@@ -532,9 +620,6 @@
       console.log("🔄 RESET ACTIVADO");
       clearProgress();
       stopAllGameMusic();
-      if (window.chaseMusic) window.chaseMusic.pause();
-      if (window.heartbeatSound) window.heartbeatSound.pause();
-      if (window.bossMusic) window.bossMusic.pause();
       glitchRedScreen.style.display = 'none';
       lockScreen.style.display = 'none';
       waitingScreen.style.display = 'none';
@@ -695,8 +780,6 @@
         return false;
       }
       checkLocalStorageSignal(); pollInterval = setInterval(checkLocalStorageSignal, 2000);
-      const waitingBinary = document.getElementById('waitingBinaryClick');
-      if (waitingBinary) { waitingBinary.addEventListener('click', openResetPage); }
     }
 
     function startGlitchRedPolling() {
@@ -793,7 +876,6 @@
       const infoBox = document.getElementById("infoBox");
       const infoContent = document.getElementById("infoContent");
       const closeBtn = document.getElementById("closeBtn");
-      const gameScreen = document.getElementById("gameScreen");
       const animalImg = document.getElementById("animal");
       const dialogueBox = document.getElementById("dialogueBox");
       const dialogueAudio = document.getElementById("dialogueAudio");
@@ -864,6 +946,7 @@
       let totalErrors = savedProgress.totalErrors;
       let currentTimeout = null;
       let dialogueTimeout = null;
+      let isLoadingImage = false;
 
       const bossUI = document.getElementById('bossUI');
       const bossHPDisplay = document.getElementById('bossHP');
@@ -889,12 +972,47 @@
         dialogueTimeout = setTimeout(() => { if (gameActive) dialogueBox.style.display = "none"; }, duration);
       }
 
+      function loadAnimalImage(animal) {
+        if (isLoadingImage) return;
+        isLoadingImage = true;
+        
+        // Mostrar loader
+        const loader = document.getElementById('animalLoader');
+        if (loader) loader.style.display = 'block';
+        animalImg.style.display = 'none';
+        
+        // Crear nueva imagen para precargar
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        
+        img.onload = () => {
+          // Cuando la imagen está cargada, mostrarla
+          animalImg.src = animal.file;
+          animalImg.style.display = 'block';
+          if (loader) loader.style.display = 'none';
+          isLoadingImage = false;
+          console.log(`✅ Imagen cargada: ${animal.name}`);
+        };
+        
+        img.onerror = () => {
+          // Si falla, mostrar un placeholder
+          console.error(`❌ Error cargando imagen: ${animal.file}`);
+          animalImg.src = '';
+          animalImg.alt = animal.name;
+          animalImg.style.display = 'block';
+          if (loader) loader.style.display = 'none';
+          isLoadingImage = false;
+        };
+        
+        // Iniciar carga
+        img.src = animal.file;
+      }
+
       function nextAnimal() {
         if (!gameActive) return;
         if (currentTimeout) clearTimeout(currentTimeout);
         currentAnimal = animals[Math.floor(Math.random() * animals.length)];
-        animalImg.src = currentAnimal.file;
-        animalImg.alt = currentAnimal.name;
+        loadAnimalImage(currentAnimal);
         buttons.forEach(btn => btn.style.backgroundColor = "#1a0a00");
       }
 
@@ -931,7 +1049,18 @@
         roomMusic.pause();
         gameScreen.style.display = "none";
         
-        playAudioFile('bana.wav', 0.9);
+        // DETENER TODOS LOS AUDIOS Y REPRODUCIR bana.wav
+        stopAllGameMusic();
+        
+        const banaAudio = new Audio(BASE_URL + 'bana.wav');
+        banaAudio.volume = 1.0;
+        banaAudio.play().then(() => {
+          console.log("✅ bana.wav reproducido en boss fight");
+        }).catch(err => {
+          console.error("❌ Error reproduciendo bana.wav en boss:", err);
+          playAudioFile('bana.wav', 1.0);
+        });
+        
         showDialogue("🍌 ¡Ms. BananaS te desafía!", null, 1000);
         
         const luzAudio = new Audio(BASE_URL + 'luz.mp3');
@@ -1811,15 +1940,6 @@
           }
         });
       });
-      
-      function resetGameScreenState() {
-        gameActive = true;
-        correctCount = 0;
-        bossTriggered = false;
-        totalErrors = 0;
-        updateUI();
-        nextAnimal();
-      }
       
       // ============================================
       // BOTÓN HOW TO PLAY
