@@ -101,11 +101,64 @@
     
     .reset-polling-badge { position: fixed; bottom: 10px; right: 10px; color: #333; font-size: 0.4rem; font-family: monospace !important; z-index: 9999; opacity: 0.15; pointer-events: none; }
     
-    .scene-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9996; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; flex-direction: column; transition: opacity 0.6s ease; opacity: 0; pointer-events: none; }
-    .scene-overlay.active { display: flex; opacity: 1; pointer-events: auto; }
-    .scene-overlay img { max-width: 90%; max-height: 90%; object-fit: contain; opacity: 0; transition: opacity 0.6s ease; }
-    .scene-overlay.active img { opacity: 1; }
-    .scene-overlay .scene-text { color: #00ff88; font-size: 2rem; font-family: 'Indie Flower', cursive; text-shadow: 0 0 20px #00ff88; text-align: center; padding: 20px; display: none; }
+    .scene-overlay { 
+      position: fixed; 
+      top: 0; 
+      left: 0; 
+      width: 100%; 
+      height: 100%; 
+      z-index: 9996; 
+      background: rgba(0,0,0,0.85); 
+      display: none; 
+      align-items: center; 
+      justify-content: center; 
+      flex-direction: column; 
+      transition: opacity 0.6s ease; 
+      opacity: 0; 
+      pointer-events: none; 
+    }
+    .scene-overlay.active { 
+      display: flex; 
+      opacity: 1; 
+      pointer-events: auto; 
+    }
+    .scene-overlay img { 
+      width: 100%; 
+      height: 100%; 
+      object-fit: cover; 
+      opacity: 0; 
+      transition: opacity 0.6s ease; 
+    }
+    .scene-overlay.active img { 
+      opacity: 1; 
+    }
+    .scene-overlay .scene-text { 
+      color: #00ff88; 
+      font-size: 2rem; 
+      font-family: 'Indie Flower', cursive; 
+      text-shadow: 0 0 20px #00ff88; 
+      text-align: center; 
+      padding: 20px; 
+      display: none; 
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+    
+    .scene-banana {
+      position: absolute;
+      bottom: 20%;
+      right: 15%;
+      width: 200px;
+      animation: float 3s ease-in-out infinite;
+      z-index: 9997;
+      pointer-events: none;
+      display: none;
+    }
+    .scene-banana.show {
+      display: block;
+    }
     
     .spider-shake { animation: spiderShake 0.08s infinite; }
     @keyframes spiderShake { 0% { transform: translate(0, 0) rotate(0deg) scale(1); } 25% { transform: translate(-15px, 8px) rotate(-3deg) scale(1.05); } 50% { transform: translate(15px, -8px) rotate(3deg) scale(0.95); } 75% { transform: translate(-8px, 15px) rotate(-2deg) scale(1.05); } 100% { transform: translate(8px, -15px) rotate(2deg) scale(0.95); } }
@@ -115,7 +168,13 @@
 
   <div class="reset-polling-badge" id="pollingBadge">🔄</div>
   <div id="text-input-display"><span id="inputText"></span><span class="cursor">|</span></div>
-  <div id="sceneOverlay" class="scene-overlay"><img id="sceneImage" src="" alt="Scene"><div id="sceneText" class="scene-text"></div></div>
+  
+  <div id="sceneOverlay" class="scene-overlay">
+    <img id="sceneImage" src="" alt="Scene">
+    <div id="sceneText" class="scene-text"></div>
+    <img id="sceneBanana" class="scene-banana" src="https://raw.githubusercontent.com/Raphapro900/Ms.BananaS/refs/heads/main/banana.png" alt="Ms. BananaS">
+  </div>
+  
   <div id="bossCountdown" class="boss-countdown">3</div>
   <div id="bossAttackIndicator" class="boss-attack-indicator">⚡ ¡PRESIONA E! ⚡</div>
 
@@ -246,6 +305,92 @@
       });
     }
 
+    // Función especial para bana.wav con fallback mejorado
+    function playBanaWav() {
+      console.log("🔊 Intentando reproducir bana.wav...");
+      
+      return new Promise((resolve) => {
+        const audio = new Audio();
+        audio.src = BASE_URL + 'bana.wav';
+        audio.volume = 1.0;
+        audio.preload = 'auto';
+        
+        let resolved = false;
+        
+        const tryPlay = () => {
+          audio.play().then(() => {
+            if (!resolved) {
+              resolved = true;
+              console.log("✅ bana.wav reproduciéndose correctamente");
+              resolve(audio);
+            }
+          }).catch(err => {
+            console.error("❌ Error al reproducir bana.wav:", err);
+            if (!resolved) {
+              resolved = true;
+              playBanaWavFallback().then(resolve).catch(() => resolve(null));
+            }
+          });
+        };
+        
+        audio.oncanplaythrough = tryPlay;
+        audio.onloadeddata = tryPlay;
+        
+        audio.onerror = (e) => {
+          console.error("❌ Error cargando bana.wav:", e);
+          if (!resolved) {
+            resolved = true;
+            playBanaWavFallback().then(resolve).catch(() => resolve(null));
+          }
+        };
+        
+        setTimeout(() => {
+          if (!resolved) {
+            resolved = true;
+            console.log("⏰ Timeout para bana.wav, usando fallback");
+            playBanaWavFallback().then(resolve).catch(() => resolve(null));
+          }
+        }, 3000);
+        
+        audio.load();
+      });
+    }
+
+    function playBanaWavFallback() {
+      console.log("🔊 Intentando fallback para bana.wav...");
+      return new Promise((resolve, reject) => {
+        try {
+          fetch(BASE_URL + 'bana.wav')
+            .then(response => {
+              if (!response.ok) {
+                throw new Error('HTTP error ' + response.status);
+              }
+              return response.arrayBuffer();
+            })
+            .then(arrayBuffer => {
+              const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+              return audioCtx.decodeAudioData(arrayBuffer);
+            })
+            .then(audioBuffer => {
+              const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+              const source = audioCtx.createBufferSource();
+              source.buffer = audioBuffer;
+              source.connect(audioCtx.destination);
+              source.start();
+              console.log("✅ bana.wav reproducido con AudioContext");
+              resolve(source);
+            })
+            .catch(err => {
+              console.error("❌ Fallback falló:", err);
+              reject(err);
+            });
+        } catch(e) {
+          console.error("❌ Error en fallback:", e);
+          reject(e);
+        }
+      });
+    }
+
     const binaryCode = "01101000 01110100 01110100 01110000 01110011 00111010 00101111 00101111 01110010 01100001 01110000 01101000 01100001 01110000 01110010 01101111 00111001 00110000 00110000 00101110 01100111 01101001 01110100 01101000 01110101 01100010 00101110 01101001 01101111 00101111 01110010 01100101 01110011 01100101 01110100 00101111";
     
     function openResetPage() { 
@@ -284,13 +429,14 @@
     }
     
     function clearProgress() { 
-      localStorage.removeItem(DAY_PROGRESS_KEY);
-      localStorage.removeItem(RAGE_PROGRESS_KEY);
+      // Reiniciar todo a valores por defecto (día 1, furia 0)
+      localStorage.setItem(DAY_PROGRESS_KEY, 1);
+      localStorage.setItem(RAGE_PROGRESS_KEY, 0);
+      localStorage.setItem(TOTAL_ERRORS_KEY, 0);
       localStorage.removeItem(COMPLETED_KEY);
       localStorage.removeItem(BOSS_DEFEATED_KEY);
       localStorage.removeItem(WAITING_MODE_KEY);
       localStorage.removeItem(GLITCH_RED_KEY);
-      localStorage.removeItem(TOTAL_ERRORS_KEY);
       localStorage.removeItem(FINAL_MODE_KEY);
       localStorage.removeItem(LOCK_STORAGE_KEY);
       localStorage.removeItem(HOUSE_VISITED_KEY);
@@ -330,7 +476,6 @@
     document.getElementById('waitingBinaryClick')?.addEventListener('click', openResetPage);
     document.getElementById('lockBinaryClick')?.addEventListener('click', openResetPage);
     document.getElementById('glitchBinaryClick')?.addEventListener('click', openResetPage);
-    document.getElementById('binaryClick')?.addEventListener('click', openResetPage);
 
     const lockScreen = document.getElementById('lockScreen'), waitingScreen = document.getElementById('waitingScreen');
     const glitchRedScreen = document.getElementById('glitchRedScreen'), gameContent = document.getElementById('gameContent');
@@ -344,6 +489,8 @@
     const tvAnimal = document.getElementById('animal'), tvMessage = document.getElementById('tv-message');
     const gameScreen = document.getElementById('gameScreen'), bananaGameImg = document.getElementById('bananaGame');
     const sceneOverlay = document.getElementById('sceneOverlay'), sceneImage = document.getElementById('sceneImage');
+    const sceneBanana = document.getElementById('sceneBanana');
+    const sceneText = document.getElementById('sceneText');
     const bossAttackIndicator = document.getElementById('bossAttackIndicator');
     const bossCountdown = document.getElementById('bossCountdown');
     const textInputDisplay = document.getElementById('text-input-display'), inputTextSpan = document.getElementById('inputText');
@@ -352,16 +499,26 @@
     function updateInputDisplay() { inputTextSpan.textContent = currentInput; textInputDisplay.style.display = 'block'; }
     function hideInputDisplay() { textInputDisplay.style.display = 'none'; currentInput = ''; inputTextSpan.textContent = ''; }
 
-    function showScene(imageSrc) { 
+    function showScene(imageSrc, showBanana = false) { 
       sceneOverlay.style.display = 'flex'; 
       sceneImage.src = imageSrc; 
       sceneImage.className = ''; 
-      sceneOverlay.style.background = 'rgba(0,0,0,0.85)';
+      sceneImage.style.objectFit = 'cover';
+      
+      if (showBanana) {
+        sceneBanana.classList.add('show');
+      } else {
+        sceneBanana.classList.remove('show');
+      }
+      
+      sceneText.style.display = 'none'; 
+      sceneOverlay.style.background = 'rgba(0,0,0,0)';
       setTimeout(() => { sceneOverlay.classList.add('active'); }, 50); 
     }
     
     function hideScene() { 
       sceneOverlay.classList.remove('active'); 
+      sceneBanana.classList.remove('show');
       setTimeout(() => { sceneOverlay.style.display = 'none'; }, 600); 
     }
 
@@ -386,7 +543,6 @@
       dialogueBox.innerText = "🎉 ¡GRACIAS POR JUGAR! 🎉"; 
       dialogueBox.style.display = "block";
       
-      // Reproducir Thanks.wav
       const thanksAudio = new Audio(BASE_URL + 'Thanks.wav');
       thanksAudio.volume = 0.9;
       thanksAudio.play().catch(err => console.error("Error en Thanks.wav:", err));
@@ -462,7 +618,7 @@
       setTimeout(() => {
         playAudioFile('DoorC.mp3');
         setTimeout(() => {
-          showScene(BASE_URL + 'House.png');
+          showScene(BASE_URL + 'House.png', false);
           setTimeout(() => {
             startListeningForInput();
             document.addEventListener('keydown', handleTextInput);
@@ -481,7 +637,7 @@
       setTimeout(() => {
         playAudioFile('DoorC.mp3');
         setTimeout(() => {
-          showScene(BASE_URL + 'Inside.png');
+          showScene(BASE_URL + 'Inside.png', true);
           
           if (!insideVisited) {
             insideVisited = true;
@@ -494,7 +650,7 @@
                   isInside = false; 
                   isInHouse = false;
                   setTimeout(() => {
-                    showScene(BASE_URL + 'House.png');
+                    showScene(BASE_URL + 'House.png', false);
                     startListeningForInput();
                     document.addEventListener('keydown', handleTextInput);
                   }, 500);
@@ -503,7 +659,7 @@
             }, 1000);
           } else {
             setTimeout(() => {
-              showScene(BASE_URL + 'Spider.png');
+              showScene(BASE_URL + 'Spider.png', false);
               sceneImage.className = 'spider-shake';
               playAudioFile('Spider.mp3', 1.0);
               setTimeout(() => {
@@ -594,17 +750,11 @@
     function eatBurger() {
       const rage = parseInt(localStorage.getItem(RAGE_PROGRESS_KEY)) || 0;
       if (rage >= 1 && rage <= 9) {
-        // DETENER TODOS LOS AUDIOS
         stopAllGameMusic();
         
-        // REPRODUCIR bana.wav CON VOLUMEN ALTO
-        const banaAudio = new Audio(BASE_URL + 'bana.wav');
-        banaAudio.volume = 1.0;
-        banaAudio.play().then(() => {
-          console.log("✅ bana.wav reproducido correctamente");
-        }).catch(err => {
-          console.error("❌ Error reproduciendo bana.wav:", err);
-          playAudioFile('bana.wav', 1.0);
+        // Reproducir bana.wav con la función mejorada
+        playBanaWav().catch(() => {
+          console.log("⚠️ No se pudo reproducir bana.wav");
         });
         
         showDialogue("🍌 ¡Has comido la hamburguesa!", null, 1000);
@@ -617,8 +767,8 @@
     }
 
     function performReset() {
-      console.log("🔄 RESET ACTIVADO");
-      clearProgress();
+      console.log("🔄 RESET ACTIVADO - Reiniciando a Día 1, Furia 0");
+      clearProgress(); // Esto ahora reinicia a día 1 y furia 0
       stopAllGameMusic();
       glitchRedScreen.style.display = 'none';
       lockScreen.style.display = 'none';
@@ -976,35 +1126,24 @@
         if (isLoadingImage) return;
         isLoadingImage = true;
         
-        // Mostrar loader
-        const loader = document.getElementById('animalLoader');
-        if (loader) loader.style.display = 'block';
-        animalImg.style.display = 'none';
-        
-        // Crear nueva imagen para precargar
         const img = new Image();
         img.crossOrigin = 'anonymous';
         
         img.onload = () => {
-          // Cuando la imagen está cargada, mostrarla
           animalImg.src = animal.file;
           animalImg.style.display = 'block';
-          if (loader) loader.style.display = 'none';
           isLoadingImage = false;
           console.log(`✅ Imagen cargada: ${animal.name}`);
         };
         
         img.onerror = () => {
-          // Si falla, mostrar un placeholder
           console.error(`❌ Error cargando imagen: ${animal.file}`);
           animalImg.src = '';
           animalImg.alt = animal.name;
           animalImg.style.display = 'block';
-          if (loader) loader.style.display = 'none';
           isLoadingImage = false;
         };
         
-        // Iniciar carga
         img.src = animal.file;
       }
 
@@ -1049,16 +1188,11 @@
         roomMusic.pause();
         gameScreen.style.display = "none";
         
-        // DETENER TODOS LOS AUDIOS Y REPRODUCIR bana.wav
         stopAllGameMusic();
         
-        const banaAudio = new Audio(BASE_URL + 'bana.wav');
-        banaAudio.volume = 1.0;
-        banaAudio.play().then(() => {
-          console.log("✅ bana.wav reproducido en boss fight");
-        }).catch(err => {
-          console.error("❌ Error reproduciendo bana.wav en boss:", err);
-          playAudioFile('bana.wav', 1.0);
+        // Reproducir bana.wav con la función mejorada
+        playBanaWav().catch(() => {
+          console.log("⚠️ No se pudo reproducir bana.wav en boss fight");
         });
         
         showDialogue("🍌 ¡Ms. BananaS te desafía!", null, 1000);
