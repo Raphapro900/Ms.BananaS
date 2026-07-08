@@ -146,7 +146,6 @@
       transform: translate(-50%, -50%);
     }
     
-    /* Banana en la escena - misma posición que en el juego */
     .scene-banana {
       position: absolute;
       left: 15%;
@@ -165,7 +164,6 @@
     .spider-shake { animation: spiderShake 0.08s infinite; }
     @keyframes spiderShake { 0% { transform: translate(0, 0) rotate(0deg) scale(1); } 25% { transform: translate(-15px, 8px) rotate(-3deg) scale(1.05); } 50% { transform: translate(15px, -8px) rotate(3deg) scale(0.95); } 75% { transform: translate(-8px, 15px) rotate(-2deg) scale(1.05); } 100% { transform: translate(8px, -15px) rotate(2deg) scale(0.95); } }
     
-    /* Indicador de velocidad x2 */
     .speed-indicator {
       position: fixed;
       bottom: 50px;
@@ -234,7 +232,6 @@
   <div id="creditssContainer" class="credits-container" style="z-index: 9998;"><video id="creditssVideo" src="Creditss.mp4"></video></div>
   <div id="creditsContainer" class="credits-container"><video id="creditsVideo" src="Creditos Ms.BananaS.mp4"></video></div>
 
-  <!-- Indicador de velocidad x2 -->
   <div id="speedIndicator" class="speed-indicator">⏩ x2</div>
 
   <div id="gameContent">
@@ -340,13 +337,9 @@
       }, 500);
     }
 
-    // ==================== CONTROL DE VELOCIDAD CON SHIFT ====================
     function setupCreditsSpeedControl(videoElement, speedIndicator) {
-      let shiftDown = false;
-      
       function handleShiftDown(e) {
         if (e.key === 'Shift' && !e.repeat) {
-          shiftDown = true;
           videoElement.playbackRate = 2.0;
           if (speedIndicator) speedIndicator.classList.add('active');
           console.log("⏩ Velocidad x2 activada");
@@ -355,14 +348,12 @@
       
       function handleShiftUp(e) {
         if (e.key === 'Shift') {
-          shiftDown = false;
           videoElement.playbackRate = 1.0;
           if (speedIndicator) speedIndicator.classList.remove('active');
           console.log("⏩ Velocidad normal");
         }
       }
       
-      // También manejar cuando el video termina o se oculta
       const cleanup = function() {
         document.removeEventListener('keydown', handleShiftDown);
         document.removeEventListener('keyup', handleShiftUp);
@@ -447,7 +438,6 @@
       return false; 
     }
 
-    // ==================== CÓDIGO BINARIO CLICKEABLE ====================
     document.getElementById('waitingBinaryClick')?.addEventListener('click', openResetPage);
     document.getElementById('lockBinaryClick')?.addEventListener('click', openResetPage);
     document.getElementById('glitchBinaryClick')?.addEventListener('click', openResetPage);
@@ -538,7 +528,6 @@
       creditsVideo.playbackRate = 1.0;
       creditsVideo.play();
       
-      // Activar control de velocidad con Shift
       const cleanup = setupCreditsSpeedControl(creditsVideo, speedIndicator);
       
       setTimeout(() => { 
@@ -562,7 +551,6 @@
       creditssVideo.playbackRate = 1.0;
       creditssVideo.play();
       
-      // Activar control de velocidad con Shift
       const cleanup = setupCreditsSpeedControl(creditssVideo, speedIndicator);
       
       creditssVideo.onended = () => { 
@@ -1239,10 +1227,8 @@
         canvas.style.height = '100%';
         
         let bossHP = 10;
-        let bossHits = 0;
         let playerHP = 10;
-        let playerHits = 0;
-        let phase = 'attack';
+        let phase = 'idle';
         let attackTimer = 5;
         let cubes = [];
         let isLineMoving = false;
@@ -1257,7 +1243,6 @@
         let attackLineTime = 0;
         let countdownInterval = null;
         let cubeInterval = null;
-        let bossAttackPhase = false;
         let playerAttacked = false;
         let isCountdownActive = false;
         
@@ -1348,7 +1333,6 @@
         
         function startBossAttackPhase() {
           phase = 'attack';
-          bossAttackPhase = true;
           playerAttacked = false;
           attackTimer = 5;
           bossTimer.textContent = `⏱️ ${attackTimer}`;
@@ -1380,7 +1364,6 @@
                 }
               }
               phase = 'player_turn';
-              bossAttackPhase = false;
               stopCubeAttack();
               canAttack = true;
               bossTimer.textContent = '⚡ ¡TU TURNO! (E) ⚡';
@@ -1425,16 +1408,12 @@
               if (distX < halfWidth && distY < halfHeight) {
                 clearInterval(attackInterval);
                 isLineMoving = false;
-                bossHits++;
                 bossHP--;
                 bossHPDisplay.textContent = `❤️ ${bossHP}`;
                 
                 const ouchSound = new Audio(BASE_URL + 'Ouch.mp3');
                 ouchSound.volume = 0.7;
                 ouchSound.play().catch(e => console.log("Ouch.mp3 error:", e));
-                
-                bossImg.style = 'filter: brightness(2) hue-rotate(30deg);';
-                setTimeout(() => { bossImg.style = ''; }, 200);
                 
                 if (bossHP <= 0) {
                   deathSequenceStarted = true;
