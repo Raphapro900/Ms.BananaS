@@ -67,22 +67,28 @@
     .waiting-screen h1 { font-size: 3rem; margin-bottom: 1rem; letter-spacing: 2px; color: #FFD700; text-shadow: 0 0 20px #FF6600; }
     .waiting-screen p { font-size: 1.2rem; max-width: 80%; line-height: 1.4; opacity: 0.7; }
     .waiting-screen .reset-signal { margin-top: 2rem; font-size: 0.9rem; opacity: 0.8; background: rgba(0,0,0,0.5); padding: 10px 20px; border-radius: 8px; max-width: 80%; word-break: break-all; }
+    .waiting-screen .reset-btn { margin-top: 1.5rem; padding: 15px 40px; font-size: 1.2rem; background: #FF6600; color: black; border: none; border-radius: 10px; cursor: pointer; transition: transform 0.2s; font-family: 'Indie Flower', cursive !important; }
+    .waiting-screen .reset-btn:hover { transform: scale(1.1); background: #FF8800; }
     
     .lock-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #0000aa; z-index: 10000; display: none; flex-direction: column; align-items: center; justify-content: center; font-family: 'Share Tech Mono', 'Indie Flower', monospace !important; color: white; text-align: center; }
     .lock-screen h1 { font-size: 4rem; margin-bottom: 1rem; letter-spacing: 2px; font-family: 'Share Tech Mono', monospace !important; }
     .lock-screen p { font-size: 1.5rem; max-width: 80%; line-height: 1.4; }
     .lock-screen .reset-signal { margin-top: 2rem; font-size: 0.9rem; opacity: 0.8; background: rgba(0,0,0,0.5); padding: 10px 20px; border-radius: 8px; max-width: 80%; word-break: break-all; }
+    .lock-screen .reset-btn { margin-top: 1.5rem; padding: 15px 40px; font-size: 1.2rem; background: #FF6600; color: black; border: none; border-radius: 10px; cursor: pointer; transition: transform 0.2s; font-family: 'Indie Flower', cursive !important; }
+    .lock-screen .reset-btn:hover { transform: scale(1.1); background: #FF8800; }
     
     .glitch-red-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #8b0000; z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; font-family: 'Share Tech Mono', monospace !important; color: #ff0000; text-align: center; overflow: hidden; }
     .glitch-red-screen h1 { font-size: 6rem; text-shadow: 0 0 30px #ff0000, 0 0 60px #ff0000, 0 0 120px #ff0000; animation: glitchText 0.1s infinite; color: #ff0000; font-family: 'Share Tech Mono', monospace !important; }
     @keyframes glitchText { 0% { transform: translate(0); opacity: 1; } 20% { transform: translate(-5px, 3px); opacity: 0.8; } 40% { transform: translate(5px, -3px); opacity: 1; } 60% { transform: translate(-3px, 5px); opacity: 0.9; } 80% { transform: translate(3px, -5px); opacity: 1; } 100% { transform: translate(0); opacity: 1; } }
     .glitch-red-screen .reset-signal-red { margin-top: 3rem; font-size: 0.8rem; opacity: 0.7; color: #ff6666; font-family: 'Share Tech Mono', monospace !important; }
+    .glitch-red-screen .reset-btn-red { margin-top: 2rem; padding: 15px 40px; font-size: 1.2rem; background: #ff0000; color: black; border: none; border-radius: 10px; cursor: pointer; transition: transform 0.2s; font-family: 'Share Tech Mono', monospace !important; }
+    .glitch-red-screen .reset-btn-red:hover { transform: scale(1.1); background: #ff3333; }
     
     .binary-code { font-family: 'Share Tech Mono', monospace !important; font-size: 0.75rem; color: #88ff88; background: #00000080; padding: 8px; border-radius: 5px; display: inline-block; margin-top: 10px; word-break: break-all; cursor: pointer; transition: all 0.2s; }
     .binary-code:hover { background: #00aa44; color: black; transform: scale(1.02); }
     .controls-mystery { letter-spacing: 2px; }
     
-    button, .menuBtn, .options button, #dialogueBox, #rageText, #dayText, .chaseUI, footer, .reset-signal { font-family: 'Indie Flower', cursive !important; }
+    button, .menuBtn, .options button, #dialogueBox, #rageText, #dayText, .chaseUI, footer, .reset-signal, .reset-btn, .reset-btn-red { font-family: 'Indie Flower', cursive !important; }
     h1, h2, h3 { font-family: 'Indie Flower', cursive !important; }
     
     .credits-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9998; background: black; display: none; align-items: center; justify-content: center; }
@@ -123,14 +129,25 @@
     <h1>🍌 Ms. BananaS 🍌</h1>
     <p>Juego completado. Esperando señal de reseteo...</p>
     <div class="reset-signal" id="waitingSignal">🔄 Buscando señal...</div>
+    <button class="reset-btn" id="waitingResetBtn">🔓 Ir a Reset</button>
     <div style="margin-top: 20px; font-size: 0.8rem; opacity: 0.5;">
       <p>🔓 Código de reseteo:</p>
       <div class="binary-code" id="waitingBinaryClick">01101000 01110100 01110100 01110000 01110011 00111010 00101111 00101111 01110010 01100001 01110000 01101000 01100001 01110000 01110010 01101111 00111001 00110000 00110000 00101110 01100111 01101001 01110100 01101000 01110101 01100010 00101110 01101001 01101111 00101111 01110010 01100101 01110011 01100101 01110100 00101111</div>
     </div>
   </div>
 
-  <div id="lockScreen" class="lock-screen"><h1>GAME NOT FOUND.</h1><p>Juego bloqueado. Esperando señal...</p><div class="reset-signal" id="resetSignal">🔄 Buscando señal...</div></div>
-  <div id="glitchRedScreen" class="glitch-red-screen"><h1>GAME NOT FOUND.</h1><div class="reset-signal-red" id="glitchResetSignal">🔄 Buscando señal de reseteo...</div></div>
+  <div id="lockScreen" class="lock-screen">
+    <h1>GAME NOT FOUND.</h1>
+    <p>Juego bloqueado. Esperando señal...</p>
+    <div class="reset-signal" id="resetSignal">🔄 Buscando señal...</div>
+    <button class="reset-btn" id="lockResetBtn">🔓 Ir a Reset</button>
+  </div>
+  
+  <div id="glitchRedScreen" class="glitch-red-screen">
+    <h1>GAME NOT FOUND.</h1>
+    <div class="reset-signal-red" id="glitchResetSignal">🔄 Buscando señal de reseteo...</div>
+    <button class="reset-btn-red" id="glitchResetBtn">🔓 Ir a Reset</button>
+  </div>
 
   <div id="glitchVideo" class="glitch-video"><video id="glitchVideoPlayer" src="glitch.mp4"></video></div>
   <div id="creditssContainer" class="credits-container" style="z-index: 9998;"><video id="creditssVideo" src="Creditss.mp4"></video></div>
@@ -203,6 +220,7 @@
     import * as THREE from 'three';
 
     const BASE_URL = "https://raw.githubusercontent.com/Raphapro900/Ms.BananaS/refs/heads/main/";
+    const RESET_URL = "https://raphapro900.github.io/Reset/";
     
     function playAudioFile(filename, volume = 0.8) {
       const url = BASE_URL + filename;
@@ -230,8 +248,14 @@
     }
 
     const binaryCode = "01101000 01110100 01110100 01110000 01110011 00111010 00101111 00101111 01110010 01100001 01110000 01101000 01100001 01110000 01110010 01101111 00111001 00110000 00110000 00101110 01100111 01101001 01110100 01101000 01110101 01100010 00101110 01101001 01101111 00101111 01110010 01100101 01110011 01100101 01110100 00101111";
-    const resetUrl = "https://raphapro900.github.io/reset/";
-    function openResetPage() { window.open(resetUrl, '_blank'); }
+    
+    function openResetPage() { 
+      window.open(RESET_URL, '_blank');
+      // También intentar abrir en la misma pestaña como fallback
+      setTimeout(() => {
+        window.location.href = RESET_URL;
+      }, 500);
+    }
 
     // ==================== SISTEMA DE BLOQUEO ====================
     const LOCK_STORAGE_KEY = "gameLocked_V5", RESET_SIGNAL_KEY = "resetSignal";
@@ -262,7 +286,18 @@
     }
     
     function clearProgress() { 
-      localStorage.removeItem(DAY_PROGRESS_KEY, RAGE_PROGRESS_KEY, COMPLETED_KEY, BOSS_DEFEATED_KEY, WAITING_MODE_KEY, GLITCH_RED_KEY, TOTAL_ERRORS_KEY, FINAL_MODE_KEY, LOCK_STORAGE_KEY, HOUSE_VISITED_KEY, INSIDE_VISITED_KEY); 
+      localStorage.removeItem(DAY_PROGRESS_KEY);
+      localStorage.removeItem(RAGE_PROGRESS_KEY);
+      localStorage.removeItem(COMPLETED_KEY);
+      localStorage.removeItem(BOSS_DEFEATED_KEY);
+      localStorage.removeItem(WAITING_MODE_KEY);
+      localStorage.removeItem(GLITCH_RED_KEY);
+      localStorage.removeItem(TOTAL_ERRORS_KEY);
+      localStorage.removeItem(FINAL_MODE_KEY);
+      localStorage.removeItem(LOCK_STORAGE_KEY);
+      localStorage.removeItem(HOUSE_VISITED_KEY);
+      localStorage.removeItem(INSIDE_VISITED_KEY);
+      localStorage.removeItem(RESET_SIGNAL_KEY);
       clearAllCookies();
     }
     
@@ -282,6 +317,7 @@
     function setGameLocked() { localStorage.setItem(LOCK_STORAGE_KEY, "true"); localStorage.removeItem(RESET_SIGNAL_KEY); }
     function isGameLocked() { return localStorage.getItem(LOCK_STORAGE_KEY) === "true"; }
     function clearGameLocked() { clearProgress(); }
+    
     function checkForResetSignal() { 
       const signal = localStorage.getItem(RESET_SIGNAL_KEY); 
       if (signal === "reset") { 
@@ -290,6 +326,13 @@
         return true; 
       } 
       return false; 
+    }
+    
+    function triggerResetFromPage() {
+      // Esta función se llama cuando el usuario hace clic en el botón de reset
+      // Simula la señal de reset
+      localStorage.setItem(RESET_SIGNAL_KEY, "reset");
+      performReset();
     }
 
     const lockScreen = document.getElementById('lockScreen'), waitingScreen = document.getElementById('waitingScreen');
@@ -307,6 +350,11 @@
     const sceneText = document.getElementById('sceneText'), bossAttackIndicator = document.getElementById('bossAttackIndicator');
     const bossCountdown = document.getElementById('bossCountdown');
     const textInputDisplay = document.getElementById('text-input-display'), inputTextSpan = document.getElementById('inputText');
+
+    // Botones de reset
+    document.getElementById('waitingResetBtn').addEventListener('click', openResetPage);
+    document.getElementById('lockResetBtn').addEventListener('click', openResetPage);
+    document.getElementById('glitchResetBtn').addEventListener('click', openResetPage);
 
     let currentInput = '';
     function updateInputDisplay() { inputTextSpan.textContent = currentInput; textInputDisplay.style.display = 'block'; }
@@ -520,11 +568,9 @@
 
     document.addEventListener('keydown', (e) => {
       const key = e.key;
-      // Solo procesar si el juego está activo y no en pantalla de inicio
       if (document.getElementById('startScreen').style.display !== 'none') return;
       if (document.getElementById('gameScreen').style.display !== 'block') return;
       
-      // Convertir a minúscula para comparación
       let mappedKey = key;
       if (key === 'b' || key === 'B') mappedKey = 'b';
       if (key === 'a' || key === 'A') mappedKey = 'a';
@@ -532,7 +578,6 @@
       keySequence.push(mappedKey);
       if (keySequence.length > 10) keySequence.shift();
       
-      // Verificar código Konami (final feliz)
       if (!konamiTriggered) {
         const konamiMatch = KONAMI_CODE.every((val, index) => {
           if (index >= keySequence.length) return false;
@@ -548,7 +593,6 @@
         }
       }
       
-      // Verificar código Boss (final con boss)
       if (!bossCodeTriggered && keySequence.length >= 4) {
         const bossMatch = BOSS_CODE.every((val, index) => {
           if (index >= keySequence.length) return false;
@@ -566,27 +610,23 @@
     });
 
     function activateHappyEnding() {
-      // Guardar progreso del día 5 completado sin errores
       saveProgress(5, 0, 0);
       const dialogueBox = document.getElementById('dialogueBox');
       dialogueBox.innerText = "🎮 ¡CÓDIGO SECRETO ACTIVADO! Día 5 completado sin errores.";
       dialogueBox.style.display = "block";
       setTimeout(() => {
         dialogueBox.style.display = "none";
-        // Forzar final feliz
         showThanksAndCredits();
       }, 3000);
     }
 
     function activateBossEnding() {
-      // Guardar progreso del día 5 con 5 errores
       saveProgress(5, 5, 5);
       const dialogueBox = document.getElementById('dialogueBox');
       dialogueBox.innerText = "🎮 ¡CÓDIGO SECRETO ACTIVADO! Día 5 con 5 errores - Boss activado.";
       dialogueBox.style.display = "block";
       setTimeout(() => {
         dialogueBox.style.display = "none";
-        // Forzar bossfight
         gameActive = false;
         roomMusic.pause();
         gameScreen.style.display = "none";
@@ -656,7 +696,7 @@
       }
       checkLocalStorageSignal(); pollInterval = setInterval(checkLocalStorageSignal, 2000);
       const waitingBinary = document.getElementById('waitingBinaryClick');
-      if (waitingBinary) { waitingBinary.addEventListener('click', () => window.open(resetUrl, '_blank')); }
+      if (waitingBinary) { waitingBinary.addEventListener('click', openResetPage); }
     }
 
     function startGlitchRedPolling() {
@@ -883,15 +923,6 @@
         };
       }
 
-      function startDayTransition(callback) {
-        sceneOverlay.style.display = 'flex';
-        sceneOverlay.style.background = 'rgba(0,0,0,0.85)';
-        sceneImage.style.display = 'none';
-        sceneText.style.display = 'none';
-        setTimeout(() => { sceneOverlay.classList.add('active'); }, 50);
-        setTimeout(() => { sceneOverlay.classList.remove('active'); setTimeout(() => { sceneOverlay.style.display = 'none'; if (callback) callback(); }, 600); }, 1500);
-      }
-
       // ==================== BOSSFIGHT 2D ====================
       function startBossFight() {
         bossFightActive = true;
@@ -900,7 +931,6 @@
         roomMusic.pause();
         gameScreen.style.display = "none";
         
-        // Reproducir bana.wav (sonido de hamburguesa)
         playAudioFile('bana.wav', 0.9);
         showDialogue("🍌 ¡Ms. BananaS te desafía!", null, 1000);
         
@@ -957,7 +987,6 @@
         canvas.style.width = '100%';
         canvas.style.height = '100%';
         
-        // ==================== ESTADO DEL BOSS ====================
         let bossHP = 10;
         let bossHits = 0;
         let playerHP = 10;
@@ -984,13 +1013,11 @@
         const bossX = canvas.width / 2;
         const bossY = canvas.height / 2 - 50;
         
-        // Cargar imagen de Banana2.png
         const bossImg = new Image();
         bossImg.src = BASE_URL + "banana2.png";
         bossImg.onload = () => { console.log("Boss image loaded: banana2.png"); };
         bossImg.onerror = () => { console.error("Error loading banana2.png, usando emoji como fallback"); };
         
-        // ==================== UI ====================
         bossUI.style.display = 'block';
         bossHPDisplay.style.display = 'block';
         playerHPDisplay.style.display = 'block';
@@ -1002,7 +1029,6 @@
         bossCountdownEl.style.display = 'none';
         bossAttackIndicatorEl.style.display = 'none';
         
-        // ==================== MOVIMIENTO DEL MOUSE ====================
         document.addEventListener('mousemove', (e) => {
           const rect = canvas.getBoundingClientRect();
           const scaleX = canvas.width / rect.width;
@@ -1011,7 +1037,6 @@
           mouseY = (e.clientY - rect.top) * scaleY;
         });
         
-        // ==================== SISTEMA DE CUBITOS ====================
         function spawnCubes() {
           if (phase !== 'attack' || deathSequenceStarted) return;
           const count = 2 + Math.floor(Math.random() * 4);
@@ -1048,7 +1073,6 @@
           return distX < threshold && distY < threshold;
         }
         
-        // ==================== COUNTDOWN Y ATAQUE DEL BOSS ====================
         function startCountdown() {
           if (isCountdownActive) return;
           isCountdownActive = true;
@@ -1118,7 +1142,6 @@
           window.currentAttackInterval = attackInterval;
         }
         
-        // ==================== ATAQUE DEL JUGADOR (PRESIONA E) ====================
         document.addEventListener('keydown', (e) => {
           if (e.key === 'e' || e.key === 'E') {
             if (!bossFightActive || deathSequenceStarted) return;
@@ -1283,7 +1306,6 @@
           startGlitchRedPolling();
         }
         
-        // ==================== CICLO DE ANIMACIÓN ====================
         let lastTime = 0;
         
         function animateBoss2D(timestamp) {
@@ -1309,12 +1331,10 @@
           ctx.fillStyle = gradient;
           ctx.fillRect(0, 0, canvas.width, canvas.height);
           
-          // Dibujar Ms. BananaS (boss) - usando banana2.png
           if (bossImg.complete && bossImg.naturalWidth > 0) {
             const size = 130;
             ctx.drawImage(bossImg, bossX - size/2, bossY - size/2, size, size);
           } else {
-            // Fallback a emoji si no carga la imagen
             ctx.fillStyle = '#ff8800';
             ctx.font = '60px Arial';
             ctx.textAlign = 'center';
@@ -1322,7 +1342,6 @@
             ctx.fillText('🍌', bossX, bossY);
           }
           
-          // Dibujar jugador (corazón - mouse)
           ctx.fillStyle = '#ff0044';
           ctx.shadowColor = '#ff0044';
           ctx.shadowBlur = 20;
@@ -1332,7 +1351,6 @@
           ctx.fillText('❤️', mouseX, mouseY);
           ctx.shadowBlur = 0;
           
-          // ACTUALIZAR Y DIBUJAR CUBOS (fase de ataque del boss)
           if (phase === 'attack') {
             const cubesToRemove = [];
             for (let i = 0; i < cubes.length; i++) {
@@ -1371,7 +1389,6 @@
             }
           }
           
-          // Línea de ataque del jugador
           if (isLineMoving) {
             ctx.fillStyle = 'rgba(255, 0, 0, 0.85)';
             ctx.shadowColor = '#ff0000';
@@ -1387,7 +1404,6 @@
             ctx.fillRect(lineX - 40, 0, 80, canvas.height);
           }
           
-          // Indicador de turno del jugador
           if (phase === 'player_turn' && canAttack) {
             ctx.fillStyle = 'rgba(0, 255, 0, 0.08)';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -1406,7 +1422,6 @@
             ctx.fillText('🎉 ¡VENCISTE AL JEFE! 🎉', canvas.width/2, canvas.height/2 + 100);
           }
           
-          // Iniciar countdown si está en idle
           if (phase === 'idle' && !isCountdownActive && !deathSequenceStarted && bossFightActive) {
             startCountdown();
           }
@@ -1440,7 +1455,7 @@
         }
       }
 
-      // ==================== PERSECUCIÓN 3D (BOSQUE) ====================
+      // ==================== PERSECUCIÓN 3D ====================
       let chaseActive = false;
       let chaseAnimationId = null;
       let scene, camera, renderer;
@@ -1872,7 +1887,6 @@
         infoBox.style.display = "none";
       });
       
-      // Inicializar el estado del juego
       gameActive = true;
       updateUI();
       nextAnimal();
