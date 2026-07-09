@@ -146,6 +146,7 @@
       transform: translate(-50%, -50%);
     }
     
+    /* Banana en la escena - misma posición que en el juego */
     .scene-banana {
       position: absolute;
       left: 15%;
@@ -159,6 +160,16 @@
     }
     .scene-banana.show {
       display: block;
+    }
+    
+    /* Fondo oscuro para la segunda vez en Inside */
+    .scene-overlay.dark-bg {
+      background: rgba(0,0,0,0.95) !important;
+    }
+    
+    /* Fondo rojo para Spider */
+    .scene-overlay.red-bg {
+      background: rgba(139,0,0,0.95) !important;
     }
     
     .spider-shake { animation: spiderShake 0.08s infinite; }
@@ -465,11 +476,22 @@
     function updateInputDisplay() { inputTextSpan.textContent = currentInput; textInputDisplay.style.display = 'block'; }
     function hideInputDisplay() { textInputDisplay.style.display = 'none'; currentInput = ''; inputTextSpan.textContent = ''; }
 
-    function showScene(imageSrc, showBanana = false) { 
+    function showScene(imageSrc, showBanana = false, darkBg = false, redBg = false) { 
       sceneOverlay.style.display = 'flex'; 
       sceneImage.src = imageSrc; 
       sceneImage.className = ''; 
       sceneImage.style.objectFit = 'cover';
+      
+      // Limpiar clases de fondo
+      sceneOverlay.classList.remove('dark-bg', 'red-bg');
+      
+      if (darkBg) {
+        sceneOverlay.classList.add('dark-bg');
+      }
+      
+      if (redBg) {
+        sceneOverlay.classList.add('red-bg');
+      }
       
       if (showBanana) {
         sceneBanana.classList.add('show');
@@ -478,13 +500,13 @@
       }
       
       sceneText.style.display = 'none'; 
-      sceneOverlay.style.background = 'rgba(0,0,0,0)';
       setTimeout(() => { sceneOverlay.classList.add('active'); }, 50); 
     }
     
     function hideScene() { 
       sceneOverlay.classList.remove('active'); 
       sceneBanana.classList.remove('show');
+      sceneOverlay.classList.remove('dark-bg', 'red-bg');
       setTimeout(() => { sceneOverlay.style.display = 'none'; }, 600); 
     }
 
@@ -613,9 +635,10 @@
       setTimeout(() => {
         playAudioFile('DoorC.mp3');
         setTimeout(() => {
-          showScene(BASE_URL + 'Inside.png', true);
-          
           if (!insideVisited) {
+            // Primera vez: Inside.png con banana y fondo normal
+            showScene(BASE_URL + 'Inside.png', true, false, false);
+            
             insideVisited = true;
             setTimeout(() => {
               playAudioFile('huh.wav');
@@ -634,8 +657,12 @@
               }, 16000);
             }, 1000);
           } else {
+            // Segunda vez: Inside.png oscuro SIN banana, luego Spider.png con fondo rojo
+            showScene(BASE_URL + 'Inside.png', false, true, false);
+            
             setTimeout(() => {
-              showScene(BASE_URL + 'Spider.png', false);
+              // Mostrar Spider.png con fondo rojo
+              showScene(BASE_URL + 'Spider.png', false, false, true);
               sceneImage.className = 'spider-shake';
               playAudioFile('Spider.mp3', 1.0);
               setTimeout(() => {
