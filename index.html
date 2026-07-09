@@ -34,75 +34,6 @@
     #infoContent .binary-code { font-family: 'Share Tech Mono', monospace !important; font-size: 0.7rem; color: #88ff88; background: #00000080; padding: 10px; border-radius: 5px; display: block; margin-top: 10px; word-break: break-all; cursor: pointer; transition: all 0.2s; text-align: center; }
     #infoContent .binary-code:hover { background: #00aa44; color: black; transform: scale(1.02); }
     
-    /* ESCENA DE DENTRO - FONDO + BANANA ENCIMA COMO Room.png */
-    .inside-scene {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 9996;
-      display: none;
-      background: #000;
-    }
-    .inside-scene.active {
-      display: block;
-    }
-    .inside-scene .inside-bg {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      position: absolute;
-      top: 0;
-      left: 0;
-      z-index: 1;
-    }
-    .inside-scene .inside-banana {
-      position: absolute;
-      left: 15%;
-      top: 50%;
-      transform: translate(-50%, -50%);
-      width: 250px;
-      animation: float 3s ease-in-out infinite;
-      z-index: 2;
-      pointer-events: none;
-      display: none;
-    }
-    .inside-scene .inside-banana.show {
-      display: block;
-    }
-    .inside-scene.dark .inside-bg {
-      filter: brightness(0.3);
-    }
-    .inside-scene.red .inside-bg {
-      filter: brightness(0.3) hue-rotate(0deg);
-      background: #8b0000;
-    }
-    .inside-scene.red .inside-bg {
-      opacity: 0.3;
-    }
-    .inside-scene .spider-overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 3;
-      display: none;
-      background: rgba(139,0,0,0.7);
-      align-items: center;
-      justify-content: center;
-    }
-    .inside-scene .spider-overlay.active {
-      display: flex;
-    }
-    .inside-scene .spider-overlay img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      animation: spiderShake 0.08s infinite;
-    }
-    
     #gameScreen { display: none; width: 100%; height: 100vh; background: url('https://raw.githubusercontent.com/Raphapro900/Ms.BananaS/refs/heads/main/Room.png') center/cover no-repeat; position: relative; }
     #bananaGame { position: absolute; left: 15%; top: 50%; transform: translate(-50%, -50%); width: 250px; animation: float 3s ease-in-out infinite; pointer-events: none; z-index: 2; display: block; }
     #gameScreen.final-mode #bananaGame { display: none !important; }
@@ -192,9 +123,6 @@
     .speed-indicator.active {
       display: block;
     }
-    
-    /* Loader para animales */
-    .animal-loader { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #FFD700; font-size: 1.5rem; z-index: 10; text-shadow: 0 0 20px #FF6600; }
   </style>
 </head>
 <body>
@@ -202,12 +130,11 @@
   <div class="reset-polling-badge" id="pollingBadge">🔄</div>
   <div id="text-input-display"><span id="inputText"></span><span class="cursor">|</span></div>
   
-  <!-- ESCENA DE DENTRO (Inside.png como fondo + banana.png encima) -->
-  <div id="insideScene" class="inside-scene">
-    <img id="insideBg" class="inside-bg" src="" alt="Inside">
-    <img id="insideBanana" class="inside-banana" src="https://raw.githubusercontent.com/Raphapro900/Ms.BananaS/refs/heads/main/banana.png" alt="Ms. BananaS">
-    <div id="spiderOverlay" class="spider-overlay">
-      <img id="spiderImage" src="" alt="Spider">
+  <div id="insideScene" class="inside-scene" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:9996;display:none;background:#000;">
+    <img id="insideBg" style="width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;z-index:1;" src="" alt="Inside">
+    <img id="insideBanana" style="position:absolute;left:15%;top:50%;transform:translate(-50%,-50%);width:250px;animation:float 3s ease-in-out infinite;z-index:2;pointer-events:none;display:none;" src="https://raw.githubusercontent.com/Raphapro900/Ms.BananaS/refs/heads/main/banana.png" alt="Ms. BananaS">
+    <div id="spiderOverlay" style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:3;display:none;background:rgba(139,0,0,0.7);align-items:center;justify-content:center;">
+      <img id="spiderImage" style="width:100%;height:100%;object-fit:cover;" src="" alt="Spider">
     </div>
   </div>
   
@@ -269,8 +196,7 @@
       <audio id="roomMusic" src="Room Theme.mp3" loop></audio>
       <img id="bananaGame" src="https://raw.githubusercontent.com/Raphapro900/Ms.BananaS/refs/heads/main/banana.png" alt="Ms. BananaS">
       <div id="tv">
-        <div class="animal-loader" id="animalLoader">🔄 Cargando...</div>
-        <img id="animal" src="" alt="Animal" style="display:none;">
+        <img id="animal" src="https://raw.githubusercontent.com/Raphapro900/Ms.BananaS/refs/heads/main/Seal.webp" alt="Animal">
         <div id="tv-message">
           <div>Hello Player,</div>
           <div>if you're reading this, it means you obviously came back.</div>
@@ -353,7 +279,6 @@
       }, 500);
     }
 
-    // ==================== CONTROL DE VELOCIDAD x4 CON PITCH ====================
     function setupCreditsSpeedControl(videoElement, speedIndicator) {
       function handleShiftDown(e) {
         if (e.key === 'Shift' && !e.repeat) {
@@ -500,41 +425,38 @@
     function hideInputDisplay() { textInputDisplay.style.display = 'none'; currentInput = ''; inputTextSpan.textContent = ''; }
 
     function showInsideScene(showBanana = true, dark = false) {
-      insideScene.classList.add('active');
+      insideScene.style.display = 'block';
       insideBg.src = BASE_URL + 'Inside.png';
       
-      // Mostrar u ocultar banana
       if (showBanana) {
-        insideBanana.classList.add('show');
+        insideBanana.style.display = 'block';
       } else {
-        insideBanana.classList.remove('show');
+        insideBanana.style.display = 'none';
       }
       
-      // Fondo oscuro o normal
       if (dark) {
-        insideScene.classList.add('dark');
+        insideBg.style.filter = 'brightness(0.3)';
       } else {
-        insideScene.classList.remove('dark');
+        insideBg.style.filter = 'none';
       }
       
-      // Ocultar spider
-      spiderOverlay.classList.remove('active');
-      insideScene.classList.remove('red');
+      spiderOverlay.style.display = 'none';
     }
     
     function showSpiderScene() {
       spiderImage.src = BASE_URL + 'Spider.png';
-      spiderOverlay.classList.add('active');
-      insideScene.classList.add('red');
-      insideBanana.classList.remove('show');
+      spiderOverlay.style.display = 'flex';
+      insideScene.style.background = '#8b0000';
+      insideBanana.style.display = 'none';
       spiderImage.className = 'spider-shake';
     }
     
     function hideInsideScene() {
-      insideScene.classList.remove('active');
-      insideScene.classList.remove('dark', 'red');
-      spiderOverlay.classList.remove('active');
-      insideBanana.classList.remove('show');
+      insideScene.style.display = 'none';
+      insideBg.style.filter = 'none';
+      spiderOverlay.style.display = 'none';
+      insideBanana.style.display = 'none';
+      insideScene.style.background = '#000';
     }
 
     function stopAllGameMusic() { 
@@ -643,12 +565,11 @@
       setTimeout(() => {
         playAudioFile('DoorC.mp3');
         setTimeout(() => {
-          // Usar la nueva escena para House.png también
-          insideScene.classList.add('active');
+          insideScene.style.display = 'block';
           insideBg.src = BASE_URL + 'House.png';
-          insideBanana.classList.remove('show');
-          spiderOverlay.classList.remove('active');
-          insideScene.classList.remove('dark', 'red');
+          insideBanana.style.display = 'none';
+          spiderOverlay.style.display = 'none';
+          insideBg.style.filter = 'none';
           
           setTimeout(() => {
             startListeningForInput();
@@ -669,7 +590,6 @@
         playAudioFile('DoorC.mp3');
         setTimeout(() => {
           if (!insideVisited) {
-            // Primera vez: Inside.png como fondo, banana.png encima (como Room.png)
             showInsideScene(true, false);
             
             insideVisited = true;
@@ -682,12 +602,11 @@
                   isInside = false; 
                   isInHouse = false;
                   setTimeout(() => {
-                    // Volver a House.png
-                    insideScene.classList.add('active');
+                    insideScene.style.display = 'block';
                     insideBg.src = BASE_URL + 'House.png';
-                    insideBanana.classList.remove('show');
-                    spiderOverlay.classList.remove('active');
-                    insideScene.classList.remove('dark', 'red');
+                    insideBanana.style.display = 'none';
+                    spiderOverlay.style.display = 'none';
+                    insideBg.style.filter = 'none';
                     
                     startListeningForInput();
                     document.addEventListener('keydown', handleTextInput);
@@ -696,11 +615,9 @@
               }, 16000);
             }, 1000);
           } else {
-            // Segunda vez: Inside oscuro SIN banana
             showInsideScene(false, true);
             
             setTimeout(() => {
-              // Mostrar Spider con fondo rojo
               showSpiderScene();
               playAudioFile('Spider.mp3', 1.0);
               setTimeout(() => {
@@ -1176,17 +1093,12 @@
         if (isLoadingImage) return;
         isLoadingImage = true;
         
-        const loader = document.getElementById('animalLoader');
-        if (loader) loader.style.display = 'block';
-        animalImg.style.display = 'none';
-        
         const img = new Image();
         img.crossOrigin = 'anonymous';
         
         img.onload = () => {
           animalImg.src = animal.file;
           animalImg.style.display = 'block';
-          if (loader) loader.style.display = 'none';
           isLoadingImage = false;
           console.log(`✅ Imagen cargada: ${animal.name}`);
         };
@@ -1196,7 +1108,6 @@
           animalImg.src = '';
           animalImg.alt = animal.name;
           animalImg.style.display = 'block';
-          if (loader) loader.style.display = 'none';
           isLoadingImage = false;
         };
         
