@@ -146,7 +146,15 @@
       transform: translate(-50%, -50%);
     }
     
-    /* Banana en la escena - misma posición que en el juego */
+    .scene-overlay.dark-bg {
+      background: rgba(0,0,0,0.95) !important;
+    }
+    
+    .scene-overlay.red-bg {
+      background: rgba(139,0,0,0.95) !important;
+    }
+    
+    /* Banana en la escena - encima del fondo, misma posición que en el juego */
     .scene-banana {
       position: absolute;
       left: 15%;
@@ -162,16 +170,6 @@
       display: block;
     }
     
-    /* Fondo oscuro para la segunda vez en Inside */
-    .scene-overlay.dark-bg {
-      background: rgba(0,0,0,0.95) !important;
-    }
-    
-    /* Fondo rojo para Spider */
-    .scene-overlay.red-bg {
-      background: rgba(139,0,0,0.95) !important;
-    }
-    
     .spider-shake { animation: spiderShake 0.08s infinite; }
     @keyframes spiderShake { 0% { transform: translate(0, 0) rotate(0deg) scale(1); } 25% { transform: translate(-15px, 8px) rotate(-3deg) scale(1.05); } 50% { transform: translate(15px, -8px) rotate(3deg) scale(0.95); } 75% { transform: translate(-8px, 15px) rotate(-2deg) scale(1.05); } 100% { transform: translate(8px, -15px) rotate(2deg) scale(0.95); } }
     
@@ -179,16 +177,16 @@
       position: fixed;
       bottom: 50px;
       right: 20px;
-      color: #00ff88;
+      color: #ff8800;
       font-size: 1.5rem;
       font-family: 'Share Tech Mono', monospace !important;
       z-index: 9999;
       display: none;
-      text-shadow: 0 0 20px #00ff88;
-      background: rgba(0,0,0,0.7);
+      text-shadow: 0 0 20px #ff8800;
+      background: rgba(0,0,0,0.8);
       padding: 5px 15px;
       border-radius: 10px;
-      border: 2px solid #00ff88;
+      border: 2px solid #ff8800;
       pointer-events: none;
     }
     .speed-indicator.active {
@@ -243,7 +241,7 @@
   <div id="creditssContainer" class="credits-container" style="z-index: 9998;"><video id="creditssVideo" src="Creditss.mp4"></video></div>
   <div id="creditsContainer" class="credits-container"><video id="creditsVideo" src="Creditos Ms.BananaS.mp4"></video></div>
 
-  <div id="speedIndicator" class="speed-indicator">⏩ x2</div>
+  <div id="speedIndicator" class="speed-indicator">⏩ x4</div>
 
   <div id="gameContent">
     <div id="startScreen">
@@ -348,18 +346,34 @@
       }, 500);
     }
 
+    // ==================== CONTROL DE VELOCIDAD x4 CON PITCH ====================
     function setupCreditsSpeedControl(videoElement, speedIndicator) {
       function handleShiftDown(e) {
         if (e.key === 'Shift' && !e.repeat) {
-          videoElement.playbackRate = 2.0;
+          videoElement.playbackRate = 4.0;
+          // Cambiar el pitch (preservePitch = false para que el tono suba)
+          try {
+            if ('preservesPitch' in videoElement) {
+              videoElement.preservesPitch = false;
+            }
+          } catch(e) {
+            console.log("preservePitch no soportado");
+          }
           if (speedIndicator) speedIndicator.classList.add('active');
-          console.log("⏩ Velocidad x2 activada");
+          console.log("⏩ Velocidad x4 activada con pitch cambiado");
         }
       }
       
       function handleShiftUp(e) {
         if (e.key === 'Shift') {
           videoElement.playbackRate = 1.0;
+          try {
+            if ('preservesPitch' in videoElement) {
+              videoElement.preservesPitch = true;
+            }
+          } catch(e) {
+            console.log("preservePitch no soportado");
+          }
           if (speedIndicator) speedIndicator.classList.remove('active');
           console.log("⏩ Velocidad normal");
         }
@@ -369,6 +383,11 @@
         document.removeEventListener('keydown', handleShiftDown);
         document.removeEventListener('keyup', handleShiftUp);
         videoElement.playbackRate = 1.0;
+        try {
+          if ('preservesPitch' in videoElement) {
+            videoElement.preservesPitch = true;
+          }
+        } catch(e) {}
         if (speedIndicator) speedIndicator.classList.remove('active');
       };
       
@@ -493,6 +512,7 @@
         sceneOverlay.classList.add('red-bg');
       }
       
+      // Mostrar u ocultar la banana (está encima del fondo)
       if (showBanana) {
         sceneBanana.classList.add('show');
       } else {
@@ -500,6 +520,7 @@
       }
       
       sceneText.style.display = 'none'; 
+      sceneOverlay.style.background = 'rgba(0,0,0,0)';
       setTimeout(() => { sceneOverlay.classList.add('active'); }, 50); 
     }
     
@@ -543,7 +564,7 @@
 
     function showCreditsVideo() {
       const dialogueBox = document.getElementById('dialogueBox');
-      dialogueBox.innerText = "🎬 CRÉDITOS - Mantén SHIFT para x2"; 
+      dialogueBox.innerText = "🎬 CRÉDITOS - Mantén SHIFT para x4"; 
       dialogueBox.style.display = "block";
       creditsContainer.style.display = 'flex'; 
       creditsVideo.currentTime = 0; 
@@ -636,7 +657,7 @@
         playAudioFile('DoorC.mp3');
         setTimeout(() => {
           if (!insideVisited) {
-            // Primera vez: Inside.png con banana y fondo normal
+            // Primera vez: Inside.png como fondo, banana.png encima
             showScene(BASE_URL + 'Inside.png', true, false, false);
             
             insideVisited = true;
