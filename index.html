@@ -144,7 +144,6 @@
       opacity: 0;
       animation: charAppear 0.04s forwards;
       font-family: 'Press Start 2P', 'Determination Mono', monospace !important;
-      image-rendering: pixelated;
       font-size: 24px;
       color: #ff4444;
       text-shadow: 0 0 10px #ff0000;
@@ -156,9 +155,11 @@
     .menuPanel { background: rgba(0,0,0,0.7); padding: 30px; border: 3px solid #FF6600; border-radius: 15px; box-shadow: 0 0 30px #ff3300; display: flex; flex-direction: row; gap: 40px; align-items: center; justify-content: center; flex-wrap: wrap; }
     .menuBtn { font-size: 1.3em; padding: 15px 25px; margin: 10px; background: #1a0a00; color: #FF9900; border: 2px solid #FF6600; cursor: pointer; transition: transform .2s ease, box-shadow .2s ease; border-radius: 8px; }
     .menuBtn:hover { transform: scale(1.1); box-shadow: 0 0 15px #FF6600; background: #331100; }
+    .menuBtn.selected { transform: scale(1.1); box-shadow: 0 0 25px #FFD700; border-color: #FFD700; background: #332200; }
     
     #bananaPlay { width: 180px; cursor: pointer; transition: transform .3s ease, filter .3s ease; animation: float 3s ease-in-out infinite; margin: 20px; filter: drop-shadow(0 0 10px #ffaa00); }
     #bananaPlay:hover { transform: scale(1.1) rotate(-5deg); filter: drop-shadow(0 0 20px #ffcc00); }
+    #bananaPlay.selected { transform: scale(1.15) rotate(-5deg); filter: drop-shadow(0 0 30px #ffdd44); }
     @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
     
     footer { margin-top: 20px; font-size: .9em; color: #884400; }
@@ -222,6 +223,7 @@
     
     .options { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; z-index: 5; }
     .options button { font-size: 1.2em; padding: 10px 20px; background: #1a0a00; color: #FF9900; border: 2px solid #FF6600; cursor: pointer; transition: 0.1s; }
+    .options button.selected-option { border-color: #FFD700; box-shadow: 0 0 20px #FFD700; background: #332200; transform: scale(1.05); }
     
     #dialogueBox { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); width: 70%; padding: 15px; background: rgba(0,0,0,.9); color: #FFD700; font-size: 1.3em; border: 2px solid #FF6600; border-radius: 10px; display: none; z-index: 15; font-weight: bold; text-shadow: 0 0 5px #ff6600; }
     #rageText { position: absolute; top: 80px; left: 50%; transform: translateX(-50%); font-size: 1.5em; color: #ff4444; background: rgba(0,0,0,0.7); padding: 5px 15px; border-radius: 20px; font-weight: bold; z-index: 5; }
@@ -246,7 +248,7 @@
       width: 100%;
       height: 100%;
       background: #0a0a1a;
-      cursor: none;
+      cursor: url('https://raw.githubusercontent.com/Raphapro900/Ms.BananaS/refs/heads/main/heart.png') 16 16, auto;
     }
     
     .boss-ui {
@@ -459,9 +461,38 @@
     .shake-boss {
       animation: bossShake 1s ease-in-out;
     }
+    
+    /* Gamepad indicator */
+    #gamepadIndicator {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: #00ff88;
+      font-size: 0.7rem;
+      font-family: 'Press Start 2P', monospace !important;
+      background: rgba(0,0,0,0.7);
+      padding: 6px 16px;
+      border-radius: 8px;
+      border: 1px solid #00ff88;
+      z-index: 9998;
+      display: none;
+      text-align: center;
+    }
+    #gamepadIndicator.show { display: block; }
+    #gamepadIndicator .key-hint {
+      color: #ffaa44;
+      font-size: 0.6rem;
+      margin-top: 3px;
+    }
   </style>
 </head>
 <body>
+
+  <div id="gamepadIndicator" class="show">
+    🎮 MANDO CONECTADO
+    <div class="key-hint">A=Seleccionar | B=Cancelar | D-Pad=Navegar</div>
+  </div>
 
   <div class="reset-polling-badge" id="pollingBadge">🔄</div>
   <div id="text-input-display">
@@ -518,29 +549,29 @@
 
   <div id="waitingScreen" class="waiting-screen">
     <h1>🍌 Ms. BananaS 🍌</h1>
-    <p>Game completed. Waiting for reset signal...</p>
-    <div class="reset-signal" id="waitingSignal">🔄 Searching signal...</div>
+    <p>Juego completado. Esperando señal de reseteo...</p>
+    <div class="reset-signal" id="waitingSignal">🔄 Buscando señal...</div>
     <div style="margin-top: 20px; font-size: 0.8rem; opacity: 0.5;">
-      <p>🔓 Reset code:</p>
+      <p>🔓 Código de reseteo:</p>
       <div class="binary-code" id="waitingBinaryClick">01101000 01110100 01110100 01110000 01110011 00111010 00101111 00101111 01110010 01100001 01110000 01101000 01100001 01110000 01110010 01101111 00111001 00110000 00110000 00101110 01100111 01101001 01110100 01101000 01110101 01100010 00101110 01101001 01101111 00101111 01110010 01100101 01110011 01100101 01110100 00101111</div>
     </div>
   </div>
 
   <div id="lockScreen" class="lock-screen">
     <h1>GAME NOT FOUND.</h1>
-    <p>Game locked. Waiting for signal...</p>
-    <div class="reset-signal" id="resetSignal">🔄 Searching signal...</div>
+    <p>Juego bloqueado. Esperando señal...</p>
+    <div class="reset-signal" id="resetSignal">🔄 Buscando señal...</div>
     <div style="margin-top: 20px; font-size: 0.8rem; opacity: 0.5;">
-      <p>🔓 Reset code:</p>
+      <p>🔓 Código de reseteo:</p>
       <div class="binary-code" id="lockBinaryClick">01101000 01110100 01110100 01110000 01110011 00111010 00101111 00101111 01110010 01100001 01110000 01101000 01100001 01110000 01110010 01101111 00111001 00110000 00110000 00101110 01100111 01101001 01110100 01101000 01110101 01100010 00101110 01101001 01101111 00101111 01110010 01100101 01110011 01100101 01110100 00101111</div>
     </div>
   </div>
   
   <div id="glitchRedScreen" class="glitch-red-screen">
     <h1>GAME NOT FOUND.</h1>
-    <div class="reset-signal-red" id="glitchResetSignal">🔄 Searching reset signal...</div>
+    <div class="reset-signal-red" id="glitchResetSignal">🔄 Buscando señal de reseteo...</div>
     <div style="margin-top: 20px; font-size: 0.8rem; opacity: 0.5;">
-      <p>🔓 Reset code:</p>
+      <p>🔓 Código de reseteo:</p>
       <div class="binary-code" id="glitchBinaryClick">01101000 01110100 01110100 01110000 01110011 00111010 00101111 00101111 01110010 01100001 01110000 01101000 01100001 01110000 01110010 01101111 00111001 00110000 00110000 00101110 01100111 01101001 01110100 01101000 01110101 01100010 00101110 01101001 01101111 00101111 01110010 01100101 01110011 01100101 01110100 00101111</div>
     </div>
   </div>
@@ -585,8 +616,8 @@
       </div>
       <div id="dialogueBox"></div>
       <audio id="dialogueAudio" preload="auto"></audio>
-      <div id="rageText">💢 Rage: 0</div>
-      <div id="dayText">🌙 Day 1 — Animals: 0/15</div>
+      <div id="rageText">💢 Furia: 0</div>
+      <div id="dayText">🌙 Día 1 — Animales: 0/15</div>
     </div>
 
     <div id="jumpscare"><video id="jumpscareVideo" src="jumpscare.mp4"></video></div>
@@ -611,6 +642,302 @@
     const BASE_URL = "https://raw.githubusercontent.com/Raphapro900/Ms.BananaS/refs/heads/main/";
     const RESET_URL = "https://raphapro900.github.io/reset/";
     
+    // ==================== GAMEPAD SUPPORT ====================
+    class GamepadManager {
+      constructor() {
+        this.gamepad = null;
+        this.connected = false;
+        this.buttons = {};
+        this.axes = { leftX: 0, leftY: 0, rightX: 0, rightY: 0 };
+        this.prevButtons = {};
+        this.listeners = [];
+        this.pollInterval = null;
+        this.deadZone = 0.15;
+        
+        this.BUTTON_MAP = {
+          A: 0, B: 1, X: 2, Y: 3,
+          LB: 4, RB: 5, LT: 6, RT: 7,
+          BACK: 8, START: 9,
+          LS: 10, RS: 11,
+          DPAD_UP: 12, DPAD_DOWN: 13, DPAD_LEFT: 14, DPAD_RIGHT: 15
+        };
+        
+        this.init();
+      }
+      
+      init() {
+        window.addEventListener('gamepadconnected', (e) => {
+          this.gamepad = e.gamepad;
+          this.connected = true;
+          document.getElementById('gamepadIndicator').classList.add('show');
+          this.startPolling();
+        });
+        
+        window.addEventListener('gamepaddisconnected', (e) => {
+          this.connected = false;
+          this.gamepad = null;
+          document.getElementById('gamepadIndicator').classList.remove('show');
+          this.stopPolling();
+        });
+        
+        this.checkInitialGamepad();
+      }
+      
+      checkInitialGamepad() {
+        const gamepads = navigator.getGamepads();
+        for (let gp of gamepads) {
+          if (gp) {
+            this.gamepad = gp;
+            this.connected = true;
+            document.getElementById('gamepadIndicator').classList.add('show');
+            this.startPolling();
+            break;
+          }
+        }
+      }
+      
+      startPolling() {
+        if (this.pollInterval) return;
+        this.pollInterval = setInterval(() => this.poll(), 16);
+      }
+      
+      stopPolling() {
+        if (this.pollInterval) {
+          clearInterval(this.pollInterval);
+          this.pollInterval = null;
+        }
+      }
+      
+      poll() {
+        if (!this.connected) return;
+        const gp = navigator.getGamepads()[this.gamepad.index];
+        if (!gp) {
+          this.connected = false;
+          this.stopPolling();
+          return;
+        }
+        this.gamepad = gp;
+        
+        this.prevButtons = { ...this.buttons };
+        
+        for (let i = 0; i < gp.buttons.length; i++) {
+          const key = Object.keys(this.BUTTON_MAP).find(k => this.BUTTON_MAP[k] === i);
+          if (key) {
+            this.buttons[key] = gp.buttons[i].pressed;
+          }
+        }
+        
+        if (gp.axes.length >= 2) {
+          this.axes.leftX = this.applyDeadZone(gp.axes[0]);
+          this.axes.leftY = this.applyDeadZone(gp.axes[1]);
+        }
+        if (gp.axes.length >= 4) {
+          this.axes.rightX = this.applyDeadZone(gp.axes[2]);
+          this.axes.rightY = this.applyDeadZone(gp.axes[3]);
+        }
+        
+        for (const listener of this.listeners) {
+          listener(this);
+        }
+      }
+      
+      applyDeadZone(value) {
+        return Math.abs(value) < this.deadZone ? 0 : value;
+      }
+      
+      isButtonPressed(buttonName) {
+        return this.buttons[buttonName] === true && this.prevButtons[buttonName] !== true;
+      }
+      
+      isButtonHeld(buttonName) {
+        return this.buttons[buttonName] === true;
+      }
+      
+      getDPad() {
+        return {
+          up: this.buttons.DPAD_UP || false,
+          down: this.buttons.DPAD_DOWN || false,
+          left: this.buttons.DPAD_LEFT || false,
+          right: this.buttons.DPAD_RIGHT || false
+        };
+      }
+      
+      getLeftStick() {
+        return {
+          x: this.axes.leftX,
+          y: this.axes.leftY
+        };
+      }
+      
+      addListener(callback) {
+        this.listeners.push(callback);
+      }
+      
+      removeListener(callback) {
+        this.listeners = this.listeners.filter(l => l !== callback);
+      }
+    }
+    
+    const gamepad = new GamepadManager();
+    
+    // ==================== NAVEGACIÓN CON GAMEPAD ====================
+    let menuSelectedIndex = 0;
+    let isBananaSelected = false;
+    const menuButtons = ['howBtn', 'shopBtn', 'exitBtn'];
+    let optionSelectedIndex = 0;
+    let isInMenu = true;
+    let isInGame = false;
+    let isBossActive = false;
+    let dialogActive = false;
+    let isInOptions = false;
+    let menuRow = 0; // 0 = banana, 1 = botones
+    const MENU_ROWS = 2;
+    const COLS_PER_ROW = [1, 3]; // banana ocupa 1 columna, botones 3
+    
+    function updateMenuSelection() {
+      const banana = document.getElementById('bananaPlay');
+      const buttons = menuButtons.map(id => document.getElementById(id));
+      
+      // Resetear todos
+      banana.classList.remove('selected');
+      buttons.forEach(btn => btn.classList.remove('selected'));
+      
+      if (menuRow === 0) {
+        banana.classList.add('selected');
+      } else {
+        const idx = menuSelectedIndex % buttons.length;
+        if (buttons[idx]) buttons[idx].classList.add('selected');
+      }
+    }
+    
+    function updateOptionSelection() {
+      const options = document.querySelectorAll('.options button');
+      options.forEach((btn, i) => {
+        if (i === optionSelectedIndex) {
+          btn.classList.add('selected-option');
+        } else {
+          btn.classList.remove('selected-option');
+        }
+      });
+    }
+    
+    function navigateMenu(dx, dy) {
+      if (!isInMenu) return;
+      
+      if (dy < 0) {
+        menuRow = Math.max(0, menuRow - 1);
+        menuSelectedIndex = 0;
+      } else if (dy > 0) {
+        menuRow = Math.min(MENU_ROWS - 1, menuRow + 1);
+        menuSelectedIndex = 0;
+      } else if (dx !== 0 && menuRow === 1) {
+        const buttons = menuButtons;
+        menuSelectedIndex = (menuSelectedIndex + dx + buttons.length) % buttons.length;
+      }
+      
+      updateMenuSelection();
+    }
+    
+    function navigateOptions(dx, dy) {
+      if (!isInOptions) return;
+      const options = document.querySelectorAll('.options button');
+      const cols = 6;
+      
+      if (dx !== 0) {
+        optionSelectedIndex = (optionSelectedIndex + dx + options.length) % options.length;
+      } else if (dy < 0) {
+        optionSelectedIndex = (optionSelectedIndex - cols + options.length) % options.length;
+      } else if (dy > 0) {
+        optionSelectedIndex = (optionSelectedIndex + cols) % options.length;
+      }
+      
+      updateOptionSelection();
+    }
+    
+    // ==================== LISTENER DEL GAMEPAD ====================
+    gamepad.addListener((gp) => {
+      // Menú principal
+      if (isInMenu) {
+        // Navegación con D-Pad
+        const dPad = gp.getDPad();
+        const stick = gp.getLeftStick();
+        
+        if (gp.isButtonPressed('DPAD_UP') || stick.y < -0.5) {
+          navigateMenu(0, -1);
+        }
+        if (gp.isButtonPressed('DPAD_DOWN') || stick.y > 0.5) {
+          navigateMenu(0, 1);
+        }
+        if (gp.isButtonPressed('DPAD_LEFT') || stick.x < -0.5) {
+          navigateMenu(-1, 0);
+        }
+        if (gp.isButtonPressed('DPAD_RIGHT') || stick.x > 0.5) {
+          navigateMenu(1, 0);
+        }
+        
+        // Seleccionar con A
+        if (gp.isButtonPressed('A')) {
+          if (menuRow === 0) {
+            document.getElementById('bananaPlay').click();
+          } else {
+            const btn = document.getElementById(menuButtons[menuSelectedIndex % menuButtons.length]);
+            if (btn) btn.click();
+          }
+        }
+        
+        // Salir con B
+        if (gp.isButtonPressed('B')) {
+          document.getElementById('exitBtn').click();
+        }
+      }
+      
+      // Juego principal (animales)
+      if (isInGame && !isBossActive && !dialogActive) {
+        const dPad = gp.getDPad();
+        const stick = gp.getLeftStick();
+        
+        if (gp.isButtonPressed('DPAD_RIGHT') || stick.x > 0.5) {
+          navigateOptions(1, 0);
+        }
+        if (gp.isButtonPressed('DPAD_LEFT') || stick.x < -0.5) {
+          navigateOptions(-1, 0);
+        }
+        if (gp.isButtonPressed('DPAD_DOWN') || stick.y > 0.5) {
+          navigateOptions(0, 1);
+        }
+        if (gp.isButtonPressed('DPAD_UP') || stick.y < -0.5) {
+          navigateOptions(0, -1);
+        }
+        
+        if (gp.isButtonPressed('A')) {
+          const options = document.querySelectorAll('.options button');
+          if (options[optionSelectedIndex]) {
+            options[optionSelectedIndex].click();
+          }
+        }
+      }
+      
+      // Boss fight
+      if (isBossActive) {
+        if (gp.isButtonPressed('A') || gp.isButtonPressed('X')) {
+          const eEvent = new KeyboardEvent('keydown', { key: 'e', keyCode: 69 });
+          document.dispatchEvent(eEvent);
+        }
+        if (gp.isButtonPressed('B') || gp.isButtonPressed('Y')) {
+          const enterEvent = new KeyboardEvent('keydown', { key: 'Enter', keyCode: 13 });
+          document.dispatchEvent(enterEvent);
+        }
+      }
+      
+      // Diálogos
+      if (dialogActive) {
+        if (gp.isButtonPressed('A') || gp.isButtonPressed('B') || gp.isButtonPressed('X') || gp.isButtonPressed('Y')) {
+          document.dispatchEvent(new Event('click'));
+        }
+      }
+    });
+    
+    // ==================== FUNCIONES DE UTILIDAD ====================
     function playAudioFile(filename, volume = 0.8) {
       const url = BASE_URL + filename;
       return new Promise((resolve) => {
@@ -757,7 +1084,7 @@
 
     // ==================== FUNCIÓN DE RESET ====================
     function performReset() {
-      console.log("🔄 RESET ACTIVADO - Reiniciando a Día 1, Rage 0");
+      console.log("🔄 RESET ACTIVADO - Reiniciando a Día 1, Furia 0");
       clearProgress();
       stopAllGameMusic();
       glitchRedScreen.style.display = 'none';
@@ -788,10 +1115,19 @@
     }
     startUniversalResetPolling();
 
-    // ==================== BOTÓN DE RESET ELIMINADO ====================
-    // No se agrega ningún botón de reset en el menú
+    // ==================== BOTÓN DE RESET EN LA PÁGINA ====================
+    const resetBtn = document.createElement('button');
+    resetBtn.className = 'menuBtn';
+    resetBtn.id = 'resetBtn';
+    resetBtn.textContent = '🔄 Reset';
+    resetBtn.style.marginTop = '10px';
+    document.querySelector('.menuPanel div').appendChild(resetBtn);
+    
+    resetBtn.addEventListener('click', function() {
+      localStorage.setItem(RESET_SIGNAL_KEY, 'reset');
+      performReset();
+    });
 
-    // Los códigos binarios abren la página de reset
     document.getElementById('waitingBinaryClick')?.addEventListener('click', openResetPage);
     document.getElementById('lockBinaryClick')?.addEventListener('click', openResetPage);
     document.getElementById('glitchBinaryClick')?.addEventListener('click', openResetPage);
@@ -845,6 +1181,9 @@
     const dialogArrow = document.getElementById('dialogArrow');
 
     let currentInput = '';
+    const inputTextSpan = document.getElementById('inputText');
+    const textInputDisplay = document.getElementById('text-input-display');
+    
     function updateInputDisplay() { 
       inputTextSpan.textContent = currentInput; 
       textInputDisplay.style.display = 'block'; 
@@ -860,28 +1199,34 @@
       infoBox.style.display = 'block';
       infoContent.innerHTML = `
         <h2>📜 How to Play</h2>
-        <p>You have 5 days. Choose the correct animal on the TV.</p>
-        <p><strong>Objectives per day:</strong><br>
-        Day 1: 15 correct<br>
-        Day 2: 20 correct<br>
-        Day 3: 25 correct<br>
-        Day 4: 30 correct<br>
-        Day 5: 35 correct</p>
-        <p>Each mistake adds RAGE. Reach 10 and you'll enter the FOREST.</p>
-        <p>Complete Day 5 without errors → Happy ending!</p>
-        <p>Complete Day 5 with errors → Bossfight!</p>
+        <p>Tienes 5 días. Elige el animal correcto en la TV.</p>
+        <p><strong>Objetivos por día:</strong><br>
+        Día 1: 15 aciertos<br>
+        Día 2: 20 aciertos<br>
+        Día 3: 25 aciertos<br>
+        Día 4: 30 aciertos<br>
+        Día 5: 35 aciertos</p>
+        <p>Cada fallo suma FURIA. Llega a 10 y entrarás al BOSQUE.</p>
+        <p>Si completas el Día 5 sin errores → ¡Final feliz!</p>
+        <p>Si completas el Día 5 con errores → ¡Bossfight!</p>
         <br>
         <p><strong>⚔️ Bossfight:</strong><br>
-        • The boss attacks with falling CUBES<br>
-        • After 5 seconds, you can ATTACK with <strong>E</strong><br>
-        • Press <strong>ENTER</strong> to hit<br>
-        • You have 10 hearts</p>
+        • El boss ataca con CUBITOS que caen<br>
+        • Después de 5 segundos, puedes ATACAR con <strong>E</strong><br>
+        • Presiona <strong>ENTER</strong> para golpear<br>
+        • Tienes 10 corazones</p>
         <br>
-        <p><strong>🎮 SECRET CODES:</strong><br>
-        <strong>↑ ↑ ↓ ↓ ← → ← → B A</strong> → Happy ending<br>
+        <p><strong>🎮 CONTROLES CON MANDO:</strong><br>
+        • <strong>A / X</strong> = Seleccionar / Atacar<br>
+        • <strong>B / O</strong> = Cancelar / Salir<br>
+        • <strong>D-Pad / Joystick</strong> = Navegar en todas las direcciones<br>
+        • <strong>Joystick</strong> = Mover en bossfight</p>
+        <br>
+        <p><strong>🎮 CÓDIGOS SECRETOS:</strong><br>
+        <strong>↑ ↑ ↓ ↓ ← → ← → B A</strong> → Final feliz<br>
         <strong>↓ ↑ B A</strong> → Bossfight</p>
         <br>
-        <p><strong>🔓 Reset code:</strong></p>
+        <p><strong>🔓 Código de reseteo:</strong></p>
         <div class="binary-code" id="binaryClick">${binaryCode}</div>
       `;
       document.getElementById('binaryClick')?.addEventListener('click', openResetPage);
@@ -889,7 +1234,7 @@
 
     shopBtn.addEventListener('click', function() {
       infoBox.style.display = 'block';
-      infoContent.innerHTML = `<h2>🛒 Shop</h2><p>Coming soon...</p>`;
+      infoContent.innerHTML = `<h2>🛒 Tienda</h2><p>Próximamente...</p>`;
     });
 
     exitBtn.addEventListener('click', function() {
@@ -955,6 +1300,7 @@
     // ==================== DIÁLOGO ESTILO UNDERTALE ====================
     function showUndertaleDialog(text, portraitUrl, isRedText = false) {
       return new Promise((resolve) => {
+        dialogActive = true;
         undertaleDialog.classList.add('active');
         dialogPortrait.src = portraitUrl || BASE_URL + 'banana2.png';
         dialogPortrait.style.filter = 'grayscale(100%) contrast(200%) brightness(0.7)';
@@ -976,13 +1322,15 @@
             if (charInterval) clearInterval(charInterval);
             dialogArrow.classList.add('show');
             const clickHandler = () => {
+              dialogActive = false;
               document.removeEventListener('click', clickHandler);
               document.removeEventListener('keydown', keyHandler);
               undertaleDialog.classList.remove('active');
               resolve();
             };
             const keyHandler = (e) => {
-              if (e.key === 'Enter' || e.key === ' ' || e.key === 'z') {
+              if (e.key === 'Enter' || e.key === ' ' || e.key === 'z' || e.key === 'e') {
+                dialogActive = false;
                 document.removeEventListener('click', clickHandler);
                 document.removeEventListener('keydown', keyHandler);
                 undertaleDialog.classList.remove('active');
@@ -1018,6 +1366,7 @@
 
     function showFinalUndertaleDialog(text, portraitUrl, isRedText = false) {
       return new Promise((resolve) => {
+        dialogActive = true;
         undertaleDialog.classList.add('active');
         dialogPortrait.src = portraitUrl || BASE_URL + 'banana2.png';
         dialogPortrait.style.filter = 'grayscale(100%) contrast(200%) brightness(0.7)';
@@ -1039,6 +1388,7 @@
             if (charInterval) clearInterval(charInterval);
             dialogArrow.classList.add('show');
             setTimeout(() => {
+              dialogActive = false;
               undertaleDialog.classList.remove('active');
               resolve();
             }, 1500);
@@ -1070,6 +1420,7 @@
     // ==================== DIÁLOGO DE MUERTE ====================
     function showDeathDialog(text) {
       return new Promise((resolve) => {
+        dialogActive = true;
         deathDialog.classList.add('active');
         deathText.innerHTML = '';
         
@@ -1087,6 +1438,7 @@
           if (index >= chars.length) {
             if (charInterval) clearInterval(charInterval);
             setTimeout(() => {
+              dialogActive = false;
               deathDialog.classList.remove('active');
               resolve();
             }, 1500);
@@ -1125,11 +1477,13 @@
         false
       );
       
-      try {
-        const underrrAudio = new Audio(BASE_URL + 'Underrr.mp3');
-        underrrAudio.volume = 0.8;
-        underrrAudio.play().catch(e => console.warn('Underrr.mp3 not available'));
-      } catch(e) {}
+      setTimeout(() => {
+        try {
+          const underrrAudio = new Audio(BASE_URL + 'Underrr.mp3');
+          underrrAudio.volume = 0.8;
+          underrrAudio.play().catch(e => {});
+        } catch(e) {}
+      }, 500);
       
       setTimeout(() => {
         showCreditssVideo();
@@ -1142,9 +1496,8 @@
       creditssVideo.playbackRate = 1.0;
       
       creditssVideo.play().catch(e => {
-        console.warn('creditsss.mp4 not available, showing text');
         creditssContainer.style.display = 'none';
-        dialogueBox.innerText = "🎬 CREDITS - Ms. BananaS";
+        dialogueBox.innerText = "🎬 CRÉDITOS - Ms. BananaS";
         dialogueBox.style.display = "block";
         setTimeout(() => {
           dialogueBox.style.display = "none";
@@ -1180,7 +1533,7 @@
     function showThanksAndCredits() {
       stopAllGameMusic();
       
-      dialogueBox.innerText = "🎉 THANKS FOR PLAYING! 🎉"; 
+      dialogueBox.innerText = "🎉 ¡GRACIAS POR JUGAR! 🎉"; 
       dialogueBox.style.display = "block";
       
       const thanksAudio = new Audio(BASE_URL + 'Thanks.wav');
@@ -1194,7 +1547,7 @@
     }
 
     function showCreditsVideoOld() {
-      dialogueBox.innerText = "🎬 CREDITS - Hold SHIFT for x4"; 
+      dialogueBox.innerText = "🎬 CRÉDITOS - Mantén SHIFT para x4"; 
       dialogueBox.style.display = "block";
       creditsContainer.style.display = 'flex'; 
       creditsVideo.currentTime = 0; 
@@ -1250,12 +1603,12 @@
     // ==================== MENSAJES DE DERROTA ====================
     async function showDefeatMessages() {
       const messages = [
-        "You lost...",
-        "Why??...",
+        "Perdiste...",
+        "Porque??...",
         "...",
-        "A banana beat you",
-        "Really?...",
-        "Are you okay?"
+        "Una banana te pudo vencer",
+        "En serio?...",
+        "Estas bien?"
       ];
       
       for (let i = 0; i < messages.length; i++) {
@@ -1264,10 +1617,10 @@
       }
       
       const resetMessages = [
-        "Reset it...",
-        "Why don't you reset it?",
-        "That works too",
-        "Reset it..."
+        "Resetealo...",
+        "Porque no lo reseteas?",
+        "Eso tambien funciona",
+        "Resetealo..."
       ];
       
       for (let i = 0; i < resetMessages.length; i++) {
@@ -1286,7 +1639,7 @@
     }
     
     async function showSpiderReset() {
-      await showDeathDialog("💀 RESET IT 💀");
+      await showDeathDialog("💀 RESETEALO 💀");
       
       const spiderAudio = new Audio(BASE_URL + 'Spider.mp3');
       spiderAudio.volume = 1.0;
@@ -1305,6 +1658,7 @@
     let bossDefeatedFlag = false;
 
     function initBossFight() {
+      isBossActive = true;
       bossContainer.classList.add('active');
       bossFightActive = true;
       
@@ -1376,16 +1730,10 @@
       bossHPContainer.classList.add('show');
       playerHPContainer.classList.add('show');
       bossTimer.classList.add('show');
-      bossUI.textContent = '⚔️ MS. BANANAS CHALLENGES YOU! ⚔️';
+      bossUI.textContent = '⚔️ ¡MS. BANANAS TE DESAFÍA! ⚔️';
       bossHPDisplay.textContent = `❤️ ${bossHP}`;
       playerHPDisplay.textContent = `❤️ ${playerHP}`;
       bossTimer.textContent = '⏱️ 5';
-
-      const heartCursor = new Image();
-      heartCursor.src = BASE_URL + 'heart.png';
-      heartCursor.onload = () => {
-        canvas.style.cursor = 'none';
-      };
 
       document.addEventListener('mousemove', (e) => {
         const rect = canvas.getBoundingClientRect();
@@ -1394,6 +1742,21 @@
         mouseX = (e.clientX - rect.left) * scaleX;
         mouseY = (e.clientY - rect.top) * scaleY;
       });
+
+      const gamepadMoveInterval = setInterval(() => {
+        if (!bossFightActive) {
+          clearInterval(gamepadMoveInterval);
+          return;
+        }
+        if (gamepad.connected) {
+          const stick = gamepad.getLeftStick();
+          const speed = 15;
+          mouseX += stick.x * speed;
+          mouseY += stick.y * speed;
+          mouseX = Math.max(0, Math.min(W, mouseX));
+          mouseY = Math.max(0, Math.min(H, mouseY));
+        }
+      }, 16);
 
       document.addEventListener('keydown', handleKeyDown);
 
@@ -1433,7 +1796,7 @@
               stopCubeAttack();
               if (window.currentAttackInterval) clearInterval(window.currentAttackInterval);
               if (countdownInterval) clearInterval(countdownInterval);
-              bossUI.textContent = "💀 BOSS DEFEATED! 💀";
+              bossUI.textContent = "💀 ¡JEFE DERROTADO! 💀";
               bossHPDisplay.textContent = "💀 0";
               bossTimer.classList.remove('show');
               bossCountdownEl.classList.remove('show');
@@ -1449,6 +1812,7 @@
                 bossVictory.classList.remove('show');
                 bossContainer.classList.remove('active');
                 bossFightActive = false;
+                isBossActive = false;
                 showBossVictoryDialogs();
               }, 1500);
             }
@@ -1467,8 +1831,8 @@
           lineDirection = 1;
           attackLineTime = 0;
           lineMoveDuration = 0;
-          bossTimer.textContent = '⚡ ATTACKING! (ENTER) ⚡';
-          bossAttackIndicatorEl.textContent = '⚡ PRESS ENTER! ⚡';
+          bossTimer.textContent = '⚡ ¡ATACANDO! (ENTER) ⚡';
+          bossAttackIndicatorEl.textContent = '⚡ ¡PRESIONA ENTER! ⚡';
           
           const attackInterval = setInterval(() => {
             attackLineTime += 0.016;
@@ -1561,7 +1925,7 @@
         playerAttacked = false;
         attackTimer = 5;
         bossTimer.textContent = `⏱️ ${attackTimer}`;
-        bossAttackIndicatorEl.textContent = '💢 DODGE THE CUBES! 💢';
+        bossAttackIndicatorEl.textContent = '💢 ¡ESQUIVA LOS CUBITOS! 💢';
         bossAttackIndicatorEl.classList.add('show');
         
         startCubeAttack();
@@ -1574,8 +1938,8 @@
             phase = 'player_turn';
             stopCubeAttack();
             canAttack = true;
-            bossTimer.textContent = '⚡ YOUR TURN! (E) ⚡';
-            bossAttackIndicatorEl.textContent = '⚡ PRESS E! ⚡';
+            bossTimer.textContent = '⚡ ¡TU TURNO! (E) ⚡';
+            bossAttackIndicatorEl.textContent = '⚡ ¡PRESIONA E! ⚡';
             bossAttackIndicatorEl.classList.add('show');
           }
         }, 1000);
@@ -1584,7 +1948,7 @@
       }
 
       function startPlayerDeathSequence() {
-        bossUI.textContent = "💀 YOU DIED! 💀";
+        bossUI.textContent = "💀 ¡HAS MUERTO! 💀";
         playerHPDisplay.textContent = "☠️ 0";
         bossTimer.classList.remove('show');
         bossCountdownEl.classList.remove('show');
@@ -1605,6 +1969,7 @@
           bossDefeat.classList.remove('show');
           bossContainer.classList.remove('active');
           bossFightActive = false;
+          isBossActive = false;
           showDefeatMessages();
         }, 2000);
       }
@@ -1733,7 +2098,7 @@
           ctx.font = '18px "Press Start 2P", monospace';
           ctx.textAlign = 'center';
           ctx.textBaseline = 'bottom';
-          ctx.fillText('PRESS E TO ATTACK', W/2, H - 30);
+          ctx.fillText('PRESIONA E PARA ATACAR', W/2, H - 30);
         }
         
         if (phase === 'idle' && !isCountdownActive && !deathSequenceStarted && gameActive) {
@@ -1763,6 +2128,12 @@
         playAudioFile('DoorC.mp3');
         setTimeout(() => {
           document.getElementById('gameScreen').style.display = 'block';
+          isInMenu = false;
+          isInGame = true;
+          isInOptions = true;
+          optionSelectedIndex = 0;
+          updateOptionSelection();
+          
           if (roomMusic) {
             roomMusic.currentTime = 0;
             roomMusic.loop = true;
@@ -1773,7 +2144,7 @@
           if (day >= 2 && day <= 5) { welcomeFile = "Dias.mp3"; }
           playAudioFile(welcomeFile, 0.8).then(() => {
             setTimeout(() => {
-              showDialogue(`🍌 DAY ${day}`, null, 3500);
+              showDialogue(`🍌 DÍA ${day}`, null, 3500);
             }, 500);
           });
           iniciarJuego();
@@ -1799,7 +2170,7 @@
           setTimeout(() => {
             startListeningForInput();
             document.addEventListener('keydown', handleTextInput);
-            showDialogue("🔑 Type 'Inside' or 'Leave'", null, 3000);
+            showDialogue("🔑 Escribe 'Inside' o 'Leave'", null, 3000);
           }, 500);
         }, 500);
       }, 1000);
@@ -1884,7 +2255,7 @@
           stopListeningForInput(); 
           leaveHouse();
         } else {
-          showDialogue(`❌ "${command}" not recognized.`, null, 1500);
+          showDialogue(`❌ "${command}" no reconocido.`, null, 1500);
           currentInput = ''; 
           inputTextSpan.textContent = '';
         }
@@ -1917,7 +2288,7 @@
         document.getElementById('rageText').style.display = 'none';
         document.getElementById('dayText').style.display = 'none';
         document.getElementById('gameScreen').style.display = 'block';
-        showDialogue("🍔 There's a burger. (E)", null, 5000);
+        showDialogue("🍔 Hay una hamburguesa. (E)", null, 5000);
         document.addEventListener('keydown', eatHandler);
       }, 1500);
     }
@@ -1958,7 +2329,7 @@
         });
         
       } else {
-        showDialogue("🍔 The burger is delicious.", null, 2000);
+        showDialogue("🍔 La hamburguesa está deliciosa.", null, 2000);
       }
     }
 
@@ -1967,10 +2338,10 @@
       let pollInterval, attempts = 0;
       function checkLocalStorageSignal() {
         attempts++;
-        if (waitingSignalDiv) waitingSignalDiv.innerHTML = `🔄 Searching signal... (Attempt ${attempts})<br>📡 Checking...`;
+        if (waitingSignalDiv) waitingSignalDiv.innerHTML = `🔄 Buscando señal... (Intento ${attempts})<br>📡 Revisando...`;
         const signal = localStorage.getItem(RESET_SIGNAL_KEY);
         if (signal === "reset") {
-          if (waitingSignalDiv) waitingSignalDiv.innerHTML = '✅ SIGNAL DETECTED! Resetting...';
+          if (waitingSignalDiv) waitingSignalDiv.innerHTML = '✅ ¡SEÑAL DETECTADA! Reiniciando...';
           localStorage.removeItem(RESET_SIGNAL_KEY); clearInterval(pollInterval); clearGameLocked(); performReset();
           return true;
         }
@@ -1983,10 +2354,10 @@
       let pollInterval, attempts = 0;
       function checkLocalStorageSignal() {
         attempts++;
-        if (glitchResetSignalDiv) glitchResetSignalDiv.innerHTML = `🔄 Searching reset signal... (Attempt ${attempts})<br>📡 Checking...`;
+        if (glitchResetSignalDiv) glitchResetSignalDiv.innerHTML = `🔄 Buscando señal de reseteo... (Intento ${attempts})<br>📡 Revisando...`;
         const signal = localStorage.getItem(RESET_SIGNAL_KEY);
         if (signal === "reset") {
-          if (glitchResetSignalDiv) glitchResetSignalDiv.innerHTML = '✅ SIGNAL DETECTED! Resetting...';
+          if (glitchResetSignalDiv) glitchResetSignalDiv.innerHTML = '✅ ¡SEÑAL DETECTADA! Reiniciando...';
           localStorage.removeItem(RESET_SIGNAL_KEY); clearInterval(pollInterval); clearGameLocked(); performReset();
           return true;
         }
@@ -1999,10 +2370,10 @@
       let pollInterval, attempts = 0;
       function checkLocalStorageSignal() {
         attempts++;
-        if (resetSignalDiv) resetSignalDiv.innerHTML = `🔄 Searching signal... (Attempt ${attempts})<br>📡 Checking...`;
+        if (resetSignalDiv) resetSignalDiv.innerHTML = `🔄 Buscando señal... (Intento ${attempts})<br>📡 Revisando...`;
         const signal = localStorage.getItem(RESET_SIGNAL_KEY);
         if (signal === "reset") {
-          if (resetSignalDiv) resetSignalDiv.innerHTML = '✅ SIGNAL DETECTED! Unlocking...';
+          if (resetSignalDiv) resetSignalDiv.innerHTML = '✅ ¡SEÑAL DETECTADA! Desbloqueando...';
           localStorage.removeItem(RESET_SIGNAL_KEY); clearInterval(pollInterval); clearGameLocked(); performReset();
           return true;
         }
@@ -2026,7 +2397,7 @@
         if (roomMusic) roomMusic.pause();
         startListeningForInput();
         document.addEventListener('keydown', handleTextInput);
-        showDialogue("🔑 Type 'Inside'", null, 3000);
+        showDialogue("🔑 Escribe 'Inside'", null, 3000);
       });
     }
 
@@ -2143,18 +2514,26 @@
         currentAnimal = animals[Math.floor(Math.random() * animals.length)];
         loadAnimalImage(currentAnimal);
         buttons.forEach(btn => btn.style.backgroundColor = "#1a0a00");
+        optionSelectedIndex = 0;
+        updateOptionSelection();
       }
 
       function updateUI() {
-        rageText.innerText = "💢 Rage: " + rage;
-        dayText.innerText = "🌙 Day " + day + " — Animals: " + correctCount + "/" + dayTargets[day];
+        rageText.innerText = "💢 Furia: " + rage;
+        dayText.innerText = "🌙 Día " + day + " — Animales: " + correctCount + "/" + dayTargets[day];
       }
 
       function returnToMenu() {
         saveProgress(day, rage, totalErrors);
         gameActive = false;
+        isInGame = false;
+        isInOptions = false;
         gameScreen.style.display = "none";
         document.getElementById('startScreen').style.display = "flex";
+        isInMenu = true;
+        menuRow = 0;
+        menuSelectedIndex = 0;
+        updateMenuSelection();
         if (roomMusic) roomMusic.pause();
         playMenuMusic();
       }
@@ -2171,6 +2550,7 @@
 
       function completeGame(hasErrors) {
         gameActive = false;
+        isInGame = false;
         if (!hasErrors) {
           showThanksAndCredits();
         } else {
@@ -2400,14 +2780,32 @@
           
           const currentPlayerSpeed = playerBaseSpeed * runningMult;
           let moveX = 0, moveZ = 0;
+          
           if (keys.w) moveZ = 1;
           if (keys.s) moveZ = -1;
           if (keys.a) moveX = -1;
           if (keys.d) moveX = 1;
           
+          if (gamepad.connected) {
+            const stick = gamepad.getLeftStick();
+            const deadZone = 0.2;
+            if (Math.abs(stick.x) > deadZone || Math.abs(stick.y) > deadZone) {
+              const mag = Math.min(1, Math.hypot(stick.x, stick.y));
+              const normX = stick.x / mag;
+              const normY = stick.y / mag;
+              moveX += normX * 1.5;
+              moveZ += normY * 1.5;
+            }
+          }
+          
+          const maxMove = 1;
+          const len = Math.hypot(moveX, moveZ);
+          if (len > maxMove) {
+            moveX = (moveX / len) * maxMove;
+            moveZ = (moveZ / len) * maxMove;
+          }
+          
           if (moveX !== 0 || moveZ !== 0) {
-            const len = Math.hypot(moveX, moveZ);
-            moveX /= len; moveZ /= len;
             const forward = new THREE.Vector3(-Math.sin(yaw), 0, -Math.cos(yaw));
             const right = new THREE.Vector3(Math.cos(yaw), 0, -Math.sin(yaw));
             playerPos.x += (forward.x * moveZ + right.x * moveX) * currentPlayerSpeed * delta;
@@ -2497,13 +2895,14 @@
       function onRageReachedTen() {
         if (!gameActive) return;
         gameActive = false;
+        isInGame = false;
         roomMusic.pause();
         gameScreen.style.display = "none";
         startChaseMinigame();
       }
       
       // ==================== EVENTOS DE LOS BOTONES ====================
-      buttons.forEach(btn => {
+      buttons.forEach((btn, index) => {
         btn.addEventListener('click', () => {
           if (!gameActive) return;
           if (bossTriggered) return;
@@ -2513,11 +2912,11 @@
             correctCount++;
             updateUI();
             const sound = getRandomSound(correctSounds);
-            showDialogue("✅ Correct!", sound, 1500);
+            showDialogue("✅ ¡Correcto!", sound, 1500);
             
             if (correctCount >= dayTargets[day]) {
               if (day < 5) {
-                showDialogue(`✨ Day ${day} completed! ✨`, null, 1500);
+                showDialogue(`✨ ¡Completaste el Día ${day}! ✨`, null, 1500);
                 gameActive = false;
                 playAudioFile('Door.mp3');
                 setTimeout(() => {
@@ -2546,7 +2945,7 @@
             totalErrors++;
             updateUI();
             const sound = getRandomSound(['f1.wav', 'f2.wav', 'f3.wav', 'f4.wav']);
-            showDialogue("❌ Wrong! It was " + currentAnimal.name + ". Rage: " + rage + "/10", sound, 2000);
+            showDialogue("❌ ¡Fallaste! Era " + currentAnimal.name + ". Furia: " + rage + "/10", sound, 2000);
             saveProgress(day, rage, totalErrors);
             
             if (rage >= 10) { 
@@ -2559,9 +2958,43 @@
       });
       
       gameActive = true;
+      isInGame = true;
+      isInOptions = true;
+      optionSelectedIndex = 0;
+      updateOptionSelection();
       updateUI();
       nextAnimal();
     }
+
+    // ==================== INICIALIZACIÓN DEL MENÚ ====================
+    isInMenu = true;
+    menuRow = 0;
+    menuSelectedIndex = 0;
+    updateMenuSelection();
+
+    document.getElementById("bananaPlay").addEventListener("click", function(e) {
+      e.preventDefault();
+      enterRoom();
+    });
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && isInMenu) {
+        if (menuRow === 0) {
+          document.getElementById('bananaPlay').click();
+        } else {
+          const btn = document.getElementById(menuButtons[menuSelectedIndex % menuButtons.length]);
+          if (btn) btn.click();
+        }
+      }
+    });
+
+    // ==================== VERIFICAR ESTADO INICIAL ====================
+    if (isFinalMode()) {
+      iniciarJuegoFinalMode();
+    }
+
+    console.log("🍌 Ms. BananaS - ¡Con soporte completo para gamepad!");
+    console.log("🎮 Controles: A=Seleccionar, B=Cancelar, D-Pad/Joystick=Navegar en todas direcciones");
   </script>
 </body>
 </html>
