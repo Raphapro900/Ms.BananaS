@@ -6,8 +6,122 @@
   <title>Ms. BananaS - Undertale Boss 2D</title>
   <link href="https://fonts.googleapis.com/css2?family=Indie+Flower&family=Share+Tech+Mono&display=swap" rel="stylesheet">
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+    
     * { user-select: none; -webkit-tap-highlight-color: transparent; font-family: 'Indie Flower', 'Courier New', cursive !important; }
     body { margin: 0; padding: 0; background: black; color: #FFD700; text-align: center; overflow: hidden; }
+    
+    /* ========== DIÁLOGO ESTILO UNDERTALE ========== */
+    .undertale-dialog {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: #000000;
+      border-top: 6px solid #ffffff;
+      z-index: 9999;
+      display: none;
+      padding: 24px 32px;
+      box-sizing: border-box;
+      min-height: 180px;
+      image-rendering: pixelated;
+    }
+    .undertale-dialog.active {
+      display: block;
+    }
+    .undertale-dialog .dialog-content {
+      display: flex;
+      align-items: flex-start;
+      gap: 24px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .undertale-dialog .dialog-portrait {
+      flex-shrink: 0;
+      width: 100px;
+      height: 100px;
+      image-rendering: pixelated;
+      border: 4px solid #ffffff;
+      background: #111111;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+      margin-top: 8px;
+    }
+    .undertale-dialog .dialog-portrait img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      image-rendering: pixelated;
+      filter: grayscale(100%) contrast(200%) brightness(0.7);
+    }
+    .undertale-dialog .dialog-text {
+      flex: 1;
+      color: #ffffff;
+      font-family: 'Press Start 2P', 'Determination Mono', monospace !important;
+      font-size: 18px;
+      line-height: 2;
+      text-align: left;
+      min-height: 80px;
+      letter-spacing: 1px;
+      image-rendering: pixelated;
+      text-shadow: none;
+      padding-top: 8px;
+      word-wrap: break-word;
+    }
+    .undertale-dialog .dialog-text .char {
+      display: inline-block;
+      opacity: 0;
+      animation: charAppear 0.04s forwards;
+      font-family: 'Press Start 2P', 'Determination Mono', monospace !important;
+      image-rendering: pixelated;
+      font-size: 18px;
+    }
+    .undertale-dialog .dialog-text .char.red {
+      color: #ff0000;
+      animation: charAppearRed 0.04s forwards, charShake 0.06s infinite alternate;
+      font-family: 'Press Start 2P', 'Determination Mono', monospace !important;
+      image-rendering: pixelated;
+    }
+    @keyframes charAppear {
+      0% { opacity: 0; transform: scale(0.9); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+    @keyframes charAppearRed {
+      0% { opacity: 0; transform: scale(0.9); color: #ff0000; }
+      100% { opacity: 1; transform: scale(1); color: #ff0000; }
+    }
+    @keyframes charShake {
+      0% { transform: translateX(-3px); }
+      100% { transform: translateX(3px); }
+    }
+    .undertale-dialog .dialog-arrow {
+      color: #ffffff;
+      font-size: 28px;
+      animation: arrowBlink 0.4s infinite;
+      font-family: 'Press Start 2P', 'Determination Mono', monospace !important;
+      position: absolute;
+      bottom: 16px;
+      right: 32px;
+      display: none;
+      image-rendering: pixelated;
+    }
+    .undertale-dialog .dialog-arrow.show {
+      display: block;
+    }
+    @keyframes arrowBlink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+    .undertale-dialog .dialog-name {
+      color: #ffff00;
+      font-family: 'Press Start 2P', 'Determination Mono', monospace !important;
+      font-size: 14px;
+      image-rendering: pixelated;
+      margin-bottom: 4px;
+    }
     
     #startScreen { height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(-45deg, #1a0a00, #3d1a00, #1f0f00, #2a1500); background-size: 400% 400%; animation: gradientBG 8s ease infinite; position: relative; z-index: 10; }
     @keyframes gradientBG { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
@@ -62,115 +176,6 @@
     #chaseContainer { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1000; background: #0a0a1a; cursor: none; }
     #chaseContainer canvas { display: block; width: 100%; height: 100%; }
     .chaseUI { position: absolute; bottom: 20px; left: 20px; color: #ffaa33; font-size: 14px; background: rgba(0,0,0,0.5); padding: 5px 10px; border-radius: 5px; z-index: 20; pointer-events: none; font-family: 'Indie Flower', cursive !important; }
-    
-    /* Diálogo estilo Undertale */
-    #undertaleDialog {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      background: rgba(0,0,0,0.92);
-      border-top: 3px solid #ffffff;
-      z-index: 9999;
-      display: none;
-      padding: 20px 30px;
-      box-sizing: border-box;
-      min-height: 180px;
-      font-family: 'Share Tech Mono', monospace !important;
-    }
-    #undertaleDialog.active {
-      display: block;
-    }
-    #undertaleDialog .dialog-content {
-      display: flex;
-      align-items: center;
-      gap: 30px;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-    #undertaleDialog .dialog-portrait {
-      flex-shrink: 0;
-      width: 120px;
-      height: 120px;
-      image-rendering: pixelated;
-      border: 3px solid #ffffff;
-      background: #111;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      position: relative;
-    }
-    #undertaleDialog .dialog-portrait img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      image-rendering: pixelated;
-      filter: grayscale(100%) contrast(200%) brightness(0.8);
-    }
-    #undertaleDialog .dialog-portrait .mouth {
-      position: absolute;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 30px;
-      height: 10px;
-      background: #222;
-      border-radius: 0 0 10px 10px;
-      transition: height 0.08s;
-    }
-    #undertaleDialog .dialog-portrait .mouth.open {
-      height: 20px;
-      border-radius: 0 0 5px 5px;
-    }
-    #undertaleDialog .dialog-text {
-      flex: 1;
-      color: #ffffff;
-      font-size: 1.8rem;
-      font-family: 'Share Tech Mono', monospace !important;
-      line-height: 1.6;
-      text-align: left;
-      min-height: 80px;
-      letter-spacing: 1px;
-    }
-    #undertaleDialog .dialog-text .char {
-      display: inline-block;
-      opacity: 0;
-      animation: charAppear 0.05s forwards;
-    }
-    #undertaleDialog .dialog-text .char.red {
-      color: #ff0000;
-      animation: charAppearRed 0.05s forwards, charShake 0.05s infinite alternate;
-    }
-    @keyframes charAppear {
-      0% { opacity: 0; transform: scale(0.8); }
-      100% { opacity: 1; transform: scale(1); }
-    }
-    @keyframes charAppearRed {
-      0% { opacity: 0; transform: scale(0.8); color: #ff0000; }
-      100% { opacity: 1; transform: scale(1); color: #ff0000; }
-    }
-    @keyframes charShake {
-      0% { transform: translateX(-2px); }
-      100% { transform: translateX(2px); }
-    }
-    #undertaleDialog .dialog-arrow {
-      color: #ffffff;
-      font-size: 2rem;
-      animation: arrowBlink 0.5s infinite;
-      font-family: 'Share Tech Mono', monospace !important;
-      position: absolute;
-      bottom: 20px;
-      right: 30px;
-      display: none;
-    }
-    #undertaleDialog .dialog-arrow.show {
-      display: block;
-    }
-    @keyframes arrowBlink {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0; }
-    }
     
     .waiting-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #0a0a2a; z-index: 10000; display: none; flex-direction: column; align-items: center; justify-content: center; font-family: 'Indie Flower', cursive !important; color: #FFAA44; text-align: center; }
     .waiting-screen h1 { font-size: 3rem; margin-bottom: 1rem; letter-spacing: 2px; color: #FFD700; text-shadow: 0 0 20px #FF6600; }
@@ -239,14 +244,16 @@
   <div class="reset-polling-badge" id="pollingBadge">🔄</div>
   <div id="text-input-display"><span id="inputText"></span><span class="cursor">|</span></div>
   
-  <!-- Diálogo estilo Undertale -->
-  <div id="undertaleDialog">
+  <!-- DIÁLOGO ESTILO UNDERTALE -->
+  <div id="undertaleDialog" class="undertale-dialog">
     <div class="dialog-content">
       <div class="dialog-portrait">
         <img id="dialogPortrait" src="" alt="Ms. BananaS">
-        <div class="mouth" id="dialogMouth"></div>
       </div>
-      <div class="dialog-text" id="dialogText"></div>
+      <div>
+        <div class="dialog-name" id="dialogName">☆ MS. BANANAS ☆</div>
+        <div class="dialog-text" id="dialogText"></div>
+      </div>
     </div>
     <div class="dialog-arrow" id="dialogArrow">▼</div>
   </div>
@@ -546,7 +553,6 @@
     const undertaleDialog = document.getElementById('undertaleDialog');
     const dialogText = document.getElementById('dialogText');
     const dialogPortrait = document.getElementById('dialogPortrait');
-    const dialogMouth = document.getElementById('dialogMouth');
     const dialogArrow = document.getElementById('dialogArrow');
 
     let currentInput = '';
@@ -607,40 +613,26 @@
       return new Promise((resolve) => {
         undertaleDialog.classList.add('active');
         dialogPortrait.src = portraitUrl || BASE_URL + 'banana2.png';
-        dialogPortrait.style.filter = 'grayscale(100%) contrast(200%) brightness(0.8)';
+        dialogPortrait.style.filter = 'grayscale(100%) contrast(200%) brightness(0.7)';
         dialogText.innerHTML = '';
         dialogArrow.classList.remove('show');
-        dialogMouth.classList.remove('open');
         
         const chars = text.split('');
         let index = 0;
-        let talkInterval = null;
         let charInterval = null;
-        let lastCharTime = 0;
         let isPaused = false;
         
         // Función para reproducir sonido de hablar
-        function playTalkSound(isRed) {
-          const soundFile = isRed ? 'Talkk.wav' : 'Talk.wav';
-          const audio = new Audio(BASE_URL + soundFile);
-          audio.volume = 0.5;
+        function playTalkSound() {
+          const audio = new Audio(BASE_URL + 'Talkk.wav');
+          audio.volume = 0.4;
           audio.play().catch(e => console.log('Talk sound error:', e));
-          // Animación de boca
-          dialogMouth.classList.add('open');
-          setTimeout(() => {
-            dialogMouth.classList.remove('open');
-          }, 80);
         }
         
-        // Función para añadir un carácter
         function addChar() {
           if (index >= chars.length) {
-            // Terminado
-            if (talkInterval) clearInterval(talkInterval);
             if (charInterval) clearInterval(charInterval);
             dialogArrow.classList.add('show');
-            dialogMouth.classList.remove('open');
-            // Esperar click para continuar
             const clickHandler = () => {
               document.removeEventListener('click', clickHandler);
               document.removeEventListener('keydown', keyHandler);
@@ -665,34 +657,17 @@
           span.textContent = char === ' ' ? '\u00A0' : char;
           span.className = 'char';
           
-          // Si es la parte roja (después de "So...")
-          if (isRedText && index >= text.indexOf('L')) {
+          if (isRedText) {
             span.classList.add('red');
-            // Reproducir Talkk.wav para caracteres rojos
-            if (char !== ' ' && char !== '.') {
-              playTalkSound(true);
-            }
-          } else if (char !== ' ' && char !== '.' && char !== ',' && char !== '?') {
-            // Reproducir Talk.wav para caracteres normales (no espacios ni puntuación)
-            playTalkSound(false);
           }
           
-          // Si es un punto, hacer pausa visual
-          if (char === '.') {
-            span.style.animationDuration = '0.5s';
+          // Sonido para cada letra (excepto espacios)
+          if (char !== ' ' && char !== '.') {
+            playTalkSound();
           }
           
           dialogText.appendChild(span);
           index++;
-          
-          // Si es un punto, hacer una pausa más larga
-          if (char === '.') {
-            setTimeout(() => {
-              if (index < chars.length) {
-                // Continuar después de la pausa
-              }
-            }, 300);
-          }
         }
         
         // Iniciar la animación de escritura
@@ -701,58 +676,6 @@
             addChar();
           }
         }, 50);
-        
-        // Manejar pausa en los puntos (pausa de 0.5s)
-        const originalAddChar = addChar;
-        addChar = function() {
-          if (index >= chars.length) {
-            if (charInterval) clearInterval(charInterval);
-            dialogArrow.classList.add('show');
-            dialogMouth.classList.remove('open');
-            const clickHandler = () => {
-              document.removeEventListener('click', clickHandler);
-              document.removeEventListener('keydown', keyHandler);
-              undertaleDialog.classList.remove('active');
-              resolve();
-            };
-            const keyHandler = (e) => {
-              if (e.key === 'Enter' || e.key === ' ' || e.key === 'z') {
-                document.removeEventListener('click', clickHandler);
-                document.removeEventListener('keydown', keyHandler);
-                undertaleDialog.classList.remove('active');
-                resolve();
-              }
-            };
-            document.addEventListener('click', clickHandler);
-            document.addEventListener('keydown', keyHandler);
-            return;
-          }
-          
-          const char = chars[index];
-          const span = document.createElement('span');
-          span.textContent = char === ' ' ? '\u00A0' : char;
-          span.className = 'char';
-          
-          if (isRedText && index >= text.indexOf('L')) {
-            span.classList.add('red');
-            if (char !== ' ' && char !== '.') {
-              playTalkSound(true);
-            }
-          } else if (char !== ' ' && char !== '.' && char !== ',' && char !== '?') {
-            playTalkSound(false);
-          }
-          
-          dialogText.appendChild(span);
-          index++;
-          
-          // Si es un punto, pausar la animación
-          if (char === '.') {
-            isPaused = true;
-            setTimeout(() => {
-              isPaused = false;
-            }, 300);
-          }
-        };
         
         // Forzar inicio
         setTimeout(() => {
@@ -1131,7 +1054,6 @@
         false
       );
       
-      // Diálogo con pausa en "So..."
       await showUndertaleDialog(
         "So... L E T ' S   S E E   W H O   D I E S   A N D   WHO   D O E S N ' T . . .",
         BASE_URL + 'banana2.png',
@@ -1139,8 +1061,10 @@
         true
       );
       
-      // Iniciar el boss después del diálogo
-      startBossFight();
+      // Reproducir glitch.mp4 antes del boss
+      playGlitchTransition(() => {
+        startBossFight();
+      });
     }
 
     // ============================================
@@ -1539,14 +1463,20 @@
         let cubeInterval = null;
         let playerAttacked = false;
         let isCountdownActive = false;
+        let bossDefeated = false;
+        let lineActive = false;
+        let lineStopX = 0;
         
         const bossX = canvas.width / 2;
         const bossY = canvas.height / 2 - 50;
         
         const bossImg = new Image();
-        bossImg.src = BASE_URL + "banana2.png";
-        bossImg.onload = () => { console.log("Boss image loaded: banana2.png"); };
-        bossImg.onerror = () => { console.error("Error loading banana2.png, usando emoji como fallback"); };
+        bossImg.src = BASE_URL + "banana3.png";
+        bossImg.onload = () => { console.log("Boss image loaded: banana3.png"); };
+        bossImg.onerror = () => { 
+          console.error("Error loading banana3.png, usando banana2.png como fallback");
+          bossImg.src = BASE_URL + "banana2.png";
+        };
         
         bossUI.style.display = 'block';
         bossHPDisplay.style.display = 'block';
@@ -1565,6 +1495,55 @@
           const scaleY = canvas.height / rect.height;
           mouseX = (e.clientX - rect.left) * scaleX;
           mouseY = (e.clientY - rect.top) * scaleY;
+        });
+        
+        // Control de la línea con Enter
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' && isLineMoving) {
+            isLineMoving = false;
+            lineStopX = lineX;
+            lineActive = true;
+            // Verificar si la línea golpea al boss
+            const distX = Math.abs(lineX - bossX);
+            const distY = Math.abs(mouseY - bossY);
+            const halfWidth = lineWidth / 2 + 60;
+            const halfHeight = 80;
+            
+            if (distX < halfWidth && distY < halfHeight) {
+              // ¡GOLPE AL BOSS!
+              bossHP--;
+              bossHPDisplay.textContent = `❤️ ${bossHP}`;
+              const ouchSound = new Audio(BASE_URL + 'Ouch.mp3');
+              ouchSound.volume = 0.7;
+              ouchSound.play().catch(e => console.log("Ouch.mp3 error:", e));
+              
+              if (bossHP <= 0) {
+                bossDefeated = true;
+                deathSequenceStarted = true;
+                bossFightActive = false;
+                stopCubeAttack();
+                if (window.currentAttackInterval) clearInterval(window.currentAttackInterval);
+                if (countdownInterval) clearInterval(countdownInterval);
+                bossUI.textContent = "💀 ¡JEFE DERROTADO! 💀";
+                bossHPDisplay.textContent = "💀 0";
+                bossTimer.style.display = 'none';
+                bossCountdownEl.style.display = 'none';
+                bossAttackIndicatorEl.style.display = 'none';
+                
+                if (window.bossMusic) {
+                  window.bossMusic.pause();
+                  window.bossMusic.currentTime = 0;
+                }
+                
+                setBossDefeated();
+                
+                // Mostrar diálogos finales
+                setTimeout(() => {
+                  showFinalDialogs();
+                }, 1500);
+              }
+            }
+          }
         });
         
         function spawnCubes() {
@@ -1682,86 +1661,51 @@
             playerAttacked = true;
             canAttack = false;
             isLineMoving = true;
+            lineActive = false;
             lineX = 0;
             lineDirection = 1;
             attackLineTime = 0;
-            bossTimer.textContent = '⚡ ¡ATACANDO! ⚡';
-            bossAttackIndicatorEl.textContent = '⚡ ¡ATACA! ⚡';
+            bossTimer.textContent = '⚡ ¡ATACANDO! (ENTER para detener) ⚡';
+            bossAttackIndicatorEl.textContent = '⚡ ¡PRESIONA ENTER PARA GOLPEAR! ⚡';
             
             const attackInterval = setInterval(() => {
               attackLineTime += 0.016;
               lineX += lineDirection * (canvas.width / 2) * 0.016 * 1.8;
               if (lineX >= canvas.width) { lineDirection = -1; }
               else if (lineX <= 0) { lineDirection = 1; }
-              
-              const distX = Math.abs(lineX - bossX);
-              const distY = Math.abs(mouseY - bossY);
-              const halfWidth = lineWidth / 2 + 60;
-              const halfHeight = 80;
-              
-              if (distX < halfWidth && distY < halfHeight) {
-                clearInterval(attackInterval);
-                isLineMoving = false;
-                bossHP--;
-                bossHPDisplay.textContent = `❤️ ${bossHP}`;
-                
-                const ouchSound = new Audio(BASE_URL + 'Ouch.mp3');
-                ouchSound.volume = 0.7;
-                ouchSound.play().catch(e => console.log("Ouch.mp3 error:", e));
-                
-                if (bossHP <= 0) {
-                  deathSequenceStarted = true;
-                  bossFightActive = false;
-                  stopCubeAttack();
-                  if (window.currentAttackInterval) clearInterval(window.currentAttackInterval);
-                  if (countdownInterval) clearInterval(countdownInterval);
-                  bossUI.textContent = "🎉 ¡JEFE DERROTADO! 🎉";
-                  bossHPDisplay.textContent = "💀 0";
-                  bossTimer.style.display = 'none';
-                  bossCountdownEl.style.display = 'none';
-                  bossAttackIndicatorEl.style.display = 'none';
-                  
-                  if (window.bossMusic) {
-                    window.bossMusic.pause();
-                    window.bossMusic.currentTime = 0;
-                  }
-                  
-                  setBossDefeated();
-                  
-                  setTimeout(() => {
-                    bossUI.style.display = 'none';
-                    bossHPDisplay.style.display = 'none';
-                    playerHPDisplay.style.display = 'none';
-                    bossTimer.style.display = 'none';
-                    bossCountdownEl.style.display = 'none';
-                    bossAttackIndicatorEl.style.display = 'none';
-                    chaseContainer.style.display = "none";
-                    completeBossFight();
-                  }, 2000);
-                }
-                return;
-              }
-              
-              if (attackLineTime >= 2) {
-                clearInterval(attackInterval);
-                isLineMoving = false;
-                if (!deathSequenceStarted) {
-                  phase = 'idle';
-                  bossTimer.textContent = '⏱️ 5';
-                  bossAttackIndicatorEl.classList.remove('show');
-                  bossAttackIndicatorEl.style.display = 'none';
-                  setTimeout(() => {
-                    if (bossFightActive && !deathSequenceStarted) {
-                      startCountdown();
-                    }
-                  }, 500);
-                }
-              }
             }, 16);
             
             window.currentPlayerAttackInterval = attackInterval;
           }
         });
+        
+        async function showFinalDialogs() {
+          // Diálogo final 1
+          await showUndertaleDialog(
+            "Okay. You beat me.",
+            BASE_URL + 'banana2.png',
+            null,
+            false
+          );
+          
+          // Diálogo final 2
+          await showUndertaleDialog(
+            "But please. Don't forget about me-",
+            BASE_URL + 'banana2.png',
+            null,
+            false
+          );
+          
+          // Sonido de muerte 8-bit
+          const deathSound = new Audio(BASE_URL + 'death_8bit.wav');
+          deathSound.volume = 0.8;
+          deathSound.play().catch(e => console.log("Death sound error:", e));
+          
+          // Esperar 3 segundos y mostrar creditss.mp4
+          setTimeout(() => {
+            showCreditssVideo();
+          }, 3000);
+        }
         
         function completeBossFight() {
           if (window.cleanupBoss2D) window.cleanupBoss2D();
@@ -1833,7 +1777,7 @@
         let lastTime = 0;
         
         function animateBoss2D(timestamp) {
-          if (!bossFightActive && !deathSequenceStarted) {
+          if (!bossFightActive && !deathSequenceStarted && !bossDefeated) {
             if (gameLoopId) {
               cancelAnimationFrame(gameLoopId);
               gameLoopId = null;
@@ -1856,7 +1800,7 @@
           ctx.fillStyle = gradient;
           ctx.fillRect(0, 0, canvas.width, canvas.height);
           
-          // Dibujar boss
+          // Dibujar boss (banana3.png)
           if (bossImg.complete && bossImg.naturalWidth > 0) {
             const size = 130;
             ctx.drawImage(bossImg, bossX - size/2, bossY - size/2, size, size);
@@ -1933,24 +1877,37 @@
             ctx.fillRect(lineX - 40, 0, 80, canvas.height);
           }
           
+          // Línea detenida (golpe)
+          if (lineActive && !isLineMoving) {
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+            ctx.shadowColor = '#ffffff';
+            ctx.shadowBlur = 20;
+            ctx.fillRect(lineStopX - lineWidth/2, 0, lineWidth, canvas.height);
+            ctx.shadowBlur = 0;
+            // Resetear después de mostrar
+            setTimeout(() => {
+              lineActive = false;
+            }, 300);
+          }
+          
           // Turno del jugador
           if (phase === 'player_turn' && canAttack) {
             ctx.fillStyle = 'rgba(0, 255, 0, 0.08)';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             ctx.fillStyle = '#44ff44';
-            ctx.font = '24px "Indie Flower", cursive';
+            ctx.font = '24px "Press Start 2P", monospace';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'bottom';
-            ctx.fillText('⚡ PRESIONA E PARA ATACAR ⚡', canvas.width/2, canvas.height - 30);
+            ctx.fillText('PRESIONA E PARA ATACAR', canvas.width/2, canvas.height - 30);
           }
           
           // Victoria
           if (deathSequenceStarted && bossHP <= 0) {
             ctx.fillStyle = '#ffdd44';
-            ctx.font = '40px "Indie Flower", cursive';
+            ctx.font = '40px "Press Start 2P", monospace';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText('🎉 ¡VENCISTE AL JEFE! 🎉', canvas.width/2, canvas.height/2 + 100);
+            ctx.fillText('🎉 VICTORIA 🎉', canvas.width/2, canvas.height/2 + 100);
           }
           
           // Iniciar countdown
@@ -1958,7 +1915,7 @@
             startCountdown();
           }
           
-          if (bossFightActive || (!deathSequenceStarted && phase !== 'idle')) {
+          if (bossFightActive || (!deathSequenceStarted && phase !== 'idle') || bossDefeated) {
             gameLoopId = requestAnimationFrame(animateBoss2D);
           }
         }
@@ -2366,7 +2323,8 @@
           • El boss ataca con CUBITOS que caen (ESQUÍVALOS)<br>
           • Después de 5 segundos, puedes ATACAR con <strong>E</strong><br>
           • La línea roja se mueve de IZQUIERDA a DERECHA<br>
-          • Si la línea toca a Banana2.png → le quita un corazón<br>
+          • Presiona <strong>ENTER</strong> para detener la línea y golpear<br>
+          • Si la línea toca a banana3.png → le quita un corazón<br>
           • Tus corazones: ARRIBA IZQUIERDA | Corazones del boss: ARRIBA DERECHA<br>
           • Tienes 10 corazones. ¡No los pierdas todos!</p>
           <br>
