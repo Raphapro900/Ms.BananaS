@@ -462,7 +462,6 @@
       animation: bossShake 1s ease-in-out;
     }
     
-    /* Gamepad indicator */
     #gamepadIndicator {
       position: fixed;
       bottom: 20px;
@@ -500,7 +499,6 @@
     <span id="inputText"></span><span class="cursor">|</span>
   </div>
   
-  <!-- DIÁLOGO UNDERTALE -->
   <div id="undertaleDialog" class="undertale-dialog">
     <div class="dialog-content">
       <div class="dialog-portrait">
@@ -514,7 +512,6 @@
     <div class="dialog-arrow" id="dialogArrow">▼</div>
   </div>
   
-  <!-- DIÁLOGO DE MUERTE (sin cuadrado) -->
   <div id="deathDialog" class="death-dialog">
     <div class="death-text" id="deathText"></div>
   </div>
@@ -592,7 +589,6 @@
           <button class="menuBtn" id="exitBtn">🚪 Exit</button>
         </div>
       </div>
-      <audio id="menuMusic" src="bananamenu.mp3" loop></audio>
       <footer>CC0 Raphapro900 - V1.0</footer>
       <div id="infoBox"><span id="closeBtn">✖</span><div id="infoContent"></div></div>
     </div>
@@ -790,15 +786,14 @@
     let isBossActive = false;
     let dialogActive = false;
     let isInOptions = false;
-    let menuRow = 0; // 0 = banana, 1 = botones
+    let menuRow = 0;
     const MENU_ROWS = 2;
-    const COLS_PER_ROW = [1, 3]; // banana ocupa 1 columna, botones 3
+    const COLS_PER_ROW = [1, 3];
     
     function updateMenuSelection() {
       const banana = document.getElementById('bananaPlay');
       const buttons = menuButtons.map(id => document.getElementById(id));
       
-      // Resetear todos
       banana.classList.remove('selected');
       buttons.forEach(btn => btn.classList.remove('selected'));
       
@@ -856,9 +851,7 @@
     
     // ==================== LISTENER DEL GAMEPAD ====================
     gamepad.addListener((gp) => {
-      // Menú principal
       if (isInMenu) {
-        // Navegación con D-Pad
         const dPad = gp.getDPad();
         const stick = gp.getLeftStick();
         
@@ -875,7 +868,6 @@
           navigateMenu(1, 0);
         }
         
-        // Seleccionar con A
         if (gp.isButtonPressed('A')) {
           if (menuRow === 0) {
             document.getElementById('bananaPlay').click();
@@ -885,13 +877,11 @@
           }
         }
         
-        // Salir con B
         if (gp.isButtonPressed('B')) {
           document.getElementById('exitBtn').click();
         }
       }
       
-      // Juego principal (animales)
       if (isInGame && !isBossActive && !dialogActive) {
         const dPad = gp.getDPad();
         const stick = gp.getLeftStick();
@@ -917,7 +907,6 @@
         }
       }
       
-      // Boss fight
       if (isBossActive) {
         if (gp.isButtonPressed('A') || gp.isButtonPressed('X')) {
           const eEvent = new KeyboardEvent('keydown', { key: 'e', keyCode: 69 });
@@ -929,7 +918,6 @@
         }
       }
       
-      // Diálogos
       if (dialogActive) {
         if (gp.isButtonPressed('A') || gp.isButtonPressed('B') || gp.isButtonPressed('X') || gp.isButtonPressed('Y')) {
           document.dispatchEvent(new Event('click'));
@@ -1082,21 +1070,27 @@
       return false; 
     }
 
-    // ==================== FUNCIÓN DE RESET ====================
+    // ==================== FUNCIÓN DE RESET (SOLO LOCAL) ====================
     function performReset() {
       console.log("🔄 RESET ACTIVADO - Reiniciando a Día 1, Furia 0");
+      
+      // Limpiar todo el progreso
       clearProgress();
       stopAllGameMusic();
+      
+      // Ocultar todas las pantallas
       glitchRedScreen.style.display = 'none';
       lockScreen.style.display = 'none';
       waitingScreen.style.display = 'none';
-      
-      document.getElementById('startScreen').style.display = 'flex';
-      document.getElementById('gameScreen').style.display = 'none';
-      document.getElementById('gameContent').style.display = 'block';
       document.getElementById('bossContainer').classList.remove('active');
       document.getElementById('bossContainer').style.display = 'none';
       
+      // Mostrar pantalla de inicio
+      document.getElementById('startScreen').style.display = 'flex';
+      document.getElementById('gameScreen').style.display = 'none';
+      document.getElementById('gameContent').style.display = 'block';
+      
+      // Recargar para reiniciar completamente
       window.location.reload();
     }
 
@@ -1115,17 +1109,21 @@
     }
     startUniversalResetPolling();
 
-    // ==================== BOTÓN DE RESET EN LA PÁGINA ====================
+    // ==================== BOTÓN DE RESET EN EL MENÚ ====================
     const resetBtn = document.createElement('button');
     resetBtn.className = 'menuBtn';
     resetBtn.id = 'resetBtn';
     resetBtn.textContent = '🔄 Reset';
     resetBtn.style.marginTop = '10px';
+    resetBtn.style.borderColor = '#FF4444';
+    resetBtn.style.color = '#FF4444';
     document.querySelector('.menuPanel div').appendChild(resetBtn);
     
     resetBtn.addEventListener('click', function() {
-      localStorage.setItem(RESET_SIGNAL_KEY, 'reset');
-      performReset();
+      if (confirm('¿Resetear todo el progreso?')) {
+        localStorage.setItem(RESET_SIGNAL_KEY, 'reset');
+        performReset();
+      }
     });
 
     document.getElementById('waitingBinaryClick')?.addEventListener('click', openResetPage);
@@ -1292,7 +1290,10 @@
     }
     
     function playMenuMusic() { 
-      if (menuMusic) { menuMusic.currentTime = 0; menuMusic.play().catch(e => {}); } 
+      if (menuMusic) { 
+        menuMusic.currentTime = 0; 
+        menuMusic.play().catch(e => console.log('Menu music not available')); 
+      } 
     }
 
     let insideVisited = false, isInHouse = false, isInside = false, isListeningForInput = false;
@@ -2123,6 +2124,8 @@
     // ==================== FUNCIONES DEL JUEGO PRINCIPAL ====================
     function enterRoom() {
       if (menuMusic) { menuMusic.pause(); menuMusic.currentTime = 0; }
+      
+      // Reproducir sonido de puerta
       playAudioFile('Door.mp3');
       setTimeout(() => {
         playAudioFile('DoorC.mp3');
@@ -2137,7 +2140,7 @@
           if (roomMusic) {
             roomMusic.currentTime = 0;
             roomMusic.loop = true;
-            roomMusic.play().catch(e => {});
+            roomMusic.play().catch(e => console.log('Room music not available'));
           }
           const day = parseInt(localStorage.getItem(DAY_PROGRESS_KEY)) || 1;
           let welcomeFile = "Primer dia.mp3";
@@ -2167,6 +2170,7 @@
           spiderOverlay.style.display = 'none';
           insideBg.style.filter = 'none';
           
+          // Mostrar diálogo con opciones
           setTimeout(() => {
             startListeningForInput();
             document.addEventListener('keydown', handleTextInput);
@@ -2186,9 +2190,11 @@
         playAudioFile('DoorC.mp3');
         setTimeout(() => {
           if (!insideVisited) {
+            // Primera vez - mostrar Inside con banana
             showInsideScene(true, false);
-            
             insideVisited = true;
+            
+            // Reproducir animación de cámara (sonido)
             setTimeout(() => {
               playAudioFile('huh.wav');
               setTimeout(() => {
@@ -2197,6 +2203,7 @@
                   hideInsideScene();
                   isInside = false; 
                   isInHouse = false;
+                  // Volver a la casa
                   setTimeout(() => {
                     insideScene.style.display = 'block';
                     insideBg.src = BASE_URL + 'House.png';
@@ -2208,9 +2215,10 @@
                     document.addEventListener('keydown', handleTextInput);
                   }, 500);
                 }, 500);
-              }, 16000);
+              }, 2000); // Tiempo para la animación
             }, 1000);
           } else {
+            // Segunda vez - mostrar spider
             showInsideScene(false, true);
             
             setTimeout(() => {
@@ -2223,7 +2231,7 @@
                 glitchRedScreen.style.display = 'flex';
                 startGlitchRedPolling();
               }, 2500);
-            }, 5000);
+            }, 3000);
           }
         }, 500);
       }, 3000);
@@ -2992,6 +3000,11 @@
     if (isFinalMode()) {
       iniciarJuegoFinalMode();
     }
+
+    // Intentar reproducir música del menú (silenciosamente si no existe)
+    setTimeout(() => {
+      playMenuMusic();
+    }, 1000);
 
     console.log("🍌 Ms. BananaS - ¡Con soporte completo para gamepad!");
     console.log("🎮 Controles: A=Seleccionar, B=Cancelar, D-Pad/Joystick=Navegar en todas direcciones");
