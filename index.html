@@ -1056,6 +1056,8 @@
       let bossY = 0;
       let bossImg = new Image();
       let gameActive = true;
+      let lineMoveDuration = 0;
+      const LINE_MOVE_MAX = 3; // segundos que se mueve la línea
 
       function resize() {
         W = canvas.width = window.innerWidth;
@@ -1152,14 +1154,34 @@
           lineX = 0;
           lineDirection = 1;
           attackLineTime = 0;
+          lineMoveDuration = 0;
           bossTimer.textContent = '⚡ ¡ATACANDO! (ENTER) ⚡';
           bossAttackIndicatorEl.textContent = '⚡ ¡PRESIONA ENTER! ⚡';
           
           const attackInterval = setInterval(() => {
             attackLineTime += 0.016;
+            lineMoveDuration += 0.016;
             lineX += lineDirection * (W / 2) * 0.016 * 1.8;
             if (lineX >= W) { lineDirection = -1; }
             else if (lineX <= 0) { lineDirection = 1; }
+            
+            // Si pasa más de 3 segundos, la línea se detiene automáticamente
+            if (lineMoveDuration >= LINE_MOVE_MAX) {
+              clearInterval(attackInterval);
+              isLineMoving = false;
+              // Volver a fase de ataque del boss
+              if (!deathSequenceStarted) {
+                phase = 'idle';
+                bossTimer.textContent = '⏱️ 5';
+                bossAttackIndicatorEl.classList.remove('show');
+                bossAttackIndicatorEl.style.display = 'none';
+                setTimeout(() => {
+                  if (bossFightActive && !deathSequenceStarted) {
+                    startCountdown();
+                  }
+                }, 500);
+              }
+            }
           }, 16);
           
           window.currentPlayerAttackInterval = attackInterval;
@@ -1311,9 +1333,18 @@
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, W, H);
         
+        // Dibujar boss con tamaño corregido
         if (bossImg.complete && bossImg.naturalWidth > 0) {
-          const size = 130;
-          ctx.drawImage(bossImg, bossX - size/2, bossY - size/2, size, size);
+          const size = 150;
+          const aspectRatio = bossImg.naturalWidth / bossImg.naturalHeight;
+          let drawWidth = size;
+          let drawHeight = size;
+          if (aspectRatio > 1) {
+            drawWidth = size * aspectRatio;
+          } else {
+            drawHeight = size / aspectRatio;
+          }
+          ctx.drawImage(bossImg, bossX - drawWidth/2, bossY - drawHeight/2, drawWidth, drawHeight);
         } else {
           ctx.fillStyle = '#ff8800';
           ctx.font = '60px Arial';
@@ -1322,6 +1353,7 @@
           ctx.fillText('🍌', bossX, bossY);
         }
         
+        // Jugador (corazón)
         ctx.fillStyle = '#ff0044';
         ctx.shadowColor = '#ff0044';
         ctx.shadowBlur = 20;
@@ -1331,6 +1363,7 @@
         ctx.fillText('❤️', mouseX, mouseY);
         ctx.shadowBlur = 0;
         
+        // Cubos
         if (phase === 'attack') {
           const cubesToRemove = [];
           for (let i = 0; i < cubes.length; i++) {
@@ -1369,6 +1402,7 @@
           }
         }
         
+        // Línea de ataque
         if (isLineMoving) {
           ctx.fillStyle = 'rgba(255, 0, 0, 0.85)';
           ctx.shadowColor = '#ff0000';
@@ -1393,6 +1427,7 @@
           setTimeout(() => { lineActive = false; }, 300);
         }
         
+        // Turno del jugador
         if (phase === 'player_turn' && canAttack) {
           ctx.fillStyle = 'rgba(0, 255, 0, 0.06)';
           ctx.fillRect(0, 0, W, H);
@@ -1403,6 +1438,7 @@
           ctx.fillText('PRESIONA E PARA ATACAR', W/2, H - 30);
         }
         
+        // Iniciar countdown
         if (phase === 'idle' && !isCountdownActive && !deathSequenceStarted && gameActive) {
           startCountdown();
         }
@@ -1690,19 +1726,21 @@
       if (rage >= 1 && rage <= 9) {
         stopAllGameMusic();
         
-        // Diálogos iniciales
+        // Diálogo 1 - Talk.wav
         await showUndertaleDialog(
           "Oh. You finished the game. But I won't let you do it.",
           BASE_URL + 'banana2.png',
           false
         );
         
+        // Diálogo 2 - Talk.wav
         await showUndertaleDialog(
           "The game was easy, but you ruined it.",
           BASE_URL + 'banana2.png',
           false
         );
         
+        // Diálogo 3 - Talk.wav para "So..." y Talkk.wav para el resto con texto rojo
         await showUndertaleDialog(
           "So... L E T ' S   S E E   W H O   D I E S   A N D   WHO   D O E S N ' T . . .",
           BASE_URL + 'banana2.png',
@@ -2524,6 +2562,7 @@
           <p><strong>⚔️ Bossfight:</strong><br>
           • El boss ataca con CUBITOS que caen (ESQUÍVALOS)<br>
           • Después de 5 segundos, puedes ATACAR con <strong>E</strong><br>
+          • La línea roja se mueve de IZQUIERDA a DERECHA<br>
           • Presiona <strong>ENTER</strong> para detener la línea y golpear<br>
           • Tienes 10 corazones. ¡No los pierdas todos!</p>
           <br>
