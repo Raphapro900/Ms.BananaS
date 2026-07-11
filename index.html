@@ -1510,23 +1510,7 @@
       showNextMessage();
     }
 
-    function showThanksAndCredits() {
-      stopAllGameMusic();
-      
-      const dialogueBox = document.getElementById('dialogueBox');
-      dialogueBox.innerText = "🎉 ¡GRACIAS POR JUGAR! 🎉"; 
-      dialogueBox.style.display = "block";
-      
-      const thanksAudio = new Audio(BASE_URL + 'Thanks.wav');
-      thanksAudio.volume = 0.9;
-      thanksAudio.play().catch(err => console.error("Error en Thanks.wav:", err));
-      
-      setTimeout(() => { 
-        dialogueBox.style.display = "none"; 
-        showCreditsVideo(); 
-      }, 21000);
-    }
-
+    // ==================== FUNCIONES DEL JUEGO PRINCIPAL ====================
     function enterRoom() {
       if (menuMusic) { menuMusic.pause(); menuMusic.currentTime = 0; }
       playAudioFile('Door.mp3');
