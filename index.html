@@ -118,6 +118,38 @@
       margin-bottom: 4px;
     }
     
+    .death-dialog {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 9999;
+      display: none;
+      text-align: center;
+      image-rendering: pixelated;
+    }
+    .death-dialog.active { display: block; }
+    .death-dialog .death-text {
+      color: #ffffff;
+      font-family: 'Press Start 2P', 'Determination Mono', monospace !important;
+      font-size: 24px;
+      line-height: 1.8;
+      text-align: center;
+      letter-spacing: 2px;
+      image-rendering: pixelated;
+      text-shadow: 0 0 30px #ff0000;
+    }
+    .death-dialog .death-text .char {
+      display: inline-block;
+      opacity: 0;
+      animation: charAppear 0.04s forwards;
+      font-family: 'Press Start 2P', 'Determination Mono', monospace !important;
+      image-rendering: pixelated;
+      font-size: 24px;
+      color: #ff4444;
+      text-shadow: 0 0 10px #ff0000;
+    }
+    
     #startScreen { height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(-45deg, #1a0a00, #3d1a00, #1f0f00, #2a1500); background-size: 400% 400%; animation: gradientBG 8s ease infinite; position: relative; z-index: 10; }
     @keyframes gradientBG { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
     
@@ -437,6 +469,7 @@
     <span id="inputText"></span><span class="cursor">|</span>
   </div>
   
+  <!-- DIÁLOGO UNDERTALE -->
   <div id="undertaleDialog" class="undertale-dialog">
     <div class="dialog-content">
       <div class="dialog-portrait">
@@ -448,6 +481,11 @@
       </div>
     </div>
     <div class="dialog-arrow" id="dialogArrow">▼</div>
+  </div>
+  
+  <!-- DIÁLOGO DE MUERTE (sin cuadrado) -->
+  <div id="deathDialog" class="death-dialog">
+    <div class="death-text" id="deathText"></div>
   </div>
   
   <div id="glitchVideo" class="glitch-video"><video id="glitchVideoPlayer" src="glitch.mp4"></video></div>
@@ -646,7 +684,7 @@
       return cleanup;
     }
 
-    // ==================== SISTEMA DE BLOQUEO ====================
+    // ==================== SISTEMA DE BLOQUEO Y RESET ====================
     const LOCK_STORAGE_KEY = "gameLocked_V5", RESET_SIGNAL_KEY = "resetSignal";
     const DAY_PROGRESS_KEY = "gameDayProgress", RAGE_PROGRESS_KEY = "gameRageProgress";
     const COMPLETED_KEY = "gameCompleted", BOSS_DEFEATED_KEY = "bossDefeated";
@@ -717,10 +755,61 @@
       return false; 
     }
 
+    // ==================== FUNCIÓN DE RESET ====================
+    function performReset() {
+      console.log("🔄 RESET ACTIVADO - Reiniciando a Día 1, Furia 0");
+      clearProgress();
+      stopAllGameMusic();
+      glitchRedScreen.style.display = 'none';
+      lockScreen.style.display = 'none';
+      waitingScreen.style.display = 'none';
+      
+      // Ocultar todo y mostrar la pantalla de inicio
+      document.getElementById('startScreen').style.display = 'flex';
+      document.getElementById('gameScreen').style.display = 'none';
+      document.getElementById('gameContent').style.display = 'block';
+      document.getElementById('bossContainer').classList.remove('active');
+      document.getElementById('bossContainer').style.display = 'none';
+      
+      // Recargar la página para reiniciar completamente
+      window.location.reload();
+    }
+
+    // ==================== POLLING PARA SEÑAL DE RESET ====================
+    let resetPollInterval = null;
+    function startUniversalResetPolling() {
+      if (resetPollInterval) return;
+      resetPollInterval = setInterval(() => {
+        const signal = localStorage.getItem(RESET_SIGNAL_KEY);
+        if (signal === "reset") {
+          localStorage.removeItem(RESET_SIGNAL_KEY);
+          clearInterval(resetPollInterval); resetPollInterval = null;
+          performReset();
+        }
+      }, 1500);
+    }
+    startUniversalResetPolling();
+
+    // ==================== BOTÓN DE RESET EN LA PÁGINA ====================
+    // Agregar botón de reset en el menú
+    const resetBtn = document.createElement('button');
+    resetBtn.className = 'menuBtn';
+    resetBtn.id = 'resetBtn';
+    resetBtn.textContent = '🔄 Reset';
+    resetBtn.style.marginTop = '10px';
+    document.querySelector('.menuPanel div').appendChild(resetBtn);
+    
+    resetBtn.addEventListener('click', function() {
+      localStorage.setItem(RESET_SIGNAL_KEY, 'reset');
+      performReset();
+    });
+
+    // También hacer clickeable el código binario
     document.getElementById('waitingBinaryClick')?.addEventListener('click', openResetPage);
     document.getElementById('lockBinaryClick')?.addEventListener('click', openResetPage);
     document.getElementById('glitchBinaryClick')?.addEventListener('click', openResetPage);
 
+    // ==================== ELEMENTOS DOM ====================
     const lockScreen = document.getElementById('lockScreen'), waitingScreen = document.getElementById('waitingScreen');
     const glitchRedScreen = document.getElementById('glitchRedScreen'), gameContent = document.getElementById('gameContent');
     const menuMusic = document.getElementById('menuMusic'), roomMusic = document.getElementById('roomMusic');
@@ -757,6 +846,8 @@
     const bossDefeat = document.getElementById('bossDefeat');
     const chaseMusic = document.getElementById('chaseMusic');
     const heartbeatSound = document.getElementById('heartbeatSound');
+    const deathDialog = document.getElementById('deathDialog');
+    const deathText = document.getElementById('deathText');
     
     const howBtn = document.getElementById('howBtn');
     const shopBtn = document.getElementById('shopBtn');
@@ -960,7 +1051,6 @@
           if (index >= chars.length) {
             if (charInterval) clearInterval(charInterval);
             dialogArrow.classList.add('show');
-            // Auto-skip después de 1.5 segundos
             setTimeout(() => {
               undertaleDialog.classList.remove('active');
               resolve();
@@ -990,6 +1080,50 @@
       });
     }
 
+    // ==================== DIÁLOGO DE MUERTE ====================
+    function showDeathDialog(text) {
+      return new Promise((resolve) => {
+        deathDialog.classList.add('active');
+        deathText.innerHTML = '';
+        
+        const chars = text.split('');
+        let index = 0;
+        let charInterval = null;
+        
+        function playTaSound() {
+          const audio = new Audio(BASE_URL + 'Ta.mp3');
+          audio.volume = 0.35;
+          audio.play().catch(e => {});
+        }
+        
+        function addChar() {
+          if (index >= chars.length) {
+            if (charInterval) clearInterval(charInterval);
+            setTimeout(() => {
+              deathDialog.classList.remove('active');
+              resolve();
+            }, 1500);
+            return;
+          }
+          
+          const char = chars[index];
+          const span = document.createElement('span');
+          span.textContent = char === ' ' ? '\u00A0' : char;
+          span.className = 'char';
+          
+          if (char !== ' ' && char !== '.' && char !== ',' && char !== '?' && char !== "'") {
+            playTaSound();
+          }
+          
+          deathText.appendChild(span);
+          index++;
+        }
+        
+        charInterval = setInterval(addChar, 45);
+        setTimeout(addChar, 100);
+      });
+    }
+
     // ==================== DIÁLOGOS DE VICTORIA ====================
     async function showBossVictoryDialogs() {
       await showFinalUndertaleDialog(
@@ -998,31 +1132,20 @@
         false
       );
       
-      // Diálogo final con auto-skip
       await showFinalUndertaleDialog(
         "But please. Don't forget about me-",
         BASE_URL + 'banana2.png',
         false
       );
       
-      // Reproducir Underrr.mp3 después del último diálogo (con fallback)
       setTimeout(() => {
         try {
           const underrrAudio = new Audio(BASE_URL + 'Underrr.mp3');
           underrrAudio.volume = 0.8;
-          underrrAudio.play().catch(e => {
-            console.log("Underrr.mp3 no encontrado, usando sonido alternativo");
-            // Fallback: reproducir otro sonido si existe
-            const fallbackAudio = new Audio(BASE_URL + 'Talkk.wav');
-            fallbackAudio.volume = 0.5;
-            fallbackAudio.play().catch(e => {});
-          });
-        } catch(e) {
-          console.log("Error reproduciendo Underrr.mp3");
-        }
+          underrrAudio.play().catch(e => {});
+        } catch(e) {}
       }, 500);
       
-      // Esperar 5 segundos desde que empieza Underrr.mp3 y mostrar creditsss.mp4
       setTimeout(() => {
         showCreditssVideo();
       }, 5500);
@@ -1033,11 +1156,8 @@
       creditssVideo.currentTime = 0; 
       creditssVideo.playbackRate = 1.0;
       
-      // Intentar reproducir creditsss.mp4
       creditssVideo.play().catch(e => {
-        console.log("creditsss.mp4 no encontrado, mostrando mensaje alternativo");
         creditssContainer.style.display = 'none';
-        // Mostrar mensaje de créditos alternativo
         dialogueBox.innerText = "🎬 CRÉDITOS - Ms. BananaS";
         dialogueBox.style.display = "block";
         setTimeout(() => {
@@ -1048,7 +1168,6 @@
       
       const cleanup = setupCreditsSpeedControl(creditssVideo, speedIndicator);
       
-      // 1 minuto y 10 segundos = 70 segundos
       setTimeout(() => {
         creditssContainer.style.display = 'none'; 
         cleanup();
@@ -1142,8 +1261,8 @@
       }, 4000);
     }
 
-    // ==================== MENSAJES DE DERROTA ====================
-    function showDefeatMessages() {
+    // ==================== MENSAJES DE DERROTA (con animación Undertale) ====================
+    async function showDefeatMessages() {
       const messages = [
         "Perdiste...",
         "Porque??...",
@@ -1153,79 +1272,48 @@
         "Estas bien?"
       ];
       
-      let messageIndex = 0;
-      let timeoutId = null;
-      let spiderTriggered = false;
+      for (let i = 0; i < messages.length; i++) {
+        await showDeathDialog(messages[i]);
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
       
-      dialogueBox.style.fontFamily = '"Press Start 2P", monospace !important';
-      dialogueBox.style.fontSize = '1.5rem';
-      dialogueBox.style.color = '#ff4444';
-      dialogueBox.style.textShadow = '0 0 20px #ff0000';
-      dialogueBox.style.background = 'rgba(0,0,0,0.95)';
-      dialogueBox.style.border = '3px solid #ff0000';
-      dialogueBox.style.display = 'block';
+      // Mostrar mensajes de reset
+      const resetMessages = [
+        "Resetealo...",
+        "Porque no lo reseteas?",
+        "Eso tambien funciona",
+        "Resetealo..."
+      ];
       
-      function showNextMessage() {
-        if (messageIndex < messages.length) {
-          dialogueBox.innerText = messages[messageIndex];
-          messageIndex++;
-          timeoutId = setTimeout(showNextMessage, 5000);
-        } else {
-          showResetMessages();
+      for (let i = 0; i < resetMessages.length; i++) {
+        await showDeathDialog(resetMessages[i]);
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+      
+      // Esperar 30 segundos para el spider
+      let spiderCountdown = 0;
+      const spiderInterval = setInterval(() => {
+        spiderCountdown++;
+        if (spiderCountdown >= 30) {
+          clearInterval(spiderInterval);
+          showSpiderReset();
         }
-      }
+      }, 1000);
+    }
+    
+    async function showSpiderReset() {
+      await showDeathDialog("💀 RESETEALO 💀");
       
-      function showResetMessages() {
-        const resetMessages = [
-          "Resetealo...",
-          "Porque no lo reseteas?",
-          "Eso tambien funciona",
-          "Resetealo..."
-        ];
-        let resetIndex = 0;
-        
-        function showNextReset() {
-          if (resetIndex < resetMessages.length) {
-            dialogueBox.innerText = resetMessages[resetIndex];
-            resetIndex++;
-            timeoutId = setTimeout(showNextReset, 5000);
-          } else {
-            let spiderCountdown = 0;
-            const spiderInterval = setInterval(() => {
-              spiderCountdown++;
-              if (spiderCountdown >= 30) {
-                clearInterval(spiderInterval);
-                if (!spiderTriggered) {
-                  spiderTriggered = true;
-                  showSpiderReset();
-                }
-              }
-            }, 1000);
-          }
-        }
-        
-        showNextReset();
-      }
+      const spiderAudio = new Audio(BASE_URL + 'Spider.mp3');
+      spiderAudio.volume = 1.0;
+      spiderAudio.play().catch(e => {});
       
-      function showSpiderReset() {
-        dialogueBox.innerText = "💀 RESETEALO 💀";
-        dialogueBox.style.animation = 'glitchText 0.1s infinite';
-        dialogueBox.style.color = '#ff0000';
-        dialogueBox.style.fontSize = '3rem';
-        
-        const spiderAudio = new Audio(BASE_URL + 'Spider.mp3');
-        spiderAudio.volume = 1.0;
-        spiderAudio.play().catch(e => {});
-        
-        setTimeout(() => {
-          setGameLocked();
-          setGlitchRedMode();
-          glitchRedScreen.style.display = 'flex';
-          startGlitchRedPolling();
-        }, 3000);
-      }
-      
-      showNextMessage();
+      setTimeout(() => {
+        setGameLocked();
+        setGlitchRedMode();
+        glitchRedScreen.style.display = 'flex';
+        startGlitchRedPolling();
+      }, 3000);
     }
 
     // ==================== BOSS FIGHT ====================
@@ -1268,8 +1356,9 @@
       let gameActive = true;
       let lineMoveDuration = 0;
       const LINE_MOVE_MAX = 3;
-      let shakeTimer = 0;
       let isShaking = false;
+      let bossImageWidth = 150;
+      let bossImageHeight = 150;
 
       function resize() {
         W = canvas.width = window.innerWidth;
@@ -1283,12 +1372,22 @@
       resize();
 
       bossImg.src = BASE_URL + "banana3.png";
-      bossImg.onload = () => console.log("Boss image loaded: banana3.png");
+      bossImg.onload = () => {
+        bossImageWidth = bossImg.naturalWidth;
+        bossImageHeight = bossImg.naturalHeight;
+        const maxSize = 150;
+        if (bossImageWidth > bossImageHeight) {
+          bossImageHeight = (bossImageHeight / bossImageWidth) * maxSize;
+          bossImageWidth = maxSize;
+        } else {
+          bossImageWidth = (bossImageWidth / bossImageHeight) * maxSize;
+          bossImageHeight = maxSize;
+        }
+      };
       bossImg.onerror = () => {
         bossImg.src = BASE_URL + "banana2.png";
       };
 
-      // Mostrar UI con etiquetas
       bossUI.classList.add('show');
       bossHPContainer.classList.add('show');
       playerHPContainer.classList.add('show');
@@ -1313,24 +1412,23 @@
           isLineMoving = false;
           lineStopX = lineX;
           lineActive = true;
-          // Verificar colisión con banana3.png (hitbox de la imagen)
-          const bossWidth = 150;
-          const bossHeight = 150;
+          
+          const halfWidth = bossImageWidth / 2;
+          const halfHeight = bossImageHeight / 2;
           const distX = Math.abs(lineX - bossX);
           const distY = Math.abs(mouseY - bossY);
-          const halfWidth = lineWidth / 2 + bossWidth / 2;
-          const halfHeight = bossHeight / 2;
           
-          if (distX < halfWidth && distY < halfHeight && !deathSequenceStarted) {
+          const hitX = distX < halfWidth + lineWidth/2;
+          const hitY = distY < halfHeight;
+          
+          if (hitX && hitY && !deathSequenceStarted) {
             bossHP--;
             bossHPDisplay.textContent = `❤️ ${bossHP}`;
             const ouchSound = new Audio(BASE_URL + 'Ouch.mp3');
             ouchSound.volume = 0.7;
             ouchSound.play().catch(e => {});
             
-            // Activar temblor de pantalla
             isShaking = true;
-            shakeTimer = 0;
             bossContainer.classList.add('shake-boss');
             setTimeout(() => {
               bossContainer.classList.remove('shake-boss');
@@ -1559,14 +1657,13 @@
           ctx.fillText('🍌', bossX, bossY);
         }
         
-        // Dibujar corazón del jugador (usando heart.png)
+        // Dibujar corazón del jugador
         const heartImg = new Image();
         heartImg.src = BASE_URL + 'heart.png';
         if (heartImg.complete && heartImg.naturalWidth > 0) {
           const heartSize = 30;
           ctx.drawImage(heartImg, mouseX - heartSize/2, mouseY - heartSize/2, heartSize, heartSize);
         } else {
-          // Fallback: dibujar emoji de corazón
           ctx.fillStyle = '#ff0044';
           ctx.shadowColor = '#ff0044';
           ctx.shadowBlur = 20;
@@ -1575,7 +1672,6 @@
           ctx.textBaseline = 'middle';
           ctx.fillText('❤️', mouseX, mouseY);
           ctx.shadowBlur = 0;
-          // Cargar la imagen para futuros frames
           heartImg.src = BASE_URL + 'heart.png';
         }
         
@@ -1875,168 +1971,6 @@
       } else {
         showDialogue("🍔 La hamburguesa está deliciosa.", null, 2000);
       }
-    }
-
-    function performReset() {
-      clearProgress();
-      stopAllGameMusic();
-      glitchRedScreen.style.display = 'none';
-      lockScreen.style.display = 'none';
-      waitingScreen.style.display = 'none';
-      glitchVideo.style.display = 'flex';
-      glitchVideoPlayer.currentTime = 0;
-      glitchVideoPlayer.play().catch(() => window.location.reload());
-      glitchVideoPlayer.onended = () => window.location.reload();
-      setTimeout(() => { if (glitchVideo.style.display === 'flex') window.location.reload(); }, 3500);
-    }
-
-    let resetPollInterval = null;
-    function startUniversalResetPolling() {
-      if (resetPollInterval) return;
-      resetPollInterval = setInterval(() => {
-        const signal = localStorage.getItem(RESET_SIGNAL_KEY);
-        if (signal === "reset") {
-          localStorage.removeItem(RESET_SIGNAL_KEY);
-          clearInterval(resetPollInterval); resetPollInterval = null;
-          performReset();
-        }
-      }, 1500);
-    }
-    startUniversalResetPolling();
-
-    // ==================== CÓDIGOS DE TECLADO ====================
-    let keySequence = [];
-    const KONAMI_CODE = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
-    const BOSS_CODE = ['ArrowDown', 'ArrowUp', 'b', 'a'];
-    let konamiTriggered = false;
-    let bossCodeTriggered = false;
-
-    document.addEventListener('keydown', (e) => {
-      const key = e.key;
-      if (document.getElementById('startScreen').style.display !== 'none') return;
-      if (document.getElementById('gameScreen').style.display !== 'block') return;
-      
-      let mappedKey = key;
-      if (key === 'b' || key === 'B') mappedKey = 'b';
-      if (key === 'a' || key === 'A') mappedKey = 'a';
-      
-      keySequence.push(mappedKey);
-      if (keySequence.length > 10) keySequence.shift();
-      
-      if (!konamiTriggered) {
-        const konamiMatch = KONAMI_CODE.every((val, index) => {
-          if (index >= keySequence.length) return false;
-          const seqKey = keySequence[keySequence.length - KONAMI_CODE.length + index];
-          return seqKey === val;
-        });
-        
-        if (konamiMatch && keySequence.length >= 10) {
-          konamiTriggered = true;
-          activateHappyEnding();
-          return;
-        }
-      }
-      
-      if (!bossCodeTriggered && keySequence.length >= 4) {
-        const bossMatch = BOSS_CODE.every((val, index) => {
-          if (index >= keySequence.length) return false;
-          const seqKey = keySequence[keySequence.length - BOSS_CODE.length + index];
-          return seqKey === val;
-        });
-        
-        if (bossMatch && keySequence.length >= 4) {
-          bossCodeTriggered = true;
-          activateBossEnding();
-          return;
-        }
-      }
-    });
-
-    function activateHappyEnding() {
-      saveProgress(5, 0, 0);
-      dialogueBox.innerText = "🎮 ¡CÓDIGO SECRETO ACTIVADO! Día 5 completado sin errores.";
-      dialogueBox.style.display = "block";
-      setTimeout(() => {
-        dialogueBox.style.display = "none";
-        showThanksAndCredits();
-      }, 3000);
-    }
-
-    function activateBossEnding() {
-      saveProgress(5, 5, 5);
-      dialogueBox.innerText = "🎮 ¡CÓDIGO SECRETO ACTIVADO! Día 5 con 5 errores - Boss activado.";
-      dialogueBox.style.display = "block";
-      setTimeout(async () => {
-        dialogueBox.style.display = "none";
-        gameActive = false;
-        roomMusic.pause();
-        gameScreen.style.display = "none";
-        await showUndertaleDialog(
-          "Oh. You finished the game. But I won't let you do it.",
-          BASE_URL + 'banana2.png',
-          false
-        );
-        
-        await showUndertaleDialog(
-          "The game was easy, but you ruined it.",
-          BASE_URL + 'banana2.png',
-          false
-        );
-        
-        await showUndertaleDialog(
-          "So... L E T ' S   S E E   W H O   D I E S   A N D   WHO   D O E S N ' T . . .",
-          BASE_URL + 'banana2.png',
-          true
-        );
-        
-        playGlitchTransition(() => {
-          initBossFight();
-        });
-      }, 1000);
-    }
-
-    // ============================================
-    // INICIALIZACIÓN
-    // ============================================
-    if (isGlitchRedMode()) {
-      gameContent.style.display = 'none'; glitchRedScreen.style.display = 'flex';
-      lockScreen.style.display = 'none'; waitingScreen.style.display = 'none';
-      stopAllGameMusic(); startGlitchRedPolling();
-    } else if (isFinalMode()) {
-      gameContent.style.display = 'block'; lockScreen.style.display = 'none';
-      waitingScreen.style.display = 'none'; glitchRedScreen.style.display = 'none';
-      stopAllGameMusic();
-      bananaPlayImg.src = BASE_URL + 'ABananaDraw.png';
-      if (menuMusic) menuMusic.pause();
-      gameScreen.classList.add('final-mode');
-      tvMessage.style.display = 'flex'; tvAnimal.style.display = 'none';
-      document.getElementById('startScreen').style.display = 'flex';
-      document.getElementById('gameScreen').style.display = 'none';
-      iniciarJuegoFinalMode();
-    } else if (isWaitingMode()) {
-      gameContent.style.display = 'none'; waitingScreen.style.display = 'flex';
-      lockScreen.style.display = 'none'; glitchRedScreen.style.display = 'none';
-      stopAllGameMusic(); startWaitingPolling();
-    } else if (isGameLocked()) {
-      if (checkForResetSignal()) { performReset(); }
-      else { gameContent.style.display = 'none'; lockScreen.style.display = 'flex'; waitingScreen.style.display = 'none'; glitchRedScreen.style.display = 'none'; stopAllGameMusic(); startPollingForReset(); }
-    } else {
-      gameContent.style.display = 'block'; lockScreen.style.display = 'none';
-      waitingScreen.style.display = 'none'; glitchRedScreen.style.display = 'none';
-      playMenuMusic();
-      if (isGameCompleted()) {
-        bananaPlayImg.src = BASE_URL + 'ABananaDraw.png';
-        if (menuMusic) menuMusic.pause();
-        tvAnimal.src = 'Thanks.png';
-      }
-      
-      const bananaPlay = document.getElementById("bananaPlay");
-      bananaPlay.addEventListener("click", function iniciarPartida(e) {
-        e.preventDefault();
-        if (menuMusic) { menuMusic.pause(); menuMusic.currentTime = 0; }
-        document.getElementById('startScreen').style.display = 'none';
-        enterRoom();
-      });
     }
 
     // ==================== POLLING ====================
