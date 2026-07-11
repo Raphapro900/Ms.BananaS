@@ -219,11 +219,11 @@
     
     .boss-ui {
       position: fixed;
-      top: 12%;
+      top: 10%;
       left: 50%;
       transform: translateX(-50%);
       color: #ff4444;
-      font-size: 1.5rem;
+      font-size: 1.3rem;
       font-family: 'Press Start 2P', monospace !important;
       text-shadow: 0 0 20px #ff0000;
       z-index: 1001;
@@ -233,35 +233,53 @@
     }
     .boss-ui.show { display: block; }
     
-    .boss-hp {
+    .boss-hp-container {
       position: fixed;
-      top: 22%;
+      top: 18%;
       right: 5%;
-      color: #ffaa44;
-      font-size: 1.2rem;
-      font-family: 'Press Start 2P', monospace !important;
-      text-shadow: 0 0 10px #ff6600;
       z-index: 1001;
       pointer-events: none;
       text-align: right;
       display: none;
     }
-    .boss-hp.show { display: block; }
-    
-    .player-hp {
-      position: fixed;
-      top: 22%;
-      left: 5%;
-      color: #ff0044;
+    .boss-hp-container.show { display: block; }
+    .boss-hp-label {
+      color: #ffaa44;
+      font-size: 0.7rem;
+      font-family: 'Press Start 2P', monospace !important;
+      text-shadow: 0 0 10px #ff6600;
+      margin-bottom: 4px;
+    }
+    .boss-hp {
+      color: #ffaa44;
       font-size: 1.2rem;
       font-family: 'Press Start 2P', monospace !important;
-      text-shadow: 0 0 10px #ff0044;
+      text-shadow: 0 0 10px #ff6600;
+    }
+    
+    .player-hp-container {
+      position: fixed;
+      top: 18%;
+      left: 5%;
       z-index: 1001;
       pointer-events: none;
       text-align: left;
       display: none;
     }
-    .player-hp.show { display: block; }
+    .player-hp-container.show { display: block; }
+    .player-hp-label {
+      color: #ff0044;
+      font-size: 0.7rem;
+      font-family: 'Press Start 2P', monospace !important;
+      text-shadow: 0 0 10px #ff0044;
+      margin-bottom: 4px;
+    }
+    .player-hp {
+      color: #ff0044;
+      font-size: 1.2rem;
+      font-family: 'Press Start 2P', monospace !important;
+      text-shadow: 0 0 10px #ff0044;
+    }
     
     .boss-timer {
       position: fixed;
@@ -437,8 +455,14 @@
   <div id="bossContainer">
     <canvas id="bossCanvas"></canvas>
     <div class="boss-ui" id="bossUI">⚔️ ¡MS. BANANAS TE DESAFÍA! ⚔️</div>
-    <div class="boss-hp" id="bossHP">❤️ 10</div>
-    <div class="player-hp" id="playerHP">❤️ 10</div>
+    <div class="boss-hp-container" id="bossHPContainer">
+      <div class="boss-hp-label">★ B4N4N</div>
+      <div class="boss-hp" id="bossHP">❤️ 10</div>
+    </div>
+    <div class="player-hp-container" id="playerHPContainer">
+      <div class="player-hp-label">♡ JUGADOR</div>
+      <div class="player-hp" id="playerHP">❤️ 10</div>
+    </div>
     <div class="boss-timer" id="bossTimer">⏱️ 5</div>
     <div class="boss-countdown" id="bossCountdown">3</div>
     <div class="boss-attack-indicator" id="bossAttackIndicator">⚡ ¡PRESIONA E! ⚡</div>
@@ -483,7 +507,7 @@
     </div>
   </div>
 
-  <div id="creditssContainer" class="credits-container" style="z-index: 9998;"><video id="creditssVideo" src="Creditss.mp4"></video></div>
+  <div id="creditsssContainer" class="credits-container" style="z-index: 9998;"><video id="creditsssVideo" src="creditsss.mp4"></video></div>
   <div id="creditsContainer" class="credits-container"><video id="creditsVideo" src="Creditos Ms.BananaS.mp4"></video></div>
 
   <div id="speedIndicator" class="speed-indicator">⏩ x4</div>
@@ -704,7 +728,7 @@
     const glitchResetSignalDiv = document.getElementById('glitchResetSignal');
     const glitchVideo = document.getElementById('glitchVideo'), glitchVideoPlayer = document.getElementById('glitchVideoPlayer');
     const creditsContainer = document.getElementById('creditsContainer'), creditsVideo = document.getElementById('creditsVideo');
-    const creditssContainer = document.getElementById('creditssContainer'), creditssVideo = document.getElementById('creditssVideo');
+    const creditsssContainer = document.getElementById('creditsssContainer'), creditsssVideo = document.getElementById('creditsssVideo');
     const speedIndicator = document.getElementById('speedIndicator');
     const bananaPlayImg = document.getElementById('bananaPlay');
     const tvAnimal = document.getElementById('animal'), tvMessage = document.getElementById('tv-message');
@@ -722,7 +746,9 @@
     const bossContainer = document.getElementById('bossContainer');
     const bossCanvas = document.getElementById('bossCanvas');
     const bossUI = document.getElementById('bossUI');
+    const bossHPContainer = document.getElementById('bossHPContainer');
     const bossHPDisplay = document.getElementById('bossHP');
+    const playerHPContainer = document.getElementById('playerHPContainer');
     const playerHPDisplay = document.getElementById('playerHP');
     const bossTimer = document.getElementById('bossTimer');
     const bossCountdownEl = document.getElementById('bossCountdown');
@@ -934,22 +960,11 @@
           if (index >= chars.length) {
             if (charInterval) clearInterval(charInterval);
             dialogArrow.classList.add('show');
-            const clickHandler = () => {
-              document.removeEventListener('click', clickHandler);
-              document.removeEventListener('keydown', keyHandler);
+            // Auto-skip después de 1.5 segundos
+            setTimeout(() => {
               undertaleDialog.classList.remove('active');
               resolve();
-            };
-            const keyHandler = (e) => {
-              if (e.key === 'Enter' || e.key === ' ' || e.key === 'z') {
-                document.removeEventListener('click', clickHandler);
-                document.removeEventListener('keydown', keyHandler);
-                undertaleDialog.classList.remove('active');
-                resolve();
-              }
-            };
-            document.addEventListener('click', clickHandler);
-            document.addEventListener('keydown', keyHandler);
+            }, 1500);
             return;
           }
           
@@ -983,6 +998,7 @@
         false
       );
       
+      // Diálogo final con auto-skip
       await showFinalUndertaleDialog(
         "But please. Don't forget about me-",
         BASE_URL + 'banana2.png',
@@ -996,22 +1012,29 @@
         underrrAudio.play().catch(e => console.log("Underrr.mp3 error:", e));
       }, 500);
       
-      // Esperar 3 segundos y mostrar creditss.mp4
+      // Esperar 5 segundos desde que empieza Underrr.mp3 y mostrar creditsss.mp4
       setTimeout(() => {
-        showCreditssVideo();
-      }, 3500);
+        showCreditsssVideo();
+      }, 5500);
     }
 
-    function showCreditssVideo() {
-      creditssContainer.style.display = 'flex'; 
-      creditssVideo.currentTime = 0; 
-      creditssVideo.playbackRate = 1.0;
-      creditssVideo.play();
+    function showCreditsssVideo() {
+      creditsssContainer.style.display = 'flex'; 
+      creditsssVideo.currentTime = 0; 
+      creditsssVideo.playbackRate = 1.0;
+      creditsssVideo.play();
       
-      const cleanup = setupCreditsSpeedControl(creditssVideo, speedIndicator);
+      const cleanup = setupCreditsSpeedControl(creditsssVideo, speedIndicator);
       
-      creditssVideo.onended = () => { 
-        creditssContainer.style.display = 'none'; 
+      // 1 minuto y 10 segundos = 70 segundos
+      setTimeout(() => {
+        creditsssContainer.style.display = 'none'; 
+        cleanup();
+        goToWaitingScreen();
+      }, 70000);
+      
+      creditsssVideo.onended = () => { 
+        creditsssContainer.style.display = 'none'; 
         cleanup();
         goToWaitingScreen(); 
       };
@@ -1243,9 +1266,10 @@
         bossImg.src = BASE_URL + "banana2.png";
       };
 
+      // Mostrar UI con etiquetas
       bossUI.classList.add('show');
-      bossHPDisplay.classList.add('show');
-      playerHPDisplay.classList.add('show');
+      bossHPContainer.classList.add('show');
+      playerHPContainer.classList.add('show');
       bossTimer.classList.add('show');
       bossUI.textContent = '⚔️ ¡MS. BANANAS TE DESAFÍA! ⚔️';
       bossHPDisplay.textContent = `❤️ ${bossHP}`;
