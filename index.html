@@ -214,7 +214,7 @@
       width: 100%;
       height: 100%;
       background: #0a0a1a;
-      cursor: none;
+      cursor: url('https://raw.githubusercontent.com/Raphapro900/Ms.BananaS/refs/heads/main/heart.png') 16 16, auto;
     }
     
     .boss-ui {
@@ -507,7 +507,7 @@
     </div>
   </div>
 
-  <div id="creditsssContainer" class="credits-container" style="z-index: 9998;"><video id="creditsssVideo" src="creditsss.mp4"></video></div>
+  <div id="creditssContainer" class="credits-container" style="z-index: 9998;"><video id="creditssVideo" src="creditsss.mp4"></video></div>
   <div id="creditsContainer" class="credits-container"><video id="creditsVideo" src="Creditos Ms.BananaS.mp4"></video></div>
 
   <div id="speedIndicator" class="speed-indicator">⏩ x4</div>
@@ -728,7 +728,7 @@
     const glitchResetSignalDiv = document.getElementById('glitchResetSignal');
     const glitchVideo = document.getElementById('glitchVideo'), glitchVideoPlayer = document.getElementById('glitchVideoPlayer');
     const creditsContainer = document.getElementById('creditsContainer'), creditsVideo = document.getElementById('creditsVideo');
-    const creditsssContainer = document.getElementById('creditsssContainer'), creditsssVideo = document.getElementById('creditsssVideo');
+    const creditssContainer = document.getElementById('creditssContainer'), creditssVideo = document.getElementById('creditssVideo');
     const speedIndicator = document.getElementById('speedIndicator');
     const bananaPlayImg = document.getElementById('bananaPlay');
     const tvAnimal = document.getElementById('animal'), tvMessage = document.getElementById('tv-message');
@@ -1005,36 +1005,58 @@
         false
       );
       
-      // Reproducir Underrr.mp3 después del último diálogo
+      // Reproducir Underrr.mp3 después del último diálogo (con fallback)
       setTimeout(() => {
-        const underrrAudio = new Audio(BASE_URL + 'Underrr.mp3');
-        underrrAudio.volume = 0.8;
-        underrrAudio.play().catch(e => console.log("Underrr.mp3 error:", e));
+        try {
+          const underrrAudio = new Audio(BASE_URL + 'Underrr.mp3');
+          underrrAudio.volume = 0.8;
+          underrrAudio.play().catch(e => {
+            console.log("Underrr.mp3 no encontrado, usando sonido alternativo");
+            // Fallback: reproducir otro sonido si existe
+            const fallbackAudio = new Audio(BASE_URL + 'Talkk.wav');
+            fallbackAudio.volume = 0.5;
+            fallbackAudio.play().catch(e => {});
+          });
+        } catch(e) {
+          console.log("Error reproduciendo Underrr.mp3");
+        }
       }, 500);
       
       // Esperar 5 segundos desde que empieza Underrr.mp3 y mostrar creditsss.mp4
       setTimeout(() => {
-        showCreditsssVideo();
+        showCreditssVideo();
       }, 5500);
     }
 
-    function showCreditsssVideo() {
-      creditsssContainer.style.display = 'flex'; 
-      creditsssVideo.currentTime = 0; 
-      creditsssVideo.playbackRate = 1.0;
-      creditsssVideo.play();
+    function showCreditssVideo() {
+      creditssContainer.style.display = 'flex'; 
+      creditssVideo.currentTime = 0; 
+      creditssVideo.playbackRate = 1.0;
       
-      const cleanup = setupCreditsSpeedControl(creditsssVideo, speedIndicator);
+      // Intentar reproducir creditsss.mp4
+      creditssVideo.play().catch(e => {
+        console.log("creditsss.mp4 no encontrado, mostrando mensaje alternativo");
+        creditssContainer.style.display = 'none';
+        // Mostrar mensaje de créditos alternativo
+        dialogueBox.innerText = "🎬 CRÉDITOS - Ms. BananaS";
+        dialogueBox.style.display = "block";
+        setTimeout(() => {
+          dialogueBox.style.display = "none";
+          goToWaitingScreen();
+        }, 5000);
+      });
+      
+      const cleanup = setupCreditsSpeedControl(creditssVideo, speedIndicator);
       
       // 1 minuto y 10 segundos = 70 segundos
       setTimeout(() => {
-        creditsssContainer.style.display = 'none'; 
+        creditssContainer.style.display = 'none'; 
         cleanup();
         goToWaitingScreen();
       }, 70000);
       
-      creditsssVideo.onended = () => { 
-        creditsssContainer.style.display = 'none'; 
+      creditssVideo.onended = () => { 
+        creditssContainer.style.display = 'none'; 
         cleanup();
         goToWaitingScreen(); 
       };
@@ -1062,11 +1084,11 @@
       
       setTimeout(() => { 
         dialogueBox.style.display = "none"; 
-        showCreditsVideo(); 
+        showCreditsVideoOld(); 
       }, 21000);
     }
 
-    function showCreditsVideo() {
+    function showCreditsVideoOld() {
       dialogueBox.innerText = "🎬 CRÉDITOS - Mantén SHIFT para x4"; 
       dialogueBox.style.display = "block";
       creditsContainer.style.display = 'flex'; 
@@ -1537,14 +1559,25 @@
           ctx.fillText('🍌', bossX, bossY);
         }
         
-        ctx.fillStyle = '#ff0044';
-        ctx.shadowColor = '#ff0044';
-        ctx.shadowBlur = 20;
-        ctx.font = '30px Arial';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('❤️', mouseX, mouseY);
-        ctx.shadowBlur = 0;
+        // Dibujar corazón del jugador (usando heart.png)
+        const heartImg = new Image();
+        heartImg.src = BASE_URL + 'heart.png';
+        if (heartImg.complete && heartImg.naturalWidth > 0) {
+          const heartSize = 30;
+          ctx.drawImage(heartImg, mouseX - heartSize/2, mouseY - heartSize/2, heartSize, heartSize);
+        } else {
+          // Fallback: dibujar emoji de corazón
+          ctx.fillStyle = '#ff0044';
+          ctx.shadowColor = '#ff0044';
+          ctx.shadowBlur = 20;
+          ctx.font = '30px Arial';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText('❤️', mouseX, mouseY);
+          ctx.shadowBlur = 0;
+          // Cargar la imagen para futuros frames
+          heartImg.src = BASE_URL + 'heart.png';
+        }
         
         if (phase === 'attack') {
           const cubesToRemove = [];
