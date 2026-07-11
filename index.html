@@ -246,7 +246,7 @@
       width: 100%;
       height: 100%;
       background: #0a0a1a;
-      cursor: url('https://raw.githubusercontent.com/Raphapro900/Ms.BananaS/refs/heads/main/heart.png') 16 16, auto;
+      cursor: none;
     }
     
     .boss-ui {
@@ -518,29 +518,29 @@
 
   <div id="waitingScreen" class="waiting-screen">
     <h1>🍌 Ms. BananaS 🍌</h1>
-    <p>Juego completado. Esperando señal de reseteo...</p>
-    <div class="reset-signal" id="waitingSignal">🔄 Buscando señal...</div>
+    <p>Game completed. Waiting for reset signal...</p>
+    <div class="reset-signal" id="waitingSignal">🔄 Searching signal...</div>
     <div style="margin-top: 20px; font-size: 0.8rem; opacity: 0.5;">
-      <p>🔓 Código de reseteo:</p>
+      <p>🔓 Reset code:</p>
       <div class="binary-code" id="waitingBinaryClick">01101000 01110100 01110100 01110000 01110011 00111010 00101111 00101111 01110010 01100001 01110000 01101000 01100001 01110000 01110010 01101111 00111001 00110000 00110000 00101110 01100111 01101001 01110100 01101000 01110101 01100010 00101110 01101001 01101111 00101111 01110010 01100101 01110011 01100101 01110100 00101111</div>
     </div>
   </div>
 
   <div id="lockScreen" class="lock-screen">
     <h1>GAME NOT FOUND.</h1>
-    <p>Juego bloqueado. Esperando señal...</p>
-    <div class="reset-signal" id="resetSignal">🔄 Buscando señal...</div>
+    <p>Game locked. Waiting for signal...</p>
+    <div class="reset-signal" id="resetSignal">🔄 Searching signal...</div>
     <div style="margin-top: 20px; font-size: 0.8rem; opacity: 0.5;">
-      <p>🔓 Código de reseteo:</p>
+      <p>🔓 Reset code:</p>
       <div class="binary-code" id="lockBinaryClick">01101000 01110100 01110100 01110000 01110011 00111010 00101111 00101111 01110010 01100001 01110000 01101000 01100001 01110000 01110010 01101111 00111001 00110000 00110000 00101110 01100111 01101001 01110100 01101000 01110101 01100010 00101110 01101001 01101111 00101111 01110010 01100101 01110011 01100101 01110100 00101111</div>
     </div>
   </div>
   
   <div id="glitchRedScreen" class="glitch-red-screen">
     <h1>GAME NOT FOUND.</h1>
-    <div class="reset-signal-red" id="glitchResetSignal">🔄 Buscando señal de reseteo...</div>
+    <div class="reset-signal-red" id="glitchResetSignal">🔄 Searching reset signal...</div>
     <div style="margin-top: 20px; font-size: 0.8rem; opacity: 0.5;">
-      <p>🔓 Código de reseteo:</p>
+      <p>🔓 Reset code:</p>
       <div class="binary-code" id="glitchBinaryClick">01101000 01110100 01110100 01110000 01110011 00111010 00101111 00101111 01110010 01100001 01110000 01101000 01100001 01110000 01110010 01101111 00111001 00110000 00110000 00101110 01100111 01101001 01110100 01101000 01110101 01100010 00101110 01101001 01101111 00101111 01110010 01100101 01110011 01100101 01110100 00101111</div>
     </div>
   </div>
@@ -585,8 +585,8 @@
       </div>
       <div id="dialogueBox"></div>
       <audio id="dialogueAudio" preload="auto"></audio>
-      <div id="rageText">💢 Furia: 0</div>
-      <div id="dayText">🌙 Día 1 — Animales: 0/15</div>
+      <div id="rageText">💢 Rage: 0</div>
+      <div id="dayText">🌙 Day 1 — Animals: 0/15</div>
     </div>
 
     <div id="jumpscare"><video id="jumpscareVideo" src="jumpscare.mp4"></video></div>
@@ -757,21 +757,19 @@
 
     // ==================== FUNCIÓN DE RESET ====================
     function performReset() {
-      console.log("🔄 RESET ACTIVADO - Reiniciando a Día 1, Furia 0");
+      console.log("🔄 RESET ACTIVADO - Reiniciando a Día 1, Rage 0");
       clearProgress();
       stopAllGameMusic();
       glitchRedScreen.style.display = 'none';
       lockScreen.style.display = 'none';
       waitingScreen.style.display = 'none';
       
-      // Ocultar todo y mostrar la pantalla de inicio
       document.getElementById('startScreen').style.display = 'flex';
       document.getElementById('gameScreen').style.display = 'none';
       document.getElementById('gameContent').style.display = 'block';
       document.getElementById('bossContainer').classList.remove('active');
       document.getElementById('bossContainer').style.display = 'none';
       
-      // Recargar la página para reiniciar completamente
       window.location.reload();
     }
 
@@ -790,21 +788,10 @@
     }
     startUniversalResetPolling();
 
-    // ==================== BOTÓN DE RESET EN LA PÁGINA ====================
-    // Agregar botón de reset en el menú
-    const resetBtn = document.createElement('button');
-    resetBtn.className = 'menuBtn';
-    resetBtn.id = 'resetBtn';
-    resetBtn.textContent = '🔄 Reset';
-    resetBtn.style.marginTop = '10px';
-    document.querySelector('.menuPanel div').appendChild(resetBtn);
-    
-    resetBtn.addEventListener('click', function() {
-      localStorage.setItem(RESET_SIGNAL_KEY, 'reset');
-      performReset();
-    });
+    // ==================== BOTÓN DE RESET ELIMINADO ====================
+    // No se agrega ningún botón de reset en el menú
 
-    // También hacer clickeable el código binario
+    // Los códigos binarios abren la página de reset
     document.getElementById('waitingBinaryClick')?.addEventListener('click', openResetPage);
     document.getElementById('lockBinaryClick')?.addEventListener('click', openResetPage);
     document.getElementById('glitchBinaryClick')?.addEventListener('click', openResetPage);
@@ -873,28 +860,28 @@
       infoBox.style.display = 'block';
       infoContent.innerHTML = `
         <h2>📜 How to Play</h2>
-        <p>Tienes 5 días. Elige el animal correcto en la TV.</p>
-        <p><strong>Objetivos por día:</strong><br>
-        Día 1: 15 aciertos<br>
-        Día 2: 20 aciertos<br>
-        Día 3: 25 aciertos<br>
-        Día 4: 30 aciertos<br>
-        Día 5: 35 aciertos</p>
-        <p>Cada fallo suma FURIA. Llega a 10 y entrarás al BOSQUE.</p>
-        <p>Si completas el Día 5 sin errores → ¡Final feliz!</p>
-        <p>Si completas el Día 5 con errores → ¡Bossfight!</p>
+        <p>You have 5 days. Choose the correct animal on the TV.</p>
+        <p><strong>Objectives per day:</strong><br>
+        Day 1: 15 correct<br>
+        Day 2: 20 correct<br>
+        Day 3: 25 correct<br>
+        Day 4: 30 correct<br>
+        Day 5: 35 correct</p>
+        <p>Each mistake adds RAGE. Reach 10 and you'll enter the FOREST.</p>
+        <p>Complete Day 5 without errors → Happy ending!</p>
+        <p>Complete Day 5 with errors → Bossfight!</p>
         <br>
         <p><strong>⚔️ Bossfight:</strong><br>
-        • El boss ataca con CUBITOS que caen<br>
-        • Después de 5 segundos, puedes ATACAR con <strong>E</strong><br>
-        • Presiona <strong>ENTER</strong> para golpear<br>
-        • Tienes 10 corazones</p>
+        • The boss attacks with falling CUBES<br>
+        • After 5 seconds, you can ATTACK with <strong>E</strong><br>
+        • Press <strong>ENTER</strong> to hit<br>
+        • You have 10 hearts</p>
         <br>
-        <p><strong>🎮 CÓDIGOS SECRETOS:</strong><br>
-        <strong>↑ ↑ ↓ ↓ ← → ← → B A</strong> → Final feliz<br>
+        <p><strong>🎮 SECRET CODES:</strong><br>
+        <strong>↑ ↑ ↓ ↓ ← → ← → B A</strong> → Happy ending<br>
         <strong>↓ ↑ B A</strong> → Bossfight</p>
         <br>
-        <p><strong>🔓 Código de reseteo:</strong></p>
+        <p><strong>🔓 Reset code:</strong></p>
         <div class="binary-code" id="binaryClick">${binaryCode}</div>
       `;
       document.getElementById('binaryClick')?.addEventListener('click', openResetPage);
@@ -902,7 +889,7 @@
 
     shopBtn.addEventListener('click', function() {
       infoBox.style.display = 'block';
-      infoContent.innerHTML = `<h2>🛒 Tienda</h2><p>Próximamente...</p>`;
+      infoContent.innerHTML = `<h2>🛒 Shop</h2><p>Coming soon...</p>`;
     });
 
     exitBtn.addEventListener('click', function() {
@@ -1138,13 +1125,11 @@
         false
       );
       
-      setTimeout(() => {
-        try {
-          const underrrAudio = new Audio(BASE_URL + 'Underrr.mp3');
-          underrrAudio.volume = 0.8;
-          underrrAudio.play().catch(e => {});
-        } catch(e) {}
-      }, 500);
+      try {
+        const underrrAudio = new Audio(BASE_URL + 'Underrr.mp3');
+        underrrAudio.volume = 0.8;
+        underrrAudio.play().catch(e => console.warn('Underrr.mp3 not available'));
+      } catch(e) {}
       
       setTimeout(() => {
         showCreditssVideo();
@@ -1157,8 +1142,9 @@
       creditssVideo.playbackRate = 1.0;
       
       creditssVideo.play().catch(e => {
+        console.warn('creditsss.mp4 not available, showing text');
         creditssContainer.style.display = 'none';
-        dialogueBox.innerText = "🎬 CRÉDITOS - Ms. BananaS";
+        dialogueBox.innerText = "🎬 CREDITS - Ms. BananaS";
         dialogueBox.style.display = "block";
         setTimeout(() => {
           dialogueBox.style.display = "none";
@@ -1194,7 +1180,7 @@
     function showThanksAndCredits() {
       stopAllGameMusic();
       
-      dialogueBox.innerText = "🎉 ¡GRACIAS POR JUGAR! 🎉"; 
+      dialogueBox.innerText = "🎉 THANKS FOR PLAYING! 🎉"; 
       dialogueBox.style.display = "block";
       
       const thanksAudio = new Audio(BASE_URL + 'Thanks.wav');
@@ -1208,7 +1194,7 @@
     }
 
     function showCreditsVideoOld() {
-      dialogueBox.innerText = "🎬 CRÉDITOS - Mantén SHIFT para x4"; 
+      dialogueBox.innerText = "🎬 CREDITS - Hold SHIFT for x4"; 
       dialogueBox.style.display = "block";
       creditsContainer.style.display = 'flex'; 
       creditsVideo.currentTime = 0; 
@@ -1261,15 +1247,15 @@
       }, 4000);
     }
 
-    // ==================== MENSAJES DE DERROTA (con animación Undertale) ====================
+    // ==================== MENSAJES DE DERROTA ====================
     async function showDefeatMessages() {
       const messages = [
-        "Perdiste...",
-        "Porque??...",
+        "You lost...",
+        "Why??...",
         "...",
-        "Una banana te pudo vencer",
-        "En serio?...",
-        "Estas bien?"
+        "A banana beat you",
+        "Really?...",
+        "Are you okay?"
       ];
       
       for (let i = 0; i < messages.length; i++) {
@@ -1277,12 +1263,11 @@
         await new Promise(resolve => setTimeout(resolve, 1000));
       }
       
-      // Mostrar mensajes de reset
       const resetMessages = [
-        "Resetealo...",
-        "Porque no lo reseteas?",
-        "Eso tambien funciona",
-        "Resetealo..."
+        "Reset it...",
+        "Why don't you reset it?",
+        "That works too",
+        "Reset it..."
       ];
       
       for (let i = 0; i < resetMessages.length; i++) {
@@ -1290,7 +1275,6 @@
         await new Promise(resolve => setTimeout(resolve, 1000));
       }
       
-      // Esperar 30 segundos para el spider
       let spiderCountdown = 0;
       const spiderInterval = setInterval(() => {
         spiderCountdown++;
@@ -1302,7 +1286,7 @@
     }
     
     async function showSpiderReset() {
-      await showDeathDialog("💀 RESETEALO 💀");
+      await showDeathDialog("💀 RESET IT 💀");
       
       const spiderAudio = new Audio(BASE_URL + 'Spider.mp3');
       spiderAudio.volume = 1.0;
@@ -1392,10 +1376,16 @@
       bossHPContainer.classList.add('show');
       playerHPContainer.classList.add('show');
       bossTimer.classList.add('show');
-      bossUI.textContent = '⚔️ ¡MS. BANANAS TE DESAFÍA! ⚔️';
+      bossUI.textContent = '⚔️ MS. BANANAS CHALLENGES YOU! ⚔️';
       bossHPDisplay.textContent = `❤️ ${bossHP}`;
       playerHPDisplay.textContent = `❤️ ${playerHP}`;
       bossTimer.textContent = '⏱️ 5';
+
+      const heartCursor = new Image();
+      heartCursor.src = BASE_URL + 'heart.png';
+      heartCursor.onload = () => {
+        canvas.style.cursor = 'none';
+      };
 
       document.addEventListener('mousemove', (e) => {
         const rect = canvas.getBoundingClientRect();
@@ -1443,7 +1433,7 @@
               stopCubeAttack();
               if (window.currentAttackInterval) clearInterval(window.currentAttackInterval);
               if (countdownInterval) clearInterval(countdownInterval);
-              bossUI.textContent = "💀 ¡JEFE DERROTADO! 💀";
+              bossUI.textContent = "💀 BOSS DEFEATED! 💀";
               bossHPDisplay.textContent = "💀 0";
               bossTimer.classList.remove('show');
               bossCountdownEl.classList.remove('show');
@@ -1477,8 +1467,8 @@
           lineDirection = 1;
           attackLineTime = 0;
           lineMoveDuration = 0;
-          bossTimer.textContent = '⚡ ¡ATACANDO! (ENTER) ⚡';
-          bossAttackIndicatorEl.textContent = '⚡ ¡PRESIONA ENTER! ⚡';
+          bossTimer.textContent = '⚡ ATTACKING! (ENTER) ⚡';
+          bossAttackIndicatorEl.textContent = '⚡ PRESS ENTER! ⚡';
           
           const attackInterval = setInterval(() => {
             attackLineTime += 0.016;
@@ -1571,7 +1561,7 @@
         playerAttacked = false;
         attackTimer = 5;
         bossTimer.textContent = `⏱️ ${attackTimer}`;
-        bossAttackIndicatorEl.textContent = '💢 ¡ESQUIVA LOS CUBITOS! 💢';
+        bossAttackIndicatorEl.textContent = '💢 DODGE THE CUBES! 💢';
         bossAttackIndicatorEl.classList.add('show');
         
         startCubeAttack();
@@ -1584,8 +1574,8 @@
             phase = 'player_turn';
             stopCubeAttack();
             canAttack = true;
-            bossTimer.textContent = '⚡ ¡TU TURNO! (E) ⚡';
-            bossAttackIndicatorEl.textContent = '⚡ ¡PRESIONA E! ⚡';
+            bossTimer.textContent = '⚡ YOUR TURN! (E) ⚡';
+            bossAttackIndicatorEl.textContent = '⚡ PRESS E! ⚡';
             bossAttackIndicatorEl.classList.add('show');
           }
         }, 1000);
@@ -1594,7 +1584,7 @@
       }
 
       function startPlayerDeathSequence() {
-        bossUI.textContent = "💀 ¡HAS MUERTO! 💀";
+        bossUI.textContent = "💀 YOU DIED! 💀";
         playerHPDisplay.textContent = "☠️ 0";
         bossTimer.classList.remove('show');
         bossCountdownEl.classList.remove('show');
@@ -1657,7 +1647,6 @@
           ctx.fillText('🍌', bossX, bossY);
         }
         
-        // Dibujar corazón del jugador
         const heartImg = new Image();
         heartImg.src = BASE_URL + 'heart.png';
         if (heartImg.complete && heartImg.naturalWidth > 0) {
@@ -1744,7 +1733,7 @@
           ctx.font = '18px "Press Start 2P", monospace';
           ctx.textAlign = 'center';
           ctx.textBaseline = 'bottom';
-          ctx.fillText('PRESIONA E PARA ATACAR', W/2, H - 30);
+          ctx.fillText('PRESS E TO ATTACK', W/2, H - 30);
         }
         
         if (phase === 'idle' && !isCountdownActive && !deathSequenceStarted && gameActive) {
@@ -1784,7 +1773,7 @@
           if (day >= 2 && day <= 5) { welcomeFile = "Dias.mp3"; }
           playAudioFile(welcomeFile, 0.8).then(() => {
             setTimeout(() => {
-              showDialogue(`🍌 DÍA ${day}`, null, 3500);
+              showDialogue(`🍌 DAY ${day}`, null, 3500);
             }, 500);
           });
           iniciarJuego();
@@ -1810,7 +1799,7 @@
           setTimeout(() => {
             startListeningForInput();
             document.addEventListener('keydown', handleTextInput);
-            showDialogue("🔑 Escribe 'Inside' o 'Leave'", null, 3000);
+            showDialogue("🔑 Type 'Inside' or 'Leave'", null, 3000);
           }, 500);
         }, 500);
       }, 1000);
@@ -1895,7 +1884,7 @@
           stopListeningForInput(); 
           leaveHouse();
         } else {
-          showDialogue(`❌ "${command}" no reconocido.`, null, 1500);
+          showDialogue(`❌ "${command}" not recognized.`, null, 1500);
           currentInput = ''; 
           inputTextSpan.textContent = '';
         }
@@ -1928,7 +1917,7 @@
         document.getElementById('rageText').style.display = 'none';
         document.getElementById('dayText').style.display = 'none';
         document.getElementById('gameScreen').style.display = 'block';
-        showDialogue("🍔 Hay una hamburguesa. (E)", null, 5000);
+        showDialogue("🍔 There's a burger. (E)", null, 5000);
         document.addEventListener('keydown', eatHandler);
       }, 1500);
     }
@@ -1969,7 +1958,7 @@
         });
         
       } else {
-        showDialogue("🍔 La hamburguesa está deliciosa.", null, 2000);
+        showDialogue("🍔 The burger is delicious.", null, 2000);
       }
     }
 
@@ -1978,10 +1967,10 @@
       let pollInterval, attempts = 0;
       function checkLocalStorageSignal() {
         attempts++;
-        if (waitingSignalDiv) waitingSignalDiv.innerHTML = `🔄 Buscando señal... (Intento ${attempts})<br>📡 Revisando...`;
+        if (waitingSignalDiv) waitingSignalDiv.innerHTML = `🔄 Searching signal... (Attempt ${attempts})<br>📡 Checking...`;
         const signal = localStorage.getItem(RESET_SIGNAL_KEY);
         if (signal === "reset") {
-          if (waitingSignalDiv) waitingSignalDiv.innerHTML = '✅ ¡SEÑAL DETECTADA! Reiniciando...';
+          if (waitingSignalDiv) waitingSignalDiv.innerHTML = '✅ SIGNAL DETECTED! Resetting...';
           localStorage.removeItem(RESET_SIGNAL_KEY); clearInterval(pollInterval); clearGameLocked(); performReset();
           return true;
         }
@@ -1994,10 +1983,10 @@
       let pollInterval, attempts = 0;
       function checkLocalStorageSignal() {
         attempts++;
-        if (glitchResetSignalDiv) glitchResetSignalDiv.innerHTML = `🔄 Buscando señal de reseteo... (Intento ${attempts})<br>📡 Revisando...`;
+        if (glitchResetSignalDiv) glitchResetSignalDiv.innerHTML = `🔄 Searching reset signal... (Attempt ${attempts})<br>📡 Checking...`;
         const signal = localStorage.getItem(RESET_SIGNAL_KEY);
         if (signal === "reset") {
-          if (glitchResetSignalDiv) glitchResetSignalDiv.innerHTML = '✅ ¡SEÑAL DETECTADA! Reiniciando...';
+          if (glitchResetSignalDiv) glitchResetSignalDiv.innerHTML = '✅ SIGNAL DETECTED! Resetting...';
           localStorage.removeItem(RESET_SIGNAL_KEY); clearInterval(pollInterval); clearGameLocked(); performReset();
           return true;
         }
@@ -2010,10 +1999,10 @@
       let pollInterval, attempts = 0;
       function checkLocalStorageSignal() {
         attempts++;
-        if (resetSignalDiv) resetSignalDiv.innerHTML = `🔄 Buscando señal... (Intento ${attempts})<br>📡 Revisando...`;
+        if (resetSignalDiv) resetSignalDiv.innerHTML = `🔄 Searching signal... (Attempt ${attempts})<br>📡 Checking...`;
         const signal = localStorage.getItem(RESET_SIGNAL_KEY);
         if (signal === "reset") {
-          if (resetSignalDiv) resetSignalDiv.innerHTML = '✅ ¡SEÑAL DETECTADA! Desbloqueando...';
+          if (resetSignalDiv) resetSignalDiv.innerHTML = '✅ SIGNAL DETECTED! Unlocking...';
           localStorage.removeItem(RESET_SIGNAL_KEY); clearInterval(pollInterval); clearGameLocked(); performReset();
           return true;
         }
@@ -2037,7 +2026,7 @@
         if (roomMusic) roomMusic.pause();
         startListeningForInput();
         document.addEventListener('keydown', handleTextInput);
-        showDialogue("🔑 Escribe 'Inside'", null, 3000);
+        showDialogue("🔑 Type 'Inside'", null, 3000);
       });
     }
 
@@ -2157,8 +2146,8 @@
       }
 
       function updateUI() {
-        rageText.innerText = "💢 Furia: " + rage;
-        dayText.innerText = "🌙 Día " + day + " — Animales: " + correctCount + "/" + dayTargets[day];
+        rageText.innerText = "💢 Rage: " + rage;
+        dayText.innerText = "🌙 Day " + day + " — Animals: " + correctCount + "/" + dayTargets[day];
       }
 
       function returnToMenu() {
@@ -2524,11 +2513,11 @@
             correctCount++;
             updateUI();
             const sound = getRandomSound(correctSounds);
-            showDialogue("✅ ¡Correcto!", sound, 1500);
+            showDialogue("✅ Correct!", sound, 1500);
             
             if (correctCount >= dayTargets[day]) {
               if (day < 5) {
-                showDialogue(`✨ ¡Completaste el Día ${day}! ✨`, null, 1500);
+                showDialogue(`✨ Day ${day} completed! ✨`, null, 1500);
                 gameActive = false;
                 playAudioFile('Door.mp3');
                 setTimeout(() => {
@@ -2557,7 +2546,7 @@
             totalErrors++;
             updateUI();
             const sound = getRandomSound(['f1.wav', 'f2.wav', 'f3.wav', 'f4.wav']);
-            showDialogue("❌ ¡Fallaste! Era " + currentAnimal.name + ". Furia: " + rage + "/10", sound, 2000);
+            showDialogue("❌ Wrong! It was " + currentAnimal.name + ". Rage: " + rage + "/10", sound, 2000);
             saveProgress(day, rage, totalErrors);
             
             if (rage >= 10) { 
