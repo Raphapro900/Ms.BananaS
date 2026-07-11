@@ -11,7 +11,6 @@
     * { user-select: none; -webkit-tap-highlight-color: transparent; font-family: 'Indie Flower', 'Courier New', cursive !important; }
     body { margin: 0; padding: 0; background: black; color: #FFD700; text-align: center; overflow: hidden; }
     
-    /* ========== DIÁLOGO ESTILO UNDERTALE ========== */
     .undertale-dialog {
       position: fixed;
       bottom: 0;
@@ -119,7 +118,6 @@
       margin-bottom: 4px;
     }
     
-    /* ========== PANTALLAS ========== */
     #startScreen { height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(-45deg, #1a0a00, #3d1a00, #1f0f00, #2a1500); background-size: 400% 400%; animation: gradientBG 8s ease infinite; position: relative; z-index: 10; }
     @keyframes gradientBG { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
     
@@ -170,7 +168,6 @@
     #jumpscare { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 9999; }
     #jumpscare video { width: 100%; height: 100%; object-fit: cover; }
     
-    /* ========== BOSS FIGHT ========== */
     #bossContainer {
       position: fixed;
       top: 0;
@@ -379,11 +376,6 @@
       pointer-events: none;
     }
     .speed-indicator.active { display: block; }
-    
-    .defeat-message {
-      font-family: 'Press Start 2P', 'Determination Mono', monospace !important;
-      image-rendering: pixelated;
-    }
   </style>
 </head>
 <body>
@@ -391,7 +383,6 @@
   <div class="reset-polling-badge" id="pollingBadge">🔄</div>
   <div id="text-input-display"><span id="inputText"></span><span class="cursor">|</span></div>
   
-  <!-- DIÁLOGO ESTILO UNDERTALE -->
   <div id="undertaleDialog" class="undertale-dialog">
     <div class="dialog-content">
       <div class="dialog-portrait">
@@ -405,10 +396,8 @@
     <div class="dialog-arrow" id="dialogArrow">▼</div>
   </div>
   
-  <!-- GLITCH VIDEO -->
   <div id="glitchVideo" class="glitch-video"><video id="glitchVideoPlayer" src="glitch.mp4"></video></div>
   
-  <!-- BOSS FIGHT -->
   <div id="bossContainer">
     <canvas id="bossCanvas"></canvas>
     <div class="boss-ui" id="bossUI">⚔️ ¡MS. BANANAS TE DESAFÍA! ⚔️</div>
@@ -419,7 +408,7 @@
     <div class="boss-attack-indicator" id="bossAttackIndicator">⚡ ¡PRESIONA E! ⚡</div>
     <div class="boss-victory" id="bossVictory">🎉 VICTORIA 🎉</div>
     <div class="boss-defeat" id="bossDefeat">💀 HAS MUERTO 💀</div>
-    <div class="boss-chase-ui">🍌 BOSS FIGHT | Mouse para moverte | E para atacar | ENTER para golpear</div>
+    <div class="boss-chase-ui">🍌 BOSS FIGHT</div>
   </div>
   
   <div id="insideScene" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:9996;display:none;background:#000;">
@@ -506,7 +495,7 @@
     <div id="jumpscare"><video id="jumpscareVideo" src="jumpscare.mp4"></video></div>
     <div id="chaseContainer">
       <canvas id="threeCanvas"></canvas>
-      <div class="chaseUI">🍌 ¡TE PERSIGUE! | Controles: WASD + Mouse</div>
+      <div class="chaseUI">🍌 ¡TE PERSIGUE!</div>
       <audio id="chaseMusic" src="chase.mp3" loop preload="auto"></audio>
       <audio id="heartbeatSound" src="latido de corazon.mp3" preload="auto"></audio>
     </div>
@@ -528,7 +517,6 @@
     
     function playAudioFile(filename, volume = 0.8) {
       const url = BASE_URL + filename;
-      console.log(`🔊 Intentando reproducir: ${url}`);
       return new Promise((resolve) => {
         const audio = new Audio();
         audio.volume = volume;
@@ -536,15 +524,12 @@
         audio.preload = 'auto';
         audio.addEventListener('canplaythrough', () => {
           audio.play().then(() => {
-            console.log(`▶️ Reproduciendo: ${filename}`);
             resolve(audio);
           }).catch(err => {
-            console.error(`❌ Error reproduciendo ${filename}:`, err);
             resolve(null);
           });
         });
         audio.addEventListener('error', (e) => {
-          console.error(`❌ Error cargando ${filename}:`, e);
           resolve(null);
         });
         audio.load();
@@ -570,7 +555,6 @@
             }
           } catch(e) {}
           if (speedIndicator) speedIndicator.classList.add('active');
-          console.log("⏩ Velocidad x4 activada con pitch cambiado");
         }
       }
       
@@ -583,7 +567,6 @@
             }
           } catch(e) {}
           if (speedIndicator) speedIndicator.classList.remove('active');
-          console.log("⏩ Velocidad normal");
         }
       }
       
@@ -699,14 +682,15 @@
     const spiderImage = document.getElementById('spiderImage');
     const chaseContainer = document.getElementById('chaseContainer');
     const dialogueBox = document.getElementById('dialogueBox');
+    const infoBox = document.getElementById('infoBox');
+    const infoContent = document.getElementById('infoContent');
+    const closeBtn = document.getElementById('closeBtn');
     
-    // Elementos del diálogo Undertale
     const undertaleDialog = document.getElementById('undertaleDialog');
     const dialogText = document.getElementById('dialogText');
     const dialogPortrait = document.getElementById('dialogPortrait');
     const dialogArrow = document.getElementById('dialogArrow');
     
-    // Elementos del boss
     const bossContainer = document.getElementById('bossContainer');
     const bossCanvas = document.getElementById('bossCanvas');
     const bossUI = document.getElementById('bossUI');
@@ -717,10 +701,69 @@
     const bossAttackIndicatorEl = document.getElementById('bossAttackIndicator');
     const bossVictory = document.getElementById('bossVictory');
     const bossDefeat = document.getElementById('bossDefeat');
+    
+    const howBtn = document.getElementById('howBtn');
+    const shopBtn = document.getElementById('shopBtn');
+    const exitBtn = document.getElementById('exitBtn');
 
     let currentInput = '';
-    function updateInputDisplay() { inputTextSpan.textContent = currentInput; textInputDisplay.style.display = 'block'; }
-    function hideInputDisplay() { textInputDisplay.style.display = 'none'; currentInput = ''; inputTextSpan.textContent = ''; }
+    function updateInputDisplay() { 
+      inputTextSpan.textContent = currentInput; 
+      textInputDisplay.style.display = 'block'; 
+    }
+    function hideInputDisplay() { 
+      textInputDisplay.style.display = 'none'; 
+      currentInput = ''; 
+      inputTextSpan.textContent = ''; 
+    }
+
+    // ==================== BOTONES DEL MENÚ ====================
+    howBtn.addEventListener('click', function() {
+      infoBox.style.display = 'block';
+      infoContent.innerHTML = `
+        <h2>📜 How to Play</h2>
+        <p>Tienes 5 días. Elige el animal correcto en la TV.</p>
+        <p><strong>Objetivos por día:</strong><br>
+        Día 1: 15 aciertos<br>
+        Día 2: 20 aciertos<br>
+        Día 3: 25 aciertos<br>
+        Día 4: 30 aciertos<br>
+        Día 5: 35 aciertos</p>
+        <p>Cada fallo suma FURIA. Llega a 10 y entrarás al BOSQUE.</p>
+        <p>Si completas el Día 5 sin errores → ¡Final feliz!</p>
+        <p>Si completas el Día 5 con errores → ¡Bossfight!</p>
+        <br>
+        <p><strong>⚔️ Bossfight:</strong><br>
+        • El boss ataca con CUBITOS que caen<br>
+        • Después de 5 segundos, puedes ATACAR con <strong>E</strong><br>
+        • Presiona <strong>ENTER</strong> para golpear<br>
+        • Tienes 10 corazones</p>
+        <br>
+        <p><strong>🎮 CÓDIGOS SECRETOS:</strong><br>
+        <strong>↑ ↑ ↓ ↓ ← → ← → B A</strong> → Final feliz<br>
+        <strong>↓ ↑ B A</strong> → Bossfight</p>
+        <br>
+        <p><strong>🔓 Código de reseteo:</strong></p>
+        <div class="binary-code" id="binaryClick">${binaryCode}</div>
+      `;
+      document.getElementById('binaryClick')?.addEventListener('click', openResetPage);
+    });
+
+    shopBtn.addEventListener('click', function() {
+      infoBox.style.display = 'block';
+      infoContent.innerHTML = `<h2>🛒 Tienda</h2><p>Próximamente...</p>`;
+    });
+
+    exitBtn.addEventListener('click', function() {
+      window.close();
+      setTimeout(() => {
+        window.location.href = "about:blank";
+      }, 100);
+    });
+
+    closeBtn.addEventListener('click', function() {
+      infoBox.style.display = 'none';
+    });
 
     function showInsideScene(showBanana = true, dark = false) {
       insideScene.style.display = 'block';
@@ -766,7 +809,7 @@
     }
     
     function playMenuMusic() { 
-      if (menuMusic) { menuMusic.currentTime = 0; menuMusic.play().catch(e => console.log("menuMusic error:", e)); } 
+      if (menuMusic) { menuMusic.currentTime = 0; menuMusic.play().catch(e => {}); } 
     }
 
     let insideVisited = false, isInHouse = false, isInside = false, isListeningForInput = false;
@@ -914,7 +957,7 @@
       
       const deathSound = new Audio(BASE_URL + 'death_8bit.wav');
       deathSound.volume = 0.8;
-      deathSound.play().catch(e => console.log("Death sound error:", e));
+      deathSound.play().catch(e => {});
       
       setTimeout(() => {
         showCreditssVideo();
@@ -949,13 +992,12 @@
     function showThanksAndCredits() {
       stopAllGameMusic();
       
-      const dialogueBox = document.getElementById('dialogueBox');
       dialogueBox.innerText = "🎉 ¡GRACIAS POR JUGAR! 🎉"; 
       dialogueBox.style.display = "block";
       
       const thanksAudio = new Audio(BASE_URL + 'Thanks.wav');
       thanksAudio.volume = 0.9;
-      thanksAudio.play().catch(err => console.error("Error en Thanks.wav:", err));
+      thanksAudio.play().catch(err => {});
       
       setTimeout(() => { 
         dialogueBox.style.display = "none"; 
@@ -964,7 +1006,6 @@
     }
 
     function showCreditsVideo() {
-      const dialogueBox = document.getElementById('dialogueBox');
       dialogueBox.innerText = "🎬 CRÉDITOS - Mantén SHIFT para x4"; 
       dialogueBox.style.display = "block";
       creditsContainer.style.display = 'flex'; 
@@ -1018,6 +1059,92 @@
       }, 4000);
     }
 
+    // ==================== MENSAJES DE DERROTA ====================
+    function showDefeatMessages() {
+      const messages = [
+        "Perdiste...",
+        "Porque??...",
+        "...",
+        "Una banana te pudo vencer",
+        "En serio?...",
+        "Estas bien?"
+      ];
+      
+      let messageIndex = 0;
+      let timeoutId = null;
+      let spiderTriggered = false;
+      
+      dialogueBox.style.fontFamily = '"Press Start 2P", monospace !important';
+      dialogueBox.style.fontSize = '1.5rem';
+      dialogueBox.style.color = '#ff4444';
+      dialogueBox.style.textShadow = '0 0 20px #ff0000';
+      dialogueBox.style.background = 'rgba(0,0,0,0.95)';
+      dialogueBox.style.border = '3px solid #ff0000';
+      dialogueBox.style.display = 'block';
+      
+      function showNextMessage() {
+        if (messageIndex < messages.length) {
+          dialogueBox.innerText = messages[messageIndex];
+          messageIndex++;
+          timeoutId = setTimeout(showNextMessage, 5000);
+        } else {
+          showResetMessages();
+        }
+      }
+      
+      function showResetMessages() {
+        const resetMessages = [
+          "Resetealo...",
+          "Porque no lo reseteas?",
+          "Eso tambien funciona",
+          "Resetealo..."
+        ];
+        let resetIndex = 0;
+        
+        function showNextReset() {
+          if (resetIndex < resetMessages.length) {
+            dialogueBox.innerText = resetMessages[resetIndex];
+            resetIndex++;
+            timeoutId = setTimeout(showNextReset, 5000);
+          } else {
+            let spiderCountdown = 0;
+            const spiderInterval = setInterval(() => {
+              spiderCountdown++;
+              if (spiderCountdown >= 30) {
+                clearInterval(spiderInterval);
+                if (!spiderTriggered) {
+                  spiderTriggered = true;
+                  showSpiderReset();
+                }
+              }
+            }, 1000);
+          }
+        }
+        
+        showNextReset();
+      }
+      
+      function showSpiderReset() {
+        dialogueBox.innerText = "💀 RESETEALO 💀";
+        dialogueBox.style.animation = 'glitchText 0.1s infinite';
+        dialogueBox.style.color = '#ff0000';
+        dialogueBox.style.fontSize = '3rem';
+        
+        const spiderAudio = new Audio(BASE_URL + 'Spider.mp3');
+        spiderAudio.volume = 1.0;
+        spiderAudio.play().catch(e => {});
+        
+        setTimeout(() => {
+          setGameLocked();
+          setGlitchRedMode();
+          glitchRedScreen.style.display = 'flex';
+          startGlitchRedPolling();
+        }, 3000);
+      }
+      
+      showNextMessage();
+    }
+
     // ==================== BOSS FIGHT ====================
     let bossFightActive = false;
     let bossDefeatedFlag = false;
@@ -1057,7 +1184,7 @@
       let bossImg = new Image();
       let gameActive = true;
       let lineMoveDuration = 0;
-      const LINE_MOVE_MAX = 3; // segundos que se mueve la línea
+      const LINE_MOVE_MAX = 3;
 
       function resize() {
         W = canvas.width = window.innerWidth;
@@ -1073,7 +1200,6 @@
       bossImg.src = BASE_URL + "banana3.png";
       bossImg.onload = () => console.log("Boss image loaded: banana3.png");
       bossImg.onerror = () => {
-        console.error("Error loading banana3.png, usando banana2.png como fallback");
         bossImg.src = BASE_URL + "banana2.png";
       };
 
@@ -1165,11 +1291,9 @@
             if (lineX >= W) { lineDirection = -1; }
             else if (lineX <= 0) { lineDirection = 1; }
             
-            // Si pasa más de 3 segundos, la línea se detiene automáticamente
             if (lineMoveDuration >= LINE_MOVE_MAX) {
               clearInterval(attackInterval);
               isLineMoving = false;
-              // Volver a fase de ataque del boss
               if (!deathSequenceStarted) {
                 phase = 'idle';
                 bossTimer.textContent = '⏱️ 5';
@@ -1261,21 +1385,6 @@
           bossTimer.textContent = `⏱️ ${attackTimer}`;
           if (attackTimer <= 0) {
             clearInterval(attackInterval);
-            if (!playerAttacked && !deathSequenceStarted) {
-              playerHP--;
-              playerHPDisplay.textContent = `❤️ ${playerHP}`;
-              const underSound = new Audio(BASE_URL + 'under.mp3');
-              underSound.volume = 0.6;
-              underSound.play().catch(e => {});
-              
-              if (playerHP <= 0) {
-                deathSequenceStarted = true;
-                gameActive = false;
-                stopCubeAttack();
-                startPlayerDeathSequence();
-                return;
-              }
-            }
             phase = 'player_turn';
             stopCubeAttack();
             canAttack = true;
@@ -1333,7 +1442,6 @@
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, W, H);
         
-        // Dibujar boss con tamaño corregido
         if (bossImg.complete && bossImg.naturalWidth > 0) {
           const size = 150;
           const aspectRatio = bossImg.naturalWidth / bossImg.naturalHeight;
@@ -1353,7 +1461,6 @@
           ctx.fillText('🍌', bossX, bossY);
         }
         
-        // Jugador (corazón)
         ctx.fillStyle = '#ff0044';
         ctx.shadowColor = '#ff0044';
         ctx.shadowBlur = 20;
@@ -1363,7 +1470,6 @@
         ctx.fillText('❤️', mouseX, mouseY);
         ctx.shadowBlur = 0;
         
-        // Cubos
         if (phase === 'attack') {
           const cubesToRemove = [];
           for (let i = 0; i < cubes.length; i++) {
@@ -1402,7 +1508,6 @@
           }
         }
         
-        // Línea de ataque
         if (isLineMoving) {
           ctx.fillStyle = 'rgba(255, 0, 0, 0.85)';
           ctx.shadowColor = '#ff0000';
@@ -1427,7 +1532,6 @@
           setTimeout(() => { lineActive = false; }, 300);
         }
         
-        // Turno del jugador
         if (phase === 'player_turn' && canAttack) {
           ctx.fillStyle = 'rgba(0, 255, 0, 0.06)';
           ctx.fillRect(0, 0, W, H);
@@ -1438,7 +1542,6 @@
           ctx.fillText('PRESIONA E PARA ATACAR', W/2, H - 30);
         }
         
-        // Iniciar countdown
         if (phase === 'idle' && !isCountdownActive && !deathSequenceStarted && gameActive) {
           startCountdown();
         }
@@ -1448,102 +1551,14 @@
         }
       }
 
-      // Iniciar música del boss
       const bossMusic = new Audio(BASE_URL + 'Boss.mp3');
       bossMusic.loop = true;
       bossMusic.volume = 0.6;
-      bossMusic.play().catch(e => console.log("Boss music error:", e));
+      bossMusic.play().catch(e => {});
       window.bossMusic = bossMusic;
 
       phase = 'idle';
       gameLoopId = requestAnimationFrame(animateBoss);
-    }
-
-    // ==================== MENSAJES DE DERROTA ====================
-    function showDefeatMessages() {
-      const messages = [
-        "Perdiste...",
-        "Porque??...",
-        "...",
-        "Una banana te pudo vencer",
-        "En serio?...",
-        "Estas bien?"
-      ];
-      
-      let messageIndex = 0;
-      let timeoutId = null;
-      let spiderTriggered = false;
-      
-      const dialogueBox = document.getElementById('dialogueBox');
-      dialogueBox.style.fontFamily = '"Press Start 2P", monospace !important';
-      dialogueBox.style.fontSize = '1.5rem';
-      dialogueBox.style.color = '#ff4444';
-      dialogueBox.style.textShadow = '0 0 20px #ff0000';
-      dialogueBox.style.background = 'rgba(0,0,0,0.95)';
-      dialogueBox.style.border = '3px solid #ff0000';
-      dialogueBox.style.display = 'block';
-      
-      function showNextMessage() {
-        if (messageIndex < messages.length) {
-          dialogueBox.innerText = messages[messageIndex];
-          messageIndex++;
-          timeoutId = setTimeout(showNextMessage, 5000);
-        } else {
-          showResetMessages();
-        }
-      }
-      
-      function showResetMessages() {
-        const resetMessages = [
-          "Resetealo...",
-          "Porque no lo reseteas?",
-          "Eso tambien funciona",
-          "Resetealo..."
-        ];
-        let resetIndex = 0;
-        
-        function showNextReset() {
-          if (resetIndex < resetMessages.length) {
-            dialogueBox.innerText = resetMessages[resetIndex];
-            resetIndex++;
-            timeoutId = setTimeout(showNextReset, 5000);
-          } else {
-            let spiderCountdown = 0;
-            const spiderInterval = setInterval(() => {
-              spiderCountdown++;
-              if (spiderCountdown >= 30) {
-                clearInterval(spiderInterval);
-                if (!spiderTriggered) {
-                  spiderTriggered = true;
-                  showSpiderReset();
-                }
-              }
-            }, 1000);
-          }
-        }
-        
-        showNextReset();
-      }
-      
-      function showSpiderReset() {
-        dialogueBox.innerText = "💀 RESETEALO 💀";
-        dialogueBox.style.animation = 'glitchText 0.1s infinite';
-        dialogueBox.style.color = '#ff0000';
-        dialogueBox.style.fontSize = '3rem';
-        
-        const spiderAudio = new Audio(BASE_URL + 'Spider.mp3');
-        spiderAudio.volume = 1.0;
-        spiderAudio.play().catch(e => console.log("Spider audio error:", e));
-        
-        setTimeout(() => {
-          setGameLocked();
-          setGlitchRedMode();
-          glitchRedScreen.style.display = 'flex';
-          startGlitchRedPolling();
-        }, 3000);
-      }
-      
-      showNextMessage();
     }
 
     // ==================== FUNCIONES DEL JUEGO PRINCIPAL ====================
@@ -1557,14 +1572,14 @@
           if (roomMusic) {
             roomMusic.currentTime = 0;
             roomMusic.loop = true;
-            roomMusic.play().catch(e => console.log("roomMusic error:", e));
+            roomMusic.play().catch(e => {});
           }
           const day = parseInt(localStorage.getItem(DAY_PROGRESS_KEY)) || 1;
           let welcomeFile = "Primer dia.mp3";
           if (day >= 2 && day <= 5) { welcomeFile = "Dias.mp3"; }
           playAudioFile(welcomeFile, 0.8).then(() => {
             setTimeout(() => {
-              showDialogue(`🍌 DÍA ${day} - ¡Continúa la aventura! Elige el animal correcto.`, null, 3500);
+              showDialogue(`🍌 DÍA ${day}`, null, 3500);
             }, 500);
           });
           iniciarJuego();
@@ -1590,7 +1605,7 @@
           setTimeout(() => {
             startListeningForInput();
             document.addEventListener('keydown', handleTextInput);
-            showDialogue("🔑 Escribe 'Inside' para entrar o 'Leave' para salir", null, 3000);
+            showDialogue("🔑 Escribe 'Inside' o 'Leave'", null, 3000);
           }, 500);
         }, 500);
       }, 1000);
@@ -1668,14 +1683,14 @@
         if (command === 'banana' || command === 'ms.bananas' || command === 'inside') {
           document.removeEventListener('keydown', handleTextInput); 
           stopListeningForInput(); 
-          document.getElementById('dialogueBox').style.display = 'none';
+          dialogueBox.style.display = 'none';
           enterInside();
         } else if (command === 'leave') {
           document.removeEventListener('keydown', handleTextInput); 
           stopListeningForInput(); 
           leaveHouse();
         } else {
-          showDialogue(`❌ Comando "${command}" no reconocido.`, null, 1500);
+          showDialogue(`❌ "${command}" no reconocido.`, null, 1500);
           currentInput = ''; 
           inputTextSpan.textContent = '';
         }
@@ -1708,7 +1723,7 @@
         document.getElementById('rageText').style.display = 'none';
         document.getElementById('dayText').style.display = 'none';
         document.getElementById('gameScreen').style.display = 'block';
-        showDialogue("🍔 Hay una hamburguesa en la mesa. ¿Quieres comerla? (E)", null, 5000);
+        showDialogue("🍔 Hay una hamburguesa. (E)", null, 5000);
         document.addEventListener('keydown', eatHandler);
       }, 1500);
     }
@@ -1726,40 +1741,34 @@
       if (rage >= 1 && rage <= 9) {
         stopAllGameMusic();
         
-        // Diálogo 1 - Talk.wav
         await showUndertaleDialog(
           "Oh. You finished the game. But I won't let you do it.",
           BASE_URL + 'banana2.png',
           false
         );
         
-        // Diálogo 2 - Talk.wav
         await showUndertaleDialog(
           "The game was easy, but you ruined it.",
           BASE_URL + 'banana2.png',
           false
         );
         
-        // Diálogo 3 - Talk.wav para "So..." y Talkk.wav para el resto con texto rojo
         await showUndertaleDialog(
           "So... L E T ' S   S E E   W H O   D I E S   A N D   WHO   D O E S N ' T . . .",
           BASE_URL + 'banana2.png',
           true
         );
         
-        // Reproducir glitch.mp4
         playGlitchTransition(() => {
-          // Iniciar el boss
           initBossFight();
         });
         
       } else {
-        showDialogue("🍔 La hamburguesa está deliciosa. No pasa nada.", null, 2000);
+        showDialogue("🍔 La hamburguesa está deliciosa.", null, 2000);
       }
     }
 
     function performReset() {
-      console.log("🔄 RESET ACTIVADO - Reiniciando a Día 1, Furia 0");
       clearProgress();
       stopAllGameMusic();
       glitchRedScreen.style.display = 'none';
@@ -1814,7 +1823,6 @@
         
         if (konamiMatch && keySequence.length >= 10) {
           konamiTriggered = true;
-          console.log("🎮 ¡CÓDIGO KONAMI ACTIVADO! Final feliz.");
           activateHappyEnding();
           return;
         }
@@ -1829,7 +1837,6 @@
         
         if (bossMatch && keySequence.length >= 4) {
           bossCodeTriggered = true;
-          console.log("🎮 ¡CÓDIGO BOSS ACTIVADO! Final con jefe.");
           activateBossEnding();
           return;
         }
@@ -1838,7 +1845,6 @@
 
     function activateHappyEnding() {
       saveProgress(5, 0, 0);
-      const dialogueBox = document.getElementById('dialogueBox');
       dialogueBox.innerText = "🎮 ¡CÓDIGO SECRETO ACTIVADO! Día 5 completado sin errores.";
       dialogueBox.style.display = "block";
       setTimeout(() => {
@@ -1849,7 +1855,6 @@
 
     function activateBossEnding() {
       saveProgress(5, 5, 5);
-      const dialogueBox = document.getElementById('dialogueBox');
       dialogueBox.innerText = "🎮 ¡CÓDIGO SECRETO ACTIVADO! Día 5 con 5 errores - Boss activado.";
       dialogueBox.style.display = "block";
       setTimeout(async () => {
@@ -1989,7 +1994,7 @@
         if (roomMusic) roomMusic.pause();
         startListeningForInput();
         document.addEventListener('keydown', handleTextInput);
-        showDialogue("🔑 Escribe 'Inside' para entrar", null, 3000);
+        showDialogue("🔑 Escribe 'Inside'", null, 3000);
       });
     }
 
@@ -1998,22 +2003,12 @@
     let bossTriggered = false;
 
     function iniciarJuego() {
-      const howBtn = document.getElementById("howBtn");
-      const shopBtn = document.getElementById("shopBtn");
-      const exitBtn = document.getElementById("exitBtn");
-      const infoBox = document.getElementById("infoBox");
-      const infoContent = document.getElementById("infoContent");
-      const closeBtn = document.getElementById("closeBtn");
-      const animalImg = document.getElementById("animal");
-      const dialogueBox = document.getElementById("dialogueBox");
-      const dialogueAudio = document.getElementById("dialogueAudio");
-      const rageText = document.getElementById("rageText");
-      const dayText = document.getElementById("dayText");
-      const jumpscareDiv = document.getElementById("jumpscare");
-      const jumpscareVideo = document.getElementById("jumpscareVideo");
+      const animalImg = document.getElementById('animal');
       const buttons = document.querySelectorAll(".options button");
       const chaseMusic = document.getElementById("chaseMusic");
       const heartbeatSound = document.getElementById("heartbeatSound");
+      const jumpscareDiv = document.getElementById("jumpscare");
+      const jumpscareVideo = document.getElementById("jumpscareVideo");
       
       window.chaseMusic = chaseMusic;
       window.heartbeatSound = heartbeatSound;
@@ -2032,10 +2027,7 @@
           eqFilter.gain.value = 0;
           source.connect(eqFilter);
           eqFilter.connect(audioContext.destination);
-          console.log("🔊 Filtro EQ configurado para chase.mp3");
-        } catch(e) {
-          console.log("⚠️ No se pudo configurar filtro EQ:", e);
-        }
+        } catch(e) {}
       }
       
       function updateChaseEQ(distance) {
@@ -2080,7 +2072,7 @@
         audioElement.volume = volume;
         audioElement.src = src;
         audioElement.currentTime = 0;
-        audioElement.play().catch(error => console.warn(`⚠️ No se pudo reproducir ${src}:`, error));
+        audioElement.play().catch(error => {});
       }
 
       function showDialogue(text, audioSrc, duration = 3000) {
@@ -2103,11 +2095,9 @@
           animalImg.src = animal.file;
           animalImg.style.display = 'block';
           isLoadingImage = false;
-          console.log(`✅ Imagen cargada: ${animal.name}`);
         };
         
         img.onerror = () => {
-          console.error(`❌ Error cargando imagen: ${animal.file}`);
           animalImg.src = '';
           animalImg.alt = animal.name;
           animalImg.style.display = 'block';
@@ -2140,7 +2130,6 @@
       }
 
       function triggerJumpscareFinal() {
-        console.log("💀 JUMPSCARE - Guardando bloqueo");
         clearProgress();
         setGameLocked();
         jumpscareDiv.style.display = "block";
@@ -2155,7 +2144,6 @@
         if (!hasErrors) {
           showThanksAndCredits();
         } else {
-          // Iniciar boss con diálogos
           startBossWithDialogs();
         }
       }
@@ -2228,7 +2216,7 @@
         heartbeatSound.playbackRate = speed;
         heartbeatSound.volume = Math.min(0.8, 0.3 + (12 - distance) / 20);
         heartbeatSound.loop = true;
-        heartbeatSound.play().catch(e => console.log("heartbeat error"));
+        heartbeatSound.play().catch(e => {});
         const intervalTime = 1000 / (speed * 1.5);
         heartbeatInterval = setInterval(() => {
           if (chaseActive && !gameOverTriggered) {
@@ -2471,7 +2459,7 @@
           chaseMusic.currentTime = 0;
           chaseMusic.loop = true;
           chaseMusic.volume = 0.7;
-          chaseMusic.play().catch(e => console.log("chaseMusic error:", e));
+          chaseMusic.play().catch(e => {});
           initChaseGame();
         });
       }
@@ -2519,7 +2507,6 @@
                 completeGame(hasErrors);
                 return;
               }
-              return;
             }
             setTimeout(nextAnimal, 1500);
           } else {
@@ -2539,71 +2526,6 @@
             }
           }
         });
-      });
-      
-      // ============================================
-      // BOTÓN HOW TO PLAY
-      // ============================================
-      howBtn.addEventListener("click", function() {
-        infoBox.style.display = "block";
-        infoContent.innerHTML = `
-          <h2>📜 How to Play</h2>
-          <p>Tienes 5 días. Elige el animal correcto en la TV.</p>
-          <p><strong>Objetivos por día:</strong><br>
-          Día 1: 15 aciertos<br>
-          Día 2: 20 aciertos<br>
-          Día 3: 25 aciertos<br>
-          Día 4: 30 aciertos<br>
-          Día 5: 35 aciertos</p>
-          <p>Cada fallo suma FURIA. Llega a 10 y entrarás al BOSQUE.</p>
-          <p>Si completas el Día 5 sin errores → ¡Final feliz!</p>
-          <p>Si completas el Día 5 con errores → ¡Bossfight!</p>
-          <br>
-          <p><strong>⚔️ Bossfight:</strong><br>
-          • El boss ataca con CUBITOS que caen (ESQUÍVALOS)<br>
-          • Después de 5 segundos, puedes ATACAR con <strong>E</strong><br>
-          • La línea roja se mueve de IZQUIERDA a DERECHA<br>
-          • Presiona <strong>ENTER</strong> para detener la línea y golpear<br>
-          • Tienes 10 corazones. ¡No los pierdas todos!</p>
-          <br>
-          <p><strong>🎮 CÓDIGOS SECRETOS:</strong><br>
-          <strong>↑ ↑ ↓ ↓ ← → ← → B A</strong> → Final feliz (Día 5 sin errores)<br>
-          <strong>↓ ↑ B A</strong> → Bossfight (Día 5 con 5 errores)</p>
-          <br>
-          <p><strong>🔓 Código de reseteo:</strong></p>
-          <div class="binary-code" id="binaryClick">${binaryCode}</div>
-          <p style="margin-top: 10px; font-size: 0.7rem;">(Descifra el código para encontrar la solución)</p>
-        `;
-        
-        const binaryElement = document.getElementById('binaryClick');
-        if (binaryElement) {
-          binaryElement.addEventListener('click', openResetPage);
-        }
-      });
-      
-      // ============================================
-      // BOTÓN SHOP
-      // ============================================
-      shopBtn.addEventListener("click", function() {
-        infoBox.style.display = "block";
-        infoContent.innerHTML = "<h2>🛒 Tienda</h2><p>Próximamente...</p>";
-      });
-      
-      // ============================================
-      // BOTÓN EXIT
-      // ============================================
-      exitBtn.addEventListener("click", function() {
-        window.close();
-        setTimeout(() => {
-          window.location.href = "about:blank";
-        }, 100);
-      });
-      
-      // ============================================
-      // BOTÓN CERRAR INFOBOX
-      // ============================================
-      closeBtn.addEventListener("click", function() {
-        infoBox.style.display = "none";
       });
       
       gameActive = true;
