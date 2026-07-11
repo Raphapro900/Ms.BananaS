@@ -59,9 +59,9 @@
     #jumpscare { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 9999; }
     #jumpscare video { width: 100%; height: 100%; object-fit: cover; }
     
-    #chaseContainer { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1000; background: #000; cursor: grab; }
+    #chaseContainer { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1000; background: #0a0a1a; cursor: none; }
     #chaseContainer canvas { display: block; width: 100%; height: 100%; }
-    .chaseUI { position: absolute; bottom: 20px; left: 20px; color: #ffaa33; font-size: 14px; background: rgba(0,0,0,0.5); padding: 5px 10px; border-radius: 5px; z-index: 20; pointer-events: none; }
+    .chaseUI { position: absolute; bottom: 20px; left: 20px; color: #ffaa33; font-size: 14px; background: rgba(0,0,0,0.5); padding: 5px 10px; border-radius: 5px; z-index: 20; pointer-events: none; font-family: 'Indie Flower', cursive !important; }
     
     .waiting-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #0a0a2a; z-index: 10000; display: none; flex-direction: column; align-items: center; justify-content: center; font-family: 'Indie Flower', cursive !important; color: #FFAA44; text-align: center; }
     .waiting-screen h1 { font-size: 3rem; margin-bottom: 1rem; letter-spacing: 2px; color: #FFD700; text-shadow: 0 0 20px #FF6600; }
@@ -130,7 +130,7 @@
   <div class="reset-polling-badge" id="pollingBadge">🔄</div>
   <div id="text-input-display"><span id="inputText"></span><span class="cursor">|</span></div>
   
-  <div id="insideScene" class="inside-scene" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:9996;display:none;background:#000;">
+  <div id="insideScene" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:9996;display:none;background:#000;">
     <img id="insideBg" style="width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;z-index:1;" src="" alt="Inside">
     <img id="insideBanana" style="position:absolute;left:15%;top:50%;transform:translate(-50%,-50%);width:250px;animation:float 3s ease-in-out infinite;z-index:2;pointer-events:none;display:none;" src="https://raw.githubusercontent.com/Raphapro900/Ms.BananaS/refs/heads/main/banana.png" alt="Ms. BananaS">
     <div id="spiderOverlay" style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:3;display:none;background:rgba(139,0,0,0.7);align-items:center;justify-content:center;">
@@ -217,8 +217,8 @@
 
     <div id="jumpscare"><video id="jumpscareVideo" src="jumpscare.mp4"></video></div>
     <div id="chaseContainer">
-      <canvas id="threeCanvas" style="width:100%;height:100%;display:block;"></canvas>
-      <div class="chaseUI">🍌 ¡TE PERSIGUE! | Controles: ? ? ? ?</div>
+      <canvas id="threeCanvas"></canvas>
+      <div class="chaseUI">🍌 ¡TE PERSIGUE! | Controles: WASD + Mouse</div>
       <audio id="chaseMusic" src="chase.mp3" loop preload="auto"></audio>
       <audio id="heartbeatSound" src="latido de corazon.mp3" preload="auto"></audio>
     </div>
@@ -416,6 +416,7 @@
     const insideBanana = document.getElementById('insideBanana');
     const spiderOverlay = document.getElementById('spiderOverlay');
     const spiderImage = document.getElementById('spiderImage');
+    const chaseContainer = document.getElementById('chaseContainer');
     const bossAttackIndicator = document.getElementById('bossAttackIndicator');
     const bossCountdown = document.getElementById('bossCountdown');
     const textInputDisplay = document.getElementById('text-input-display'), inputTextSpan = document.getElementById('inputText');
@@ -1001,7 +1002,6 @@
       const jumpscareDiv = document.getElementById("jumpscare");
       const jumpscareVideo = document.getElementById("jumpscareVideo");
       const buttons = document.querySelectorAll(".options button");
-      const chaseContainer = document.getElementById("chaseContainer");
       const chaseMusic = document.getElementById("chaseMusic");
       const heartbeatSound = document.getElementById("heartbeatSound");
       
@@ -1159,6 +1159,10 @@
         
         showDialogue("⚔️ ¡Ms. BananaS te desafía! ⚔️", null, 1500);
         
+        // Mostrar el contenedor del boss
+        chaseContainer.style.display = 'block';
+        chaseContainer.style.background = '#0a0a1a';
+        
         const luzAudio = new Audio(BASE_URL + 'luz.mp3');
         luzAudio.volume = 0.8;
         luzAudio.play().catch(e => console.log("luz.mp3 error:", e));
@@ -1169,8 +1173,6 @@
           fffAudio.play().catch(e => console.log("FFF.wav error:", e));
           
           setTimeout(() => {
-            chaseContainer.style.display = "flex";
-            
             const bossMusic = new Audio(BASE_URL + 'Boss.mp3');
             bossMusic.loop = true;
             bossMusic.volume = 0.7;
@@ -1187,7 +1189,6 @@
             fffAudio.volume = 0.9;
             fffAudio.play().catch(e => console.log("FFF.wav error:", e));
             setTimeout(() => {
-              chaseContainer.style.display = "flex";
               const bossMusic = new Audio(BASE_URL + 'Boss.mp3');
               bossMusic.loop = true;
               bossMusic.volume = 0.7;
@@ -1203,10 +1204,12 @@
         const canvas = document.getElementById('threeCanvas');
         const ctx = canvas.getContext('2d');
         
+        // Asegurar que el canvas tenga el tamaño correcto
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         canvas.style.width = '100%';
         canvas.style.height = '100%';
+        canvas.style.display = 'block';
         
         let bossHP = 10;
         let playerHP = 10;
@@ -1236,6 +1239,7 @@
         bossImg.onload = () => { console.log("Boss image loaded: banana2.png"); };
         bossImg.onerror = () => { console.error("Error loading banana2.png, usando emoji como fallback"); };
         
+        // Mostrar UI del boss
         bossUI.style.display = 'block';
         bossHPDisplay.style.display = 'block';
         playerHPDisplay.style.display = 'block';
@@ -1534,6 +1538,7 @@
           
           ctx.clearRect(0, 0, canvas.width, canvas.height);
           
+          // Fondo
           const gradient = ctx.createRadialGradient(
             canvas.width/2, canvas.height/2, 50,
             canvas.width/2, canvas.height/2, 500
@@ -1543,6 +1548,7 @@
           ctx.fillStyle = gradient;
           ctx.fillRect(0, 0, canvas.width, canvas.height);
           
+          // Dibujar boss
           if (bossImg.complete && bossImg.naturalWidth > 0) {
             const size = 130;
             ctx.drawImage(bossImg, bossX - size/2, bossY - size/2, size, size);
@@ -1554,6 +1560,7 @@
             ctx.fillText('🍌', bossX, bossY);
           }
           
+          // Dibujar jugador (corazón)
           ctx.fillStyle = '#ff0044';
           ctx.shadowColor = '#ff0044';
           ctx.shadowBlur = 20;
@@ -1563,6 +1570,7 @@
           ctx.fillText('❤️', mouseX, mouseY);
           ctx.shadowBlur = 0;
           
+          // Cubos
           if (phase === 'attack') {
             const cubesToRemove = [];
             for (let i = 0; i < cubes.length; i++) {
@@ -1601,6 +1609,7 @@
             }
           }
           
+          // Línea de ataque
           if (isLineMoving) {
             ctx.fillStyle = 'rgba(255, 0, 0, 0.85)';
             ctx.shadowColor = '#ff0000';
@@ -1616,6 +1625,7 @@
             ctx.fillRect(lineX - 40, 0, 80, canvas.height);
           }
           
+          // Turno del jugador
           if (phase === 'player_turn' && canAttack) {
             ctx.fillStyle = 'rgba(0, 255, 0, 0.08)';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -1626,6 +1636,7 @@
             ctx.fillText('⚡ PRESIONA E PARA ATACAR ⚡', canvas.width/2, canvas.height - 30);
           }
           
+          // Victoria
           if (deathSequenceStarted && bossHP <= 0) {
             ctx.fillStyle = '#ffdd44';
             ctx.font = '40px "Indie Flower", cursive';
@@ -1634,6 +1645,7 @@
             ctx.fillText('🎉 ¡VENCISTE AL JEFE! 🎉', canvas.width/2, canvas.height/2 + 100);
           }
           
+          // Iniciar countdown
           if (phase === 'idle' && !isCountdownActive && !deathSequenceStarted && bossFightActive) {
             startCountdown();
           }
