@@ -118,48 +118,16 @@
       margin-bottom: 4px;
     }
     
-    .death-dialog {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 9999;
-      display: none;
-      text-align: center;
-      image-rendering: pixelated;
-    }
-    .death-dialog.active { display: block; }
-    .death-dialog .death-text {
-      color: #ffffff;
-      font-family: 'Press Start 2P', 'Determination Mono', monospace !important;
-      font-size: 24px;
-      line-height: 1.8;
-      text-align: center;
-      letter-spacing: 2px;
-      image-rendering: pixelated;
-      text-shadow: 0 0 30px #ff0000;
-    }
-    .death-dialog .death-text .char {
-      display: inline-block;
-      opacity: 0;
-      animation: charAppear 0.04s forwards;
-      font-family: 'Press Start 2P', 'Determination Mono', monospace !important;
-      font-size: 24px;
-      color: #ff4444;
-      text-shadow: 0 0 10px #ff0000;
-    }
-    
     #startScreen { height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(-45deg, #1a0a00, #3d1a00, #1f0f00, #2a1500); background-size: 400% 400%; animation: gradientBG 8s ease infinite; position: relative; z-index: 10; }
     @keyframes gradientBG { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
     
     .menuPanel { background: rgba(0,0,0,0.7); padding: 30px; border: 3px solid #FF6600; border-radius: 15px; box-shadow: 0 0 30px #ff3300; display: flex; flex-direction: row; gap: 40px; align-items: center; justify-content: center; flex-wrap: wrap; }
     .menuBtn { font-size: 1.3em; padding: 15px 25px; margin: 10px; background: #1a0a00; color: #FF9900; border: 2px solid #FF6600; cursor: pointer; transition: transform .2s ease, box-shadow .2s ease; border-radius: 8px; }
     .menuBtn:hover { transform: scale(1.1); box-shadow: 0 0 15px #FF6600; background: #331100; }
-    .menuBtn.selected { transform: scale(1.1); box-shadow: 0 0 25px #FFD700; border-color: #FFD700; background: #332200; }
+    .menuBtn:focus-visible { outline: 3px solid #FFD700; outline-offset: 2px; }
     
     #bananaPlay { width: 180px; cursor: pointer; transition: transform .3s ease, filter .3s ease; animation: float 3s ease-in-out infinite; margin: 20px; filter: drop-shadow(0 0 10px #ffaa00); }
     #bananaPlay:hover { transform: scale(1.1) rotate(-5deg); filter: drop-shadow(0 0 20px #ffcc00); }
-    #bananaPlay.selected { transform: scale(1.15) rotate(-5deg); filter: drop-shadow(0 0 30px #ffdd44); }
     @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
     
     footer { margin-top: 20px; font-size: .9em; color: #884400; }
@@ -222,8 +190,23 @@
     @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
     
     .options { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; z-index: 5; }
-    .options button { font-size: 1.2em; padding: 10px 20px; background: #1a0a00; color: #FF9900; border: 2px solid #FF6600; cursor: pointer; transition: 0.1s; }
-    .options button.selected-option { border-color: #FFD700; box-shadow: 0 0 20px #FFD700; background: #332200; transform: scale(1.05); }
+    .options button { 
+      font-size: 1.2em; 
+      padding: 10px 20px; 
+      background: #1a0a00; 
+      color: #FF9900; 
+      border: 2px solid #FF6600; 
+      cursor: pointer; 
+      transition: 0.1s;
+      min-width: 80px;
+      font-family: 'Press Start 2P', monospace !important;
+      font-size: 0.8rem;
+    }
+    .options button:focus-visible { outline: 3px solid #FFD700; outline-offset: 2px; }
+    .options button:hover { background: #331100; }
+    .options button.selected { background: #2a6a2a; border-color: #00ff00; }
+    .options button.wrong { background: #882222; border-color: #ff0000; }
+    .options button.correct { background: #2a6a2a; border-color: #00ff00; }
     
     #dialogueBox { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); width: 70%; padding: 15px; background: rgba(0,0,0,.9); color: #FFD700; font-size: 1.3em; border: 2px solid #FF6600; border-radius: 10px; display: none; z-index: 15; font-weight: bold; text-shadow: 0 0 5px #ff6600; }
     #rageText { position: absolute; top: 80px; left: 50%; transform: translateX(-50%); font-size: 1.5em; color: #ff4444; background: rgba(0,0,0,0.7); padding: 5px 15px; border-radius: 20px; font-weight: bold; z-index: 5; }
@@ -249,6 +232,7 @@
       height: 100%;
       background: #0a0a1a;
       cursor: url('https://raw.githubusercontent.com/Raphapro900/Ms.BananaS/refs/heads/main/heart.png') 16 16, auto;
+      touch-action: none;
     }
     
     .boss-ui {
@@ -462,38 +446,76 @@
       animation: bossShake 1s ease-in-out;
     }
     
-    #gamepadIndicator {
+    /* Controles en pantalla para móvil/táctil */
+    .touch-controls {
       position: fixed;
       bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
+      left: 0;
+      width: 100%;
+      display: none;
+      justify-content: space-between;
+      padding: 0 20px;
+      box-sizing: border-box;
+      z-index: 9996;
+      pointer-events: none;
+    }
+    .touch-controls .btn-group {
+      display: flex;
+      gap: 10px;
+      pointer-events: auto;
+    }
+    .touch-controls button {
+      background: rgba(255,255,255,0.15);
+      border: 2px solid rgba(255,255,255,0.3);
+      color: white;
+      font-size: 1.5rem;
+      padding: 15px 20px;
+      border-radius: 12px;
+      backdrop-filter: blur(4px);
+      min-width: 60px;
+      font-family: 'Press Start 2P', monospace !important;
+      touch-action: manipulation;
+      user-select: none;
+    }
+    .touch-controls button:active {
+      background: rgba(255,255,255,0.3);
+      transform: scale(0.95);
+    }
+    .touch-controls .action-btn {
+      background: rgba(255,50,50,0.3);
+      border-color: #ff4444;
+    }
+    .touch-controls .action-btn:active {
+      background: rgba(255,50,50,0.6);
+    }
+    @media (pointer: coarse) {
+      .touch-controls { display: flex !important; }
+    }
+    
+    /* Indicador de mando conectado */
+    .controller-status {
+      position: fixed;
+      top: 10px;
+      right: 10px;
       color: #00ff88;
       font-size: 0.7rem;
       font-family: 'Press Start 2P', monospace !important;
       background: rgba(0,0,0,0.7);
-      padding: 6px 16px;
+      padding: 5px 12px;
       border-radius: 8px;
       border: 1px solid #00ff88;
-      z-index: 9998;
+      z-index: 9999;
       display: none;
-      text-align: center;
+      pointer-events: none;
     }
-    #gamepadIndicator.show { display: block; }
-    #gamepadIndicator .key-hint {
-      color: #ffaa44;
-      font-size: 0.6rem;
-      margin-top: 3px;
-    }
+    .controller-status.show { display: block; }
   </style>
 </head>
 <body>
 
-  <div id="gamepadIndicator" class="show">
-    🎮 MANDO CONECTADO
-    <div class="key-hint">A=Seleccionar | B=Cancelar | D-Pad=Navegar</div>
-  </div>
-
   <div class="reset-polling-badge" id="pollingBadge">🔄</div>
+  <div class="controller-status" id="controllerStatus">🎮 Mando Conectado</div>
+  
   <div id="text-input-display">
     <span class="input-label">>_</span>
     <span id="inputText"></span><span class="cursor">|</span>
@@ -510,10 +532,6 @@
       </div>
     </div>
     <div class="dialog-arrow" id="dialogArrow">▼</div>
-  </div>
-  
-  <div id="deathDialog" class="death-dialog">
-    <div class="death-text" id="deathText"></div>
   </div>
   
   <div id="glitchVideo" class="glitch-video"><video id="glitchVideoPlayer" src="glitch.mp4"></video></div>
@@ -578,6 +596,21 @@
 
   <div id="speedIndicator" class="speed-indicator">⏩ x4</div>
 
+  <!-- Controles táctiles para móvil/consola -->
+  <div class="touch-controls" id="touchControls">
+    <div class="btn-group">
+      <button id="btnUp">▲</button>
+      <button id="btnDown">▼</button>
+      <button id="btnLeft">◄</button>
+      <button id="btnRight">►</button>
+    </div>
+    <div class="btn-group">
+      <button id="btnAction" class="action-btn">A</button>
+      <button id="btnAction2" class="action-btn">B</button>
+      <button id="btnStart" class="action-btn">▶</button>
+    </div>
+  </div>
+
   <div id="gameContent">
     <div id="startScreen">
       <h1 style="text-shadow: 0 0 10px #ff6600;" id="mainTitle">🍌 Ms. BananaS 🍌</h1>
@@ -589,6 +622,7 @@
           <button class="menuBtn" id="exitBtn">🚪 Exit</button>
         </div>
       </div>
+      <audio id="menuMusic" src="bananamenu.mp3" loop></audio>
       <footer>CC0 Raphapro900 - V1.0</footer>
       <div id="infoBox"><span id="closeBtn">✖</span><div id="infoContent"></div></div>
     </div>
@@ -606,9 +640,13 @@
           <div class="signature">- Ms. BananaS 🍌</div>
         </div>
       </div>
-      <div class="options">
-        <button>Seal</button><button>Dog</button><button>Cat</button>
-        <button>Duck</button><button>Eagle</button><button>Snake</button>
+      <div class="options" id="animalOptions">
+        <button data-animal="Seal">Seal</button>
+        <button data-animal="Dog">Dog</button>
+        <button data-animal="Cat">Cat</button>
+        <button data-animal="Duck">Duck</button>
+        <button data-animal="Eagle">Eagle</button>
+        <button data-animal="Snake">Snake</button>
       </div>
       <div id="dialogueBox"></div>
       <audio id="dialogueAudio" preload="auto"></audio>
@@ -638,294 +676,338 @@
     const BASE_URL = "https://raw.githubusercontent.com/Raphapro900/Ms.BananaS/refs/heads/main/";
     const RESET_URL = "https://raphapro900.github.io/reset/";
     
-    // ==================== GAMEPAD SUPPORT ====================
-    class GamepadManager {
-      constructor() {
-        this.gamepad = null;
-        this.connected = false;
-        this.buttons = {};
-        this.axes = { leftX: 0, leftY: 0, rightX: 0, rightY: 0 };
-        this.prevButtons = {};
-        this.listeners = [];
-        this.pollInterval = null;
-        this.deadZone = 0.15;
-        
-        this.BUTTON_MAP = {
-          A: 0, B: 1, X: 2, Y: 3,
-          LB: 4, RB: 5, LT: 6, RT: 7,
-          BACK: 8, START: 9,
-          LS: 10, RS: 11,
-          DPAD_UP: 12, DPAD_DOWN: 13, DPAD_LEFT: 14, DPAD_RIGHT: 15
-        };
-        
-        this.init();
-      }
+    // ==================== SISTEMA DE MANDO ====================
+    const controllerStatus = document.getElementById('controllerStatus');
+    let gamepadConnected = false;
+    let gamepadIndex = null;
+    let gamepadCheckInterval = null;
+    
+    // Mapeo de botones de mando
+    const GAMEPAD_BUTTONS = {
+      A: 0,      // PlayStation: X, Xbox: A
+      B: 1,      // PlayStation: Circle, Xbox: B
+      X: 2,      // PlayStation: Square, Xbox: X
+      Y: 3,      // PlayStation: Triangle, Xbox: Y
+      LB: 4,     // L1
+      RB: 5,     // R1
+      LT: 6,     // L2
+      RT: 7,     // R2
+      SELECT: 8,
+      START: 9,
+      LEFT_STICK: 10,
+      RIGHT_STICK: 11,
+      DPAD_UP: 12,
+      DPAD_DOWN: 13,
+      DPAD_LEFT: 14,
+      DPAD_RIGHT: 15,
+      HOME: 16
+    };
+    
+    // Estado del mando
+    const gamepadState = {
+      buttons: {},
+      axes: { leftX: 0, leftY: 0, rightX: 0, rightY: 0 },
+      touchpad: { x: 0, y: 0, active: false }
+    };
+    
+    function initGamepadSupport() {
+      // Detectar conexión de mando
+      window.addEventListener('gamepadconnected', (e) => {
+        gamepadConnected = true;
+        gamepadIndex = e.gamepad.index;
+        controllerStatus.classList.add('show');
+        console.log('🎮 Mando conectado:', e.gamepad.id);
+        if (gamepadCheckInterval) clearInterval(gamepadCheckInterval);
+        gamepadCheckInterval = setInterval(updateGamepadState, 16);
+      });
       
-      init() {
-        window.addEventListener('gamepadconnected', (e) => {
-          this.gamepad = e.gamepad;
-          this.connected = true;
-          document.getElementById('gamepadIndicator').classList.add('show');
-          this.startPolling();
-        });
-        
-        window.addEventListener('gamepaddisconnected', (e) => {
-          this.connected = false;
-          this.gamepad = null;
-          document.getElementById('gamepadIndicator').classList.remove('show');
-          this.stopPolling();
-        });
-        
-        this.checkInitialGamepad();
-      }
-      
-      checkInitialGamepad() {
-        const gamepads = navigator.getGamepads();
-        for (let gp of gamepads) {
-          if (gp) {
-            this.gamepad = gp;
-            this.connected = true;
-            document.getElementById('gamepadIndicator').classList.add('show');
-            this.startPolling();
-            break;
+      window.addEventListener('gamepaddisconnected', (e) => {
+        if (gamepadIndex === e.gamepad.index) {
+          gamepadConnected = false;
+          gamepadIndex = null;
+          controllerStatus.classList.remove('show');
+          if (gamepadCheckInterval) {
+            clearInterval(gamepadCheckInterval);
+            gamepadCheckInterval = null;
           }
-        }
-      }
-      
-      startPolling() {
-        if (this.pollInterval) return;
-        this.pollInterval = setInterval(() => this.poll(), 16);
-      }
-      
-      stopPolling() {
-        if (this.pollInterval) {
-          clearInterval(this.pollInterval);
-          this.pollInterval = null;
-        }
-      }
-      
-      poll() {
-        if (!this.connected) return;
-        const gp = navigator.getGamepads()[this.gamepad.index];
-        if (!gp) {
-          this.connected = false;
-          this.stopPolling();
-          return;
-        }
-        this.gamepad = gp;
-        
-        this.prevButtons = { ...this.buttons };
-        
-        for (let i = 0; i < gp.buttons.length; i++) {
-          const key = Object.keys(this.BUTTON_MAP).find(k => this.BUTTON_MAP[k] === i);
-          if (key) {
-            this.buttons[key] = gp.buttons[i].pressed;
-          }
-        }
-        
-        if (gp.axes.length >= 2) {
-          this.axes.leftX = this.applyDeadZone(gp.axes[0]);
-          this.axes.leftY = this.applyDeadZone(gp.axes[1]);
-        }
-        if (gp.axes.length >= 4) {
-          this.axes.rightX = this.applyDeadZone(gp.axes[2]);
-          this.axes.rightY = this.applyDeadZone(gp.axes[3]);
-        }
-        
-        for (const listener of this.listeners) {
-          listener(this);
-        }
-      }
-      
-      applyDeadZone(value) {
-        return Math.abs(value) < this.deadZone ? 0 : value;
-      }
-      
-      isButtonPressed(buttonName) {
-        return this.buttons[buttonName] === true && this.prevButtons[buttonName] !== true;
-      }
-      
-      isButtonHeld(buttonName) {
-        return this.buttons[buttonName] === true;
-      }
-      
-      getDPad() {
-        return {
-          up: this.buttons.DPAD_UP || false,
-          down: this.buttons.DPAD_DOWN || false,
-          left: this.buttons.DPAD_LEFT || false,
-          right: this.buttons.DPAD_RIGHT || false
-        };
-      }
-      
-      getLeftStick() {
-        return {
-          x: this.axes.leftX,
-          y: this.axes.leftY
-        };
-      }
-      
-      addListener(callback) {
-        this.listeners.push(callback);
-      }
-      
-      removeListener(callback) {
-        this.listeners = this.listeners.filter(l => l !== callback);
-      }
-    }
-    
-    const gamepad = new GamepadManager();
-    
-    // ==================== NAVEGACIÓN CON GAMEPAD ====================
-    let menuSelectedIndex = 0;
-    let isBananaSelected = false;
-    const menuButtons = ['howBtn', 'shopBtn', 'exitBtn'];
-    let optionSelectedIndex = 0;
-    let isInMenu = true;
-    let isInGame = false;
-    let isBossActive = false;
-    let dialogActive = false;
-    let isInOptions = false;
-    let menuRow = 0;
-    const MENU_ROWS = 2;
-    const COLS_PER_ROW = [1, 3];
-    
-    function updateMenuSelection() {
-      const banana = document.getElementById('bananaPlay');
-      const buttons = menuButtons.map(id => document.getElementById(id));
-      
-      banana.classList.remove('selected');
-      buttons.forEach(btn => btn.classList.remove('selected'));
-      
-      if (menuRow === 0) {
-        banana.classList.add('selected');
-      } else {
-        const idx = menuSelectedIndex % buttons.length;
-        if (buttons[idx]) buttons[idx].classList.add('selected');
-      }
-    }
-    
-    function updateOptionSelection() {
-      const options = document.querySelectorAll('.options button');
-      options.forEach((btn, i) => {
-        if (i === optionSelectedIndex) {
-          btn.classList.add('selected-option');
-        } else {
-          btn.classList.remove('selected-option');
         }
       });
-    }
-    
-    function navigateMenu(dx, dy) {
-      if (!isInMenu) return;
       
-      if (dy < 0) {
-        menuRow = Math.max(0, menuRow - 1);
-        menuSelectedIndex = 0;
-      } else if (dy > 0) {
-        menuRow = Math.min(MENU_ROWS - 1, menuRow + 1);
-        menuSelectedIndex = 0;
-      } else if (dx !== 0 && menuRow === 1) {
-        const buttons = menuButtons;
-        menuSelectedIndex = (menuSelectedIndex + dx + buttons.length) % buttons.length;
+      // Detectar si ya hay un mando conectado
+      const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
+      for (const gp of gamepads) {
+        if (gp) {
+          gamepadConnected = true;
+          gamepadIndex = gp.index;
+          controllerStatus.classList.add('show');
+          if (gamepadCheckInterval) clearInterval(gamepadCheckInterval);
+          gamepadCheckInterval = setInterval(updateGamepadState, 16);
+          break;
+        }
       }
       
-      updateMenuSelection();
+      // Soporte para touchpad de DualSense (Gamepad API)
+      // Nota: El touchpad no es directamente accesible via Gamepad API estándar,
+      // pero podemos usar eventos de mouse/touch que ya funcionan
     }
     
-    function navigateOptions(dx, dy) {
-      if (!isInOptions) return;
-      const options = document.querySelectorAll('.options button');
-      const cols = 6;
+    function updateGamepadState() {
+      if (!gamepadConnected || gamepadIndex === null) return;
       
-      if (dx !== 0) {
-        optionSelectedIndex = (optionSelectedIndex + dx + options.length) % options.length;
-      } else if (dy < 0) {
-        optionSelectedIndex = (optionSelectedIndex - cols + options.length) % options.length;
-      } else if (dy > 0) {
-        optionSelectedIndex = (optionSelectedIndex + cols) % options.length;
+      const gp = navigator.getGamepads()[gamepadIndex];
+      if (!gp) {
+        gamepadConnected = false;
+        controllerStatus.classList.remove('show');
+        return;
       }
       
-      updateOptionSelection();
+      // Leer botones
+      for (const [name, index] of Object.entries(GAMEPAD_BUTTONS)) {
+        if (gp.buttons[index]) {
+          gamepadState.buttons[name] = gp.buttons[index].pressed;
+        }
+      }
+      
+      // Leer ejes
+      if (gp.axes.length >= 2) {
+        gamepadState.axes.leftX = gp.axes[0] || 0;
+        gamepadState.axes.leftY = gp.axes[1] || 0;
+      }
+      if (gp.axes.length >= 4) {
+        gamepadState.axes.rightX = gp.axes[2] || 0;
+        gamepadState.axes.rightY = gp.axes[3] || 0;
+      }
+      
+      // Emular touchpad con el stick derecho
+      const threshold = 0.3;
+      const moveX = gamepadState.axes.rightX;
+      const moveY = gamepadState.axes.rightY;
+      
+      if (Math.abs(moveX) > threshold || Math.abs(moveY) > threshold) {
+        // Mover el cursor con el stick derecho
+        const canvas = document.getElementById('bossCanvas');
+        if (canvas && document.getElementById('bossContainer').classList.contains('active')) {
+          const rect = canvas.getBoundingClientRect();
+          const currentX = parseFloat(canvas.dataset.mouseX) || window.innerWidth / 2;
+          const currentY = parseFloat(canvas.dataset.mouseY) || window.innerHeight / 2;
+          const speed = 8;
+          let newX = currentX + moveX * speed * 1.5;
+          let newY = currentY + moveY * speed * 1.5;
+          newX = Math.max(0, Math.min(window.innerWidth, newX));
+          newY = Math.max(0, Math.min(window.innerHeight, newY));
+          canvas.dataset.mouseX = newX;
+          canvas.dataset.mouseY = newY;
+          
+          // Disparar evento de mousemove
+          const event = new MouseEvent('mousemove', {
+            clientX: (newX / window.innerWidth) * window.innerWidth,
+            clientY: (newY / window.innerHeight) * window.innerHeight
+          });
+          canvas.dispatchEvent(event);
+        }
+      }
     }
     
-    // ==================== LISTENER DEL GAMEPAD ====================
-    gamepad.addListener((gp) => {
-      if (isInMenu) {
-        const dPad = gp.getDPad();
-        const stick = gp.getLeftStick();
+    // Inicializar soporte de mando
+    initGamepadSupport();
+    
+    // ==================== SISTEMA DE NAVEGACIÓN POR TECLADO/MANDO ====================
+    class FocusNavigator {
+      constructor() {
+        this.focusableElements = [];
+        this.currentIndex = -1;
+        this.isActive = false;
+        this.container = null;
+        this.onSelect = null;
+        this.selector = '';
+      }
+      
+      init(container, selector, onSelect) {
+        this.container = container;
+        this.selector = selector;
+        this.onSelect = onSelect;
+        this.updateElements();
         
-        if (gp.isButtonPressed('DPAD_UP') || stick.y < -0.5) {
-          navigateMenu(0, -1);
-        }
-        if (gp.isButtonPressed('DPAD_DOWN') || stick.y > 0.5) {
-          navigateMenu(0, 1);
-        }
-        if (gp.isButtonPressed('DPAD_LEFT') || stick.x < -0.5) {
-          navigateMenu(-1, 0);
-        }
-        if (gp.isButtonPressed('DPAD_RIGHT') || stick.x > 0.5) {
-          navigateMenu(1, 0);
-        }
+        // Escuchar eventos de teclado
+        document.addEventListener('keydown', (e) => {
+          if (!this.isActive) return;
+          const key = e.key;
+          if (key === 'ArrowDown' || key === 'ArrowRight') {
+            e.preventDefault();
+            this.next();
+          } else if (key === 'ArrowUp' || key === 'ArrowLeft') {
+            e.preventDefault();
+            this.prev();
+          } else if (key === 'Enter' || key === ' ') {
+            e.preventDefault();
+            this.select();
+          }
+        });
         
-        if (gp.isButtonPressed('A')) {
-          if (menuRow === 0) {
-            document.getElementById('bananaPlay').click();
+        // También escuchar eventos de mando
+        this.gamepadInterval = setInterval(() => {
+          if (!this.isActive || !gamepadConnected) return;
+          const gp = navigator.getGamepads()[gamepadIndex];
+          if (!gp) return;
+          
+          // DPAD
+          if (gp.buttons[GAMEPAD_BUTTONS.DPAD_DOWN]?.pressed || gp.buttons[GAMEPAD_BUTTONS.DPAD_RIGHT]?.pressed) {
+            if (!this._dpadNext) {
+              this._dpadNext = true;
+              this.next();
+              setTimeout(() => { this._dpadNext = false; }, 300);
+            }
+          } else if (gp.buttons[GAMEPAD_BUTTONS.DPAD_UP]?.pressed || gp.buttons[GAMEPAD_BUTTONS.DPAD_LEFT]?.pressed) {
+            if (!this._dpadPrev) {
+              this._dpadPrev = true;
+              this.prev();
+              setTimeout(() => { this._dpadPrev = false; }, 300);
+            }
+          }
+          
+          // Botón A (X en PlayStation) para seleccionar
+          if (gp.buttons[GAMEPAD_BUTTONS.A]?.pressed && !this._aPressed) {
+            this._aPressed = true;
+            this.select();
+            setTimeout(() => { this._aPressed = false; }, 200);
+          }
+          if (!gp.buttons[GAMEPAD_BUTTONS.A]?.pressed) {
+            this._aPressed = false;
+          }
+        }, 50);
+      }
+      
+      updateElements() {
+        if (!this.container) return;
+        this.focusableElements = Array.from(this.container.querySelectorAll(this.selector));
+        if (this.focusableElements.length > 0 && this.currentIndex === -1) {
+          this.currentIndex = 0;
+        }
+        this.updateFocus();
+      }
+      
+      updateFocus() {
+        this.focusableElements.forEach((el, i) => {
+          if (i === this.currentIndex) {
+            el.focus();
+            el.style.outline = '3px solid #FFD700';
+            el.style.outlineOffset = '2px';
           } else {
-            const btn = document.getElementById(menuButtons[menuSelectedIndex % menuButtons.length]);
-            if (btn) btn.click();
+            el.style.outline = 'none';
           }
-        }
-        
-        if (gp.isButtonPressed('B')) {
-          document.getElementById('exitBtn').click();
-        }
+        });
       }
       
-      if (isInGame && !isBossActive && !dialogActive) {
-        const dPad = gp.getDPad();
-        const stick = gp.getLeftStick();
-        
-        if (gp.isButtonPressed('DPAD_RIGHT') || stick.x > 0.5) {
-          navigateOptions(1, 0);
-        }
-        if (gp.isButtonPressed('DPAD_LEFT') || stick.x < -0.5) {
-          navigateOptions(-1, 0);
-        }
-        if (gp.isButtonPressed('DPAD_DOWN') || stick.y > 0.5) {
-          navigateOptions(0, 1);
-        }
-        if (gp.isButtonPressed('DPAD_UP') || stick.y < -0.5) {
-          navigateOptions(0, -1);
-        }
-        
-        if (gp.isButtonPressed('A')) {
-          const options = document.querySelectorAll('.options button');
-          if (options[optionSelectedIndex]) {
-            options[optionSelectedIndex].click();
+      next() {
+        if (this.focusableElements.length === 0) return;
+        this.currentIndex = (this.currentIndex + 1) % this.focusableElements.length;
+        this.updateFocus();
+      }
+      
+      prev() {
+        if (this.focusableElements.length === 0) return;
+        this.currentIndex = (this.currentIndex - 1 + this.focusableElements.length) % this.focusableElements.length;
+        this.updateFocus();
+      }
+      
+      select() {
+        if (this.currentIndex >= 0 && this.currentIndex < this.focusableElements.length) {
+          const el = this.focusableElements[this.currentIndex];
+          if (this.onSelect) {
+            this.onSelect(el);
+          } else {
+            el.click();
           }
         }
       }
       
-      if (isBossActive) {
-        if (gp.isButtonPressed('A') || gp.isButtonPressed('X')) {
-          const eEvent = new KeyboardEvent('keydown', { key: 'e', keyCode: 69 });
-          document.dispatchEvent(eEvent);
+      activate() {
+        this.isActive = true;
+        if (this.focusableElements.length > 0 && this.currentIndex === -1) {
+          this.currentIndex = 0;
         }
-        if (gp.isButtonPressed('B') || gp.isButtonPressed('Y')) {
-          const enterEvent = new KeyboardEvent('keydown', { key: 'Enter', keyCode: 13 });
-          document.dispatchEvent(enterEvent);
-        }
+        this.updateFocus();
       }
       
-      if (dialogActive) {
-        if (gp.isButtonPressed('A') || gp.isButtonPressed('B') || gp.isButtonPressed('X') || gp.isButtonPressed('Y')) {
-          document.dispatchEvent(new Event('click'));
-        }
+      deactivate() {
+        this.isActive = false;
+        this.focusableElements.forEach(el => el.style.outline = 'none');
       }
-    });
+      
+      destroy() {
+        if (this.gamepadInterval) clearInterval(this.gamepadInterval);
+        this.deactivate();
+      }
+    }
     
-    // ==================== FUNCIONES DE UTILIDAD ====================
+    // Crear navegador para el menú de animales
+    const animalNavigator = new FocusNavigator();
+    
+    // ==================== SISTEMA DE ENTRADA DE TEXTO CON MANDO ====================
+    let textInputActive = false;
+    let textInputCallback = null;
+    let textInputValue = '';
+    
+    function startTextInput(callback, initialValue = '') {
+      textInputActive = true;
+      textInputCallback = callback;
+      textInputValue = initialValue;
+      document.getElementById('text-input-display').style.display = 'block';
+      document.getElementById('inputText').textContent = textInputValue;
+      
+      // Enfocar para teclado
+      document.addEventListener('keydown', handleTextInputKeyboard);
+      
+      // También manejar entrada con mando
+      textInputGamepadInterval = setInterval(() => {
+        if (!textInputActive || !gamepadConnected) return;
+        const gp = navigator.getGamepads()[gamepadIndex];
+        if (!gp) return;
+        
+        // Usar el stick izquierdo o DPAD para navegar
+        // Por simplicidad, usamos un teclado virtual simple
+        // El usuario puede usar el teclado físico o escribir con el mando
+      }, 50);
+    }
+    
+    let textInputGamepadInterval = null;
+    
+    function stopTextInput() {
+      textInputActive = false;
+      textInputCallback = null;
+      document.getElementById('text-input-display').style.display = 'none';
+      document.removeEventListener('keydown', handleTextInputKeyboard);
+      if (textInputGamepadInterval) {
+        clearInterval(textInputGamepadInterval);
+        textInputGamepadInterval = null;
+      }
+    }
+    
+    function handleTextInputKeyboard(e) {
+      if (!textInputActive) return;
+      const key = e.key;
+      if (key === 'Enter') {
+        e.preventDefault();
+        if (textInputCallback) {
+          textInputCallback(textInputValue);
+        }
+        stopTextInput();
+        return;
+      }
+      if (key === 'Backspace') {
+        e.preventDefault();
+        textInputValue = textInputValue.slice(0, -1);
+        document.getElementById('inputText').textContent = textInputValue;
+        return;
+      }
+      if (key.length === 1 && key.match(/[a-zA-Z.]/)) {
+        e.preventDefault();
+        textInputValue += key;
+        document.getElementById('inputText').textContent = textInputValue;
+      }
+    }
+    
+    // ==================== FUNCIONES EXISTENTES ====================
     function playAudioFile(filename, volume = 0.8) {
       const url = BASE_URL + filename;
       return new Promise((resolve) => {
@@ -999,7 +1081,7 @@
       return cleanup;
     }
 
-    // ==================== SISTEMA DE BLOQUEO Y RESET ====================
+    // ==================== SISTEMA DE BLOQUEO ====================
     const LOCK_STORAGE_KEY = "gameLocked_V5", RESET_SIGNAL_KEY = "resetSignal";
     const DAY_PROGRESS_KEY = "gameDayProgress", RAGE_PROGRESS_KEY = "gameRageProgress";
     const COMPLETED_KEY = "gameCompleted", BOSS_DEFEATED_KEY = "bossDefeated";
@@ -1070,67 +1152,10 @@
       return false; 
     }
 
-    // ==================== FUNCIÓN DE RESET (SOLO LOCAL) ====================
-    function performReset() {
-      console.log("🔄 RESET ACTIVADO - Reiniciando a Día 1, Furia 0");
-      
-      // Limpiar todo el progreso
-      clearProgress();
-      stopAllGameMusic();
-      
-      // Ocultar todas las pantallas
-      glitchRedScreen.style.display = 'none';
-      lockScreen.style.display = 'none';
-      waitingScreen.style.display = 'none';
-      document.getElementById('bossContainer').classList.remove('active');
-      document.getElementById('bossContainer').style.display = 'none';
-      
-      // Mostrar pantalla de inicio
-      document.getElementById('startScreen').style.display = 'flex';
-      document.getElementById('gameScreen').style.display = 'none';
-      document.getElementById('gameContent').style.display = 'block';
-      
-      // Recargar para reiniciar completamente
-      window.location.reload();
-    }
-
-    // ==================== POLLING PARA SEÑAL DE RESET ====================
-    let resetPollInterval = null;
-    function startUniversalResetPolling() {
-      if (resetPollInterval) return;
-      resetPollInterval = setInterval(() => {
-        const signal = localStorage.getItem(RESET_SIGNAL_KEY);
-        if (signal === "reset") {
-          localStorage.removeItem(RESET_SIGNAL_KEY);
-          clearInterval(resetPollInterval); resetPollInterval = null;
-          performReset();
-        }
-      }, 1500);
-    }
-    startUniversalResetPolling();
-
-    // ==================== BOTÓN DE RESET EN EL MENÚ ====================
-    const resetBtn = document.createElement('button');
-    resetBtn.className = 'menuBtn';
-    resetBtn.id = 'resetBtn';
-    resetBtn.textContent = '🔄 Reset';
-    resetBtn.style.marginTop = '10px';
-    resetBtn.style.borderColor = '#FF4444';
-    resetBtn.style.color = '#FF4444';
-    document.querySelector('.menuPanel div').appendChild(resetBtn);
-    
-    resetBtn.addEventListener('click', function() {
-      if (confirm('¿Resetear todo el progreso?')) {
-        localStorage.setItem(RESET_SIGNAL_KEY, 'reset');
-        performReset();
-      }
-    });
-
     document.getElementById('waitingBinaryClick')?.addEventListener('click', openResetPage);
     document.getElementById('lockBinaryClick')?.addEventListener('click', openResetPage);
     document.getElementById('glitchBinaryClick')?.addEventListener('click', openResetPage);
 
-    // ==================== ELEMENTOS DOM ====================
     const lockScreen = document.getElementById('lockScreen'), waitingScreen = document.getElementById('waitingScreen');
     const glitchRedScreen = document.getElementById('glitchRedScreen'), gameContent = document.getElementById('gameContent');
     const menuMusic = document.getElementById('menuMusic'), roomMusic = document.getElementById('roomMusic');
@@ -1156,9 +1181,7 @@
     const bossContainer = document.getElementById('bossContainer');
     const bossCanvas = document.getElementById('bossCanvas');
     const bossUI = document.getElementById('bossUI');
-    const bossHPContainer = document.getElementById('bossHPContainer');
     const bossHPDisplay = document.getElementById('bossHP');
-    const playerHPContainer = document.getElementById('playerHPContainer');
     const playerHPDisplay = document.getElementById('playerHP');
     const bossTimer = document.getElementById('bossTimer');
     const bossCountdownEl = document.getElementById('bossCountdown');
@@ -1167,8 +1190,6 @@
     const bossDefeat = document.getElementById('bossDefeat');
     const chaseMusic = document.getElementById('chaseMusic');
     const heartbeatSound = document.getElementById('heartbeatSound');
-    const deathDialog = document.getElementById('deathDialog');
-    const deathText = document.getElementById('deathText');
     
     const howBtn = document.getElementById('howBtn');
     const shopBtn = document.getElementById('shopBtn');
@@ -1214,15 +1235,16 @@
         • Presiona <strong>ENTER</strong> para golpear<br>
         • Tienes 10 corazones</p>
         <br>
-        <p><strong>🎮 CONTROLES CON MANDO:</strong><br>
-        • <strong>A / X</strong> = Seleccionar / Atacar<br>
-        • <strong>B / O</strong> = Cancelar / Salir<br>
-        • <strong>D-Pad / Joystick</strong> = Navegar en todas las direcciones<br>
-        • <strong>Joystick</strong> = Mover en bossfight</p>
-        <br>
         <p><strong>🎮 CÓDIGOS SECRETOS:</strong><br>
         <strong>↑ ↑ ↓ ↓ ← → ← → B A</strong> → Final feliz<br>
         <strong>↓ ↑ B A</strong> → Bossfight</p>
+        <br>
+        <p><strong>🎮 CONTROLES DE MANDO:</strong><br>
+        • DPAD/Stick Izquierdo: Navegar menús<br>
+        • Botón A (X): Seleccionar/Atacar<br>
+        • Botón B (Círculo): Cancelar/Volver<br>
+        • Stick Derecho: Mover cursor en Bossfight<br>
+        • Botón Start: Pausa/Menú</p>
         <br>
         <p><strong>🔓 Código de reseteo:</strong></p>
         <div class="binary-code" id="binaryClick">${binaryCode}</div>
@@ -1290,10 +1312,7 @@
     }
     
     function playMenuMusic() { 
-      if (menuMusic) { 
-        menuMusic.currentTime = 0; 
-        menuMusic.play().catch(e => console.log('Menu music not available')); 
-      } 
+      if (menuMusic) { menuMusic.currentTime = 0; menuMusic.play().catch(e => {}); } 
     }
 
     let insideVisited = false, isInHouse = false, isInside = false, isListeningForInput = false;
@@ -1301,7 +1320,6 @@
     // ==================== DIÁLOGO ESTILO UNDERTALE ====================
     function showUndertaleDialog(text, portraitUrl, isRedText = false) {
       return new Promise((resolve) => {
-        dialogActive = true;
         undertaleDialog.classList.add('active');
         dialogPortrait.src = portraitUrl || BASE_URL + 'banana2.png';
         dialogPortrait.style.filter = 'grayscale(100%) contrast(200%) brightness(0.7)';
@@ -1323,15 +1341,13 @@
             if (charInterval) clearInterval(charInterval);
             dialogArrow.classList.add('show');
             const clickHandler = () => {
-              dialogActive = false;
               document.removeEventListener('click', clickHandler);
               document.removeEventListener('keydown', keyHandler);
               undertaleDialog.classList.remove('active');
               resolve();
             };
             const keyHandler = (e) => {
-              if (e.key === 'Enter' || e.key === ' ' || e.key === 'z' || e.key === 'e') {
-                dialogActive = false;
+              if (e.key === 'Enter' || e.key === ' ' || e.key === 'z' || e.key === 'a') {
                 document.removeEventListener('click', clickHandler);
                 document.removeEventListener('keydown', keyHandler);
                 undertaleDialog.classList.remove('active');
@@ -1367,7 +1383,6 @@
 
     function showFinalUndertaleDialog(text, portraitUrl, isRedText = false) {
       return new Promise((resolve) => {
-        dialogActive = true;
         undertaleDialog.classList.add('active');
         dialogPortrait.src = portraitUrl || BASE_URL + 'banana2.png';
         dialogPortrait.style.filter = 'grayscale(100%) contrast(200%) brightness(0.7)';
@@ -1389,7 +1404,6 @@
             if (charInterval) clearInterval(charInterval);
             dialogArrow.classList.add('show');
             setTimeout(() => {
-              dialogActive = false;
               undertaleDialog.classList.remove('active');
               resolve();
             }, 1500);
@@ -1418,52 +1432,6 @@
       });
     }
 
-    // ==================== DIÁLOGO DE MUERTE ====================
-    function showDeathDialog(text) {
-      return new Promise((resolve) => {
-        dialogActive = true;
-        deathDialog.classList.add('active');
-        deathText.innerHTML = '';
-        
-        const chars = text.split('');
-        let index = 0;
-        let charInterval = null;
-        
-        function playTaSound() {
-          const audio = new Audio(BASE_URL + 'Ta.mp3');
-          audio.volume = 0.35;
-          audio.play().catch(e => {});
-        }
-        
-        function addChar() {
-          if (index >= chars.length) {
-            if (charInterval) clearInterval(charInterval);
-            setTimeout(() => {
-              dialogActive = false;
-              deathDialog.classList.remove('active');
-              resolve();
-            }, 1500);
-            return;
-          }
-          
-          const char = chars[index];
-          const span = document.createElement('span');
-          span.textContent = char === ' ' ? '\u00A0' : char;
-          span.className = 'char';
-          
-          if (char !== ' ' && char !== '.' && char !== ',' && char !== '?' && char !== "'") {
-            playTaSound();
-          }
-          
-          deathText.appendChild(span);
-          index++;
-        }
-        
-        charInterval = setInterval(addChar, 45);
-        setTimeout(addChar, 100);
-      });
-    }
-
     // ==================== DIÁLOGOS DE VICTORIA ====================
     async function showBossVictoryDialogs() {
       await showFinalUndertaleDialog(
@@ -1482,8 +1450,15 @@
         try {
           const underrrAudio = new Audio(BASE_URL + 'Underrr.mp3');
           underrrAudio.volume = 0.8;
-          underrrAudio.play().catch(e => {});
-        } catch(e) {}
+          underrrAudio.play().catch(e => {
+            console.log("Underrr.mp3 no encontrado, usando sonido alternativo");
+            const fallbackAudio = new Audio(BASE_URL + 'Talkk.wav');
+            fallbackAudio.volume = 0.5;
+            fallbackAudio.play().catch(e => {});
+          });
+        } catch(e) {
+          console.log("Error reproduciendo Underrr.mp3");
+        }
       }, 500);
       
       setTimeout(() => {
@@ -1497,6 +1472,7 @@
       creditssVideo.playbackRate = 1.0;
       
       creditssVideo.play().catch(e => {
+        console.log("creditsss.mp4 no encontrado, mostrando mensaje alternativo");
         creditssContainer.style.display = 'none';
         dialogueBox.innerText = "🎬 CRÉDITOS - Ms. BananaS";
         dialogueBox.style.display = "block";
@@ -1602,7 +1578,7 @@
     }
 
     // ==================== MENSAJES DE DERROTA ====================
-    async function showDefeatMessages() {
+    function showDefeatMessages() {
       const messages = [
         "Perdiste...",
         "Porque??...",
@@ -1612,46 +1588,79 @@
         "Estas bien?"
       ];
       
-      for (let i = 0; i < messages.length; i++) {
-        await showDeathDialog(messages[i]);
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      }
+      let messageIndex = 0;
+      let timeoutId = null;
+      let spiderTriggered = false;
       
-      const resetMessages = [
-        "Resetealo...",
-        "Porque no lo reseteas?",
-        "Eso tambien funciona",
-        "Resetealo..."
-      ];
+      dialogueBox.style.fontFamily = '"Press Start 2P", monospace !important';
+      dialogueBox.style.fontSize = '1.5rem';
+      dialogueBox.style.color = '#ff4444';
+      dialogueBox.style.textShadow = '0 0 20px #ff0000';
+      dialogueBox.style.background = 'rgba(0,0,0,0.95)';
+      dialogueBox.style.border = '3px solid #ff0000';
+      dialogueBox.style.display = 'block';
       
-      for (let i = 0; i < resetMessages.length; i++) {
-        await showDeathDialog(resetMessages[i]);
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      }
-      
-      let spiderCountdown = 0;
-      const spiderInterval = setInterval(() => {
-        spiderCountdown++;
-        if (spiderCountdown >= 30) {
-          clearInterval(spiderInterval);
-          showSpiderReset();
+      function showNextMessage() {
+        if (messageIndex < messages.length) {
+          dialogueBox.innerText = messages[messageIndex];
+          messageIndex++;
+          timeoutId = setTimeout(showNextMessage, 5000);
+        } else {
+          showResetMessages();
         }
-      }, 1000);
-    }
-    
-    async function showSpiderReset() {
-      await showDeathDialog("💀 RESETEALO 💀");
+      }
       
-      const spiderAudio = new Audio(BASE_URL + 'Spider.mp3');
-      spiderAudio.volume = 1.0;
-      spiderAudio.play().catch(e => {});
+      function showResetMessages() {
+        const resetMessages = [
+          "Resetealo...",
+          "Porque no lo reseteas?",
+          "Eso tambien funciona",
+          "Resetealo..."
+        ];
+        let resetIndex = 0;
+        
+        function showNextReset() {
+          if (resetIndex < resetMessages.length) {
+            dialogueBox.innerText = resetMessages[resetIndex];
+            resetIndex++;
+            timeoutId = setTimeout(showNextReset, 5000);
+          } else {
+            let spiderCountdown = 0;
+            const spiderInterval = setInterval(() => {
+              spiderCountdown++;
+              if (spiderCountdown >= 30) {
+                clearInterval(spiderInterval);
+                if (!spiderTriggered) {
+                  spiderTriggered = true;
+                  showSpiderReset();
+                }
+              }
+            }, 1000);
+          }
+        }
+        
+        showNextReset();
+      }
       
-      setTimeout(() => {
-        setGameLocked();
-        setGlitchRedMode();
-        glitchRedScreen.style.display = 'flex';
-        startGlitchRedPolling();
-      }, 3000);
+      function showSpiderReset() {
+        dialogueBox.innerText = "💀 RESETEALO 💀";
+        dialogueBox.style.animation = 'glitchText 0.1s infinite';
+        dialogueBox.style.color = '#ff0000';
+        dialogueBox.style.fontSize = '3rem';
+        
+        const spiderAudio = new Audio(BASE_URL + 'Spider.mp3');
+        spiderAudio.volume = 1.0;
+        spiderAudio.play().catch(e => {});
+        
+        setTimeout(() => {
+          setGameLocked();
+          setGlitchRedMode();
+          glitchRedScreen.style.display = 'flex';
+          startGlitchRedPolling();
+        }, 3000);
+      }
+      
+      showNextMessage();
     }
 
     // ==================== BOSS FIGHT ====================
@@ -1659,7 +1668,6 @@
     let bossDefeatedFlag = false;
 
     function initBossFight() {
-      isBossActive = true;
       bossContainer.classList.add('active');
       bossFightActive = true;
       
@@ -1695,9 +1703,8 @@
       let gameActive = true;
       let lineMoveDuration = 0;
       const LINE_MOVE_MAX = 3;
+      let shakeTimer = 0;
       let isShaking = false;
-      let bossImageWidth = 150;
-      let bossImageHeight = 150;
 
       function resize() {
         W = canvas.width = window.innerWidth;
@@ -1706,23 +1713,14 @@
         bossY = H / 2 - 50;
         mouseX = W / 2;
         mouseY = H / 2;
+        canvas.dataset.mouseX = mouseX;
+        canvas.dataset.mouseY = mouseY;
       }
       window.addEventListener('resize', resize);
       resize();
 
       bossImg.src = BASE_URL + "banana3.png";
-      bossImg.onload = () => {
-        bossImageWidth = bossImg.naturalWidth;
-        bossImageHeight = bossImg.naturalHeight;
-        const maxSize = 150;
-        if (bossImageWidth > bossImageHeight) {
-          bossImageHeight = (bossImageHeight / bossImageWidth) * maxSize;
-          bossImageWidth = maxSize;
-        } else {
-          bossImageWidth = (bossImageWidth / bossImageHeight) * maxSize;
-          bossImageHeight = maxSize;
-        }
-      };
+      bossImg.onload = () => console.log("Boss image loaded: banana3.png");
       bossImg.onerror = () => {
         bossImg.src = BASE_URL + "banana2.png";
       };
@@ -1736,46 +1734,92 @@
       playerHPDisplay.textContent = `❤️ ${playerHP}`;
       bossTimer.textContent = '⏱️ 5';
 
+      // Mouse/Touch events para mover el corazón
       document.addEventListener('mousemove', (e) => {
         const rect = canvas.getBoundingClientRect();
         const scaleX = W / rect.width;
         const scaleY = H / rect.height;
         mouseX = (e.clientX - rect.left) * scaleX;
         mouseY = (e.clientY - rect.top) * scaleY;
+        canvas.dataset.mouseX = mouseX;
+        canvas.dataset.mouseY = mouseY;
       });
 
-      const gamepadMoveInterval = setInterval(() => {
-        if (!bossFightActive) {
-          clearInterval(gamepadMoveInterval);
-          return;
-        }
-        if (gamepad.connected) {
-          const stick = gamepad.getLeftStick();
-          const speed = 15;
-          mouseX += stick.x * speed;
-          mouseY += stick.y * speed;
-          mouseX = Math.max(0, Math.min(W, mouseX));
-          mouseY = Math.max(0, Math.min(H, mouseY));
-        }
-      }, 16);
+      // Soporte para touch
+      canvas.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+        const rect = canvas.getBoundingClientRect();
+        const touch = e.touches[0];
+        const scaleX = W / rect.width;
+        const scaleY = H / rect.height;
+        mouseX = (touch.clientX - rect.left) * scaleX;
+        mouseY = (touch.clientY - rect.top) * scaleY;
+        canvas.dataset.mouseX = mouseX;
+        canvas.dataset.mouseY = mouseY;
+      }, { passive: false });
+
+      canvas.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        const rect = canvas.getBoundingClientRect();
+        const touch = e.touches[0];
+        const scaleX = W / rect.width;
+        const scaleY = H / rect.height;
+        mouseX = (touch.clientX - rect.left) * scaleX;
+        mouseY = (touch.clientY - rect.top) * scaleY;
+        canvas.dataset.mouseX = mouseX;
+        canvas.dataset.mouseY = mouseY;
+      }, { passive: false });
 
       document.addEventListener('keydown', handleKeyDown);
+      
+      // También manejar eventos de mando para el boss
+      function handleGamepadBoss() {
+        if (!bossFightActive || !gamepadConnected) return;
+        const gp = navigator.getGamepads()[gamepadIndex];
+        if (!gp) return;
+        
+        // Botón A para atacar (E)
+        if (gp.buttons[GAMEPAD_BUTTONS.A]?.pressed && !window._bossAPressed) {
+          window._bossAPressed = true;
+          // Simular tecla E
+          const eEvent = new KeyboardEvent('keydown', { key: 'e' });
+          document.dispatchEvent(eEvent);
+          setTimeout(() => { window._bossAPressed = false; }, 300);
+        }
+        if (!gp.buttons[GAMEPAD_BUTTONS.A]?.pressed) {
+          window._bossAPressed = false;
+        }
+        
+        // Botón B (Círculo) para Enter (golpear)
+        if (gp.buttons[GAMEPAD_BUTTONS.B]?.pressed && !window._bossBPressed) {
+          window._bossBPressed = true;
+          const enterEvent = new KeyboardEvent('keydown', { key: 'Enter' });
+          document.dispatchEvent(enterEvent);
+          setTimeout(() => { window._bossBPressed = false; }, 300);
+        }
+        if (!gp.buttons[GAMEPAD_BUTTONS.B]?.pressed) {
+          window._bossBPressed = false;
+        }
+        
+        // Stick derecho para mover el cursor (ya se maneja en updateGamepadState)
+      }
+      
+      // Intervalo para procesar entrada de mando en el boss
+      const bossGamepadInterval = setInterval(handleGamepadBoss, 50);
 
       function handleKeyDown(e) {
         if (e.key === 'Enter' && isLineMoving) {
           isLineMoving = false;
           lineStopX = lineX;
           lineActive = true;
-          
-          const halfWidth = bossImageWidth / 2;
-          const halfHeight = bossImageHeight / 2;
+          const bossWidth = 150;
+          const bossHeight = 150;
           const distX = Math.abs(lineX - bossX);
           const distY = Math.abs(mouseY - bossY);
+          const halfWidth = lineWidth / 2 + bossWidth / 2;
+          const halfHeight = bossHeight / 2;
           
-          const hitX = distX < halfWidth + lineWidth/2;
-          const hitY = distY < halfHeight;
-          
-          if (hitX && hitY && !deathSequenceStarted) {
+          if (distX < halfWidth && distY < halfHeight && !deathSequenceStarted) {
             bossHP--;
             bossHPDisplay.textContent = `❤️ ${bossHP}`;
             const ouchSound = new Audio(BASE_URL + 'Ouch.mp3');
@@ -1783,6 +1827,7 @@
             ouchSound.play().catch(e => {});
             
             isShaking = true;
+            shakeTimer = 0;
             bossContainer.classList.add('shake-boss');
             setTimeout(() => {
               bossContainer.classList.remove('shake-boss');
@@ -1797,6 +1842,7 @@
               stopCubeAttack();
               if (window.currentAttackInterval) clearInterval(window.currentAttackInterval);
               if (countdownInterval) clearInterval(countdownInterval);
+              if (bossGamepadInterval) clearInterval(bossGamepadInterval);
               bossUI.textContent = "💀 ¡JEFE DERROTADO! 💀";
               bossHPDisplay.textContent = "💀 0";
               bossTimer.classList.remove('show');
@@ -1813,7 +1859,6 @@
                 bossVictory.classList.remove('show');
                 bossContainer.classList.remove('active');
                 bossFightActive = false;
-                isBossActive = false;
                 showBossVictoryDialogs();
               }, 1500);
             }
@@ -1970,7 +2015,7 @@
           bossDefeat.classList.remove('show');
           bossContainer.classList.remove('active');
           bossFightActive = false;
-          isBossActive = false;
+          if (bossGamepadInterval) clearInterval(bossGamepadInterval);
           showDefeatMessages();
         }, 2000);
       }
@@ -2013,6 +2058,7 @@
           ctx.fillText('🍌', bossX, bossY);
         }
         
+        // Dibujar corazón del jugador
         const heartImg = new Image();
         heartImg.src = BASE_URL + 'heart.png';
         if (heartImg.complete && heartImg.naturalWidth > 0) {
@@ -2124,23 +2170,15 @@
     // ==================== FUNCIONES DEL JUEGO PRINCIPAL ====================
     function enterRoom() {
       if (menuMusic) { menuMusic.pause(); menuMusic.currentTime = 0; }
-      
-      // Reproducir sonido de puerta
       playAudioFile('Door.mp3');
       setTimeout(() => {
         playAudioFile('DoorC.mp3');
         setTimeout(() => {
           document.getElementById('gameScreen').style.display = 'block';
-          isInMenu = false;
-          isInGame = true;
-          isInOptions = true;
-          optionSelectedIndex = 0;
-          updateOptionSelection();
-          
           if (roomMusic) {
             roomMusic.currentTime = 0;
             roomMusic.loop = true;
-            roomMusic.play().catch(e => console.log('Room music not available'));
+            roomMusic.play().catch(e => {});
           }
           const day = parseInt(localStorage.getItem(DAY_PROGRESS_KEY)) || 1;
           let welcomeFile = "Primer dia.mp3";
@@ -2170,10 +2208,8 @@
           spiderOverlay.style.display = 'none';
           insideBg.style.filter = 'none';
           
-          // Mostrar diálogo con opciones
           setTimeout(() => {
             startListeningForInput();
-            document.addEventListener('keydown', handleTextInput);
             showDialogue("🔑 Escribe 'Inside' o 'Leave'", null, 3000);
           }, 500);
         }, 500);
@@ -2190,11 +2226,9 @@
         playAudioFile('DoorC.mp3');
         setTimeout(() => {
           if (!insideVisited) {
-            // Primera vez - mostrar Inside con banana
             showInsideScene(true, false);
-            insideVisited = true;
             
-            // Reproducir animación de cámara (sonido)
+            insideVisited = true;
             setTimeout(() => {
               playAudioFile('huh.wav');
               setTimeout(() => {
@@ -2203,7 +2237,6 @@
                   hideInsideScene();
                   isInside = false; 
                   isInHouse = false;
-                  // Volver a la casa
                   setTimeout(() => {
                     insideScene.style.display = 'block';
                     insideBg.src = BASE_URL + 'House.png';
@@ -2212,13 +2245,11 @@
                     insideBg.style.filter = 'none';
                     
                     startListeningForInput();
-                    document.addEventListener('keydown', handleTextInput);
                   }, 500);
                 }, 500);
-              }, 2000); // Tiempo para la animación
+              }, 16000);
             }, 1000);
           } else {
-            // Segunda vez - mostrar spider
             showInsideScene(false, true);
             
             setTimeout(() => {
@@ -2231,7 +2262,7 @@
                 glitchRedScreen.style.display = 'flex';
                 startGlitchRedPolling();
               }, 2500);
-            }, 3000);
+            }, 5000);
           }
         }, 500);
       }, 3000);
@@ -2339,6 +2370,168 @@
       } else {
         showDialogue("🍔 La hamburguesa está deliciosa.", null, 2000);
       }
+    }
+
+    function performReset() {
+      clearProgress();
+      stopAllGameMusic();
+      glitchRedScreen.style.display = 'none';
+      lockScreen.style.display = 'none';
+      waitingScreen.style.display = 'none';
+      glitchVideo.style.display = 'flex';
+      glitchVideoPlayer.currentTime = 0;
+      glitchVideoPlayer.play().catch(() => window.location.reload());
+      glitchVideoPlayer.onended = () => window.location.reload();
+      setTimeout(() => { if (glitchVideo.style.display === 'flex') window.location.reload(); }, 3500);
+    }
+
+    let resetPollInterval = null;
+    function startUniversalResetPolling() {
+      if (resetPollInterval) return;
+      resetPollInterval = setInterval(() => {
+        const signal = localStorage.getItem(RESET_SIGNAL_KEY);
+        if (signal === "reset") {
+          localStorage.removeItem(RESET_SIGNAL_KEY);
+          clearInterval(resetPollInterval); resetPollInterval = null;
+          performReset();
+        }
+      }, 1500);
+    }
+    startUniversalResetPolling();
+
+    // ==================== CÓDIGOS DE TECLADO ====================
+    let keySequence = [];
+    const KONAMI_CODE = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+    const BOSS_CODE = ['ArrowDown', 'ArrowUp', 'b', 'a'];
+    let konamiTriggered = false;
+    let bossCodeTriggered = false;
+
+    document.addEventListener('keydown', (e) => {
+      const key = e.key;
+      if (document.getElementById('startScreen').style.display !== 'none') return;
+      if (document.getElementById('gameScreen').style.display !== 'block') return;
+      
+      let mappedKey = key;
+      if (key === 'b' || key === 'B') mappedKey = 'b';
+      if (key === 'a' || key === 'A') mappedKey = 'a';
+      
+      keySequence.push(mappedKey);
+      if (keySequence.length > 10) keySequence.shift();
+      
+      if (!konamiTriggered) {
+        const konamiMatch = KONAMI_CODE.every((val, index) => {
+          if (index >= keySequence.length) return false;
+          const seqKey = keySequence[keySequence.length - KONAMI_CODE.length + index];
+          return seqKey === val;
+        });
+        
+        if (konamiMatch && keySequence.length >= 10) {
+          konamiTriggered = true;
+          activateHappyEnding();
+          return;
+        }
+      }
+      
+      if (!bossCodeTriggered && keySequence.length >= 4) {
+        const bossMatch = BOSS_CODE.every((val, index) => {
+          if (index >= keySequence.length) return false;
+          const seqKey = keySequence[keySequence.length - BOSS_CODE.length + index];
+          return seqKey === val;
+        });
+        
+        if (bossMatch && keySequence.length >= 4) {
+          bossCodeTriggered = true;
+          activateBossEnding();
+          return;
+        }
+      }
+    });
+
+    function activateHappyEnding() {
+      saveProgress(5, 0, 0);
+      dialogueBox.innerText = "🎮 ¡CÓDIGO SECRETO ACTIVADO! Día 5 completado sin errores.";
+      dialogueBox.style.display = "block";
+      setTimeout(() => {
+        dialogueBox.style.display = "none";
+        showThanksAndCredits();
+      }, 3000);
+    }
+
+    function activateBossEnding() {
+      saveProgress(5, 5, 5);
+      dialogueBox.innerText = "🎮 ¡CÓDIGO SECRETO ACTIVADO! Día 5 con 5 errores - Boss activado.";
+      dialogueBox.style.display = "block";
+      setTimeout(async () => {
+        dialogueBox.style.display = "none";
+        gameActive = false;
+        roomMusic.pause();
+        gameScreen.style.display = "none";
+        await showUndertaleDialog(
+          "Oh. You finished the game. But I won't let you do it.",
+          BASE_URL + 'banana2.png',
+          false
+        );
+        
+        await showUndertaleDialog(
+          "The game was easy, but you ruined it.",
+          BASE_URL + 'banana2.png',
+          false
+        );
+        
+        await showUndertaleDialog(
+          "So... L E T ' S   S E E   W H O   D I E S   A N D   WHO   D O E S N ' T . . .",
+          BASE_URL + 'banana2.png',
+          true
+        );
+        
+        playGlitchTransition(() => {
+          initBossFight();
+        });
+      }, 1000);
+    }
+
+    // ============================================
+    // INICIALIZACIÓN
+    // ============================================
+    if (isGlitchRedMode()) {
+      gameContent.style.display = 'none'; glitchRedScreen.style.display = 'flex';
+      lockScreen.style.display = 'none'; waitingScreen.style.display = 'none';
+      stopAllGameMusic(); startGlitchRedPolling();
+    } else if (isFinalMode()) {
+      gameContent.style.display = 'block'; lockScreen.style.display = 'none';
+      waitingScreen.style.display = 'none'; glitchRedScreen.style.display = 'none';
+      stopAllGameMusic();
+      bananaPlayImg.src = BASE_URL + 'ABananaDraw.png';
+      if (menuMusic) menuMusic.pause();
+      gameScreen.classList.add('final-mode');
+      tvMessage.style.display = 'flex'; tvAnimal.style.display = 'none';
+      document.getElementById('startScreen').style.display = 'flex';
+      document.getElementById('gameScreen').style.display = 'none';
+      iniciarJuegoFinalMode();
+    } else if (isWaitingMode()) {
+      gameContent.style.display = 'none'; waitingScreen.style.display = 'flex';
+      lockScreen.style.display = 'none'; glitchRedScreen.style.display = 'none';
+      stopAllGameMusic(); startWaitingPolling();
+    } else if (isGameLocked()) {
+      if (checkForResetSignal()) { performReset(); }
+      else { gameContent.style.display = 'none'; lockScreen.style.display = 'flex'; waitingScreen.style.display = 'none'; glitchRedScreen.style.display = 'none'; stopAllGameMusic(); startPollingForReset(); }
+    } else {
+      gameContent.style.display = 'block'; lockScreen.style.display = 'none';
+      waitingScreen.style.display = 'none'; glitchRedScreen.style.display = 'none';
+      playMenuMusic();
+      if (isGameCompleted()) {
+        bananaPlayImg.src = BASE_URL + 'ABananaDraw.png';
+        if (menuMusic) menuMusic.pause();
+        tvAnimal.src = 'Thanks.png';
+      }
+      
+      const bananaPlay = document.getElementById("bananaPlay");
+      bananaPlay.addEventListener("click", function iniciarPartida(e) {
+        e.preventDefault();
+        if (menuMusic) { menuMusic.pause(); menuMusic.currentTime = 0; }
+        document.getElementById('startScreen').style.display = 'none';
+        enterRoom();
+      });
     }
 
     // ==================== POLLING ====================
@@ -2521,29 +2714,29 @@
         if (currentTimeout) clearTimeout(currentTimeout);
         currentAnimal = animals[Math.floor(Math.random() * animals.length)];
         loadAnimalImage(currentAnimal);
-        buttons.forEach(btn => btn.style.backgroundColor = "#1a0a00");
-        optionSelectedIndex = 0;
-        updateOptionSelection();
+        buttons.forEach(btn => {
+          btn.style.backgroundColor = "#1a0a00";
+          btn.classList.remove('selected', 'correct', 'wrong');
+        });
+        
+        // Actualizar navegador
+        animalNavigator.updateElements();
+        animalNavigator.activate();
       }
 
       function updateUI() {
-        rageText.innerText = "💢 Furia: " + rage;
-        dayText.innerText = "🌙 Día " + day + " — Animales: " + correctCount + "/" + dayTargets[day];
+        document.getElementById('rageText').innerText = "💢 Furia: " + rage;
+        document.getElementById('dayText').innerText = "🌙 Día " + day + " — Animales: " + correctCount + "/" + dayTargets[day];
       }
 
       function returnToMenu() {
         saveProgress(day, rage, totalErrors);
         gameActive = false;
-        isInGame = false;
-        isInOptions = false;
         gameScreen.style.display = "none";
         document.getElementById('startScreen').style.display = "flex";
-        isInMenu = true;
-        menuRow = 0;
-        menuSelectedIndex = 0;
-        updateMenuSelection();
         if (roomMusic) roomMusic.pause();
         playMenuMusic();
+        animalNavigator.deactivate();
       }
 
       function triggerJumpscareFinal() {
@@ -2558,7 +2751,7 @@
 
       function completeGame(hasErrors) {
         gameActive = false;
-        isInGame = false;
+        animalNavigator.deactivate();
         if (!hasErrors) {
           showThanksAndCredits();
         } else {
@@ -2754,6 +2947,7 @@
           camera.rotation.x = pitch;
         }
         
+        // Controles de teclado
         window.addEventListener('keydown', (e) => {
           const key = e.key.toLowerCase();
           if (key === 'w') keys.w = true;
@@ -2772,6 +2966,63 @@
           if (key === 'shift') { keys.shift = false; runningMult = 1.0; }
         });
         
+        // Controles con mando para la persecución
+        function handleChaseGamepad() {
+          if (!chaseActive || gameOverTriggered || !gamepadConnected) return;
+          const gp = navigator.getGamepads()[gamepadIndex];
+          if (!gp) return;
+          
+          // Stick izquierdo para movimiento
+          const lx = gp.axes[0] || 0;
+          const ly = gp.axes[1] || 0;
+          const deadZone = 0.2;
+          
+          // Mapear a teclas WASD
+          if (Math.abs(ly) > deadZone) {
+            if (ly < -deadZone) keys.w = true;
+            else keys.w = false;
+            if (ly > deadZone) keys.s = true;
+            else keys.s = false;
+          } else {
+            keys.w = false;
+            keys.s = false;
+          }
+          
+          if (Math.abs(lx) > deadZone) {
+            if (lx < -deadZone) keys.a = true;
+            else keys.a = false;
+            if (lx > deadZone) keys.d = true;
+            else keys.d = false;
+          } else {
+            keys.a = false;
+            keys.d = false;
+          }
+          
+          // Stick derecho para mirar
+          const rx = gp.axes[2] || 0;
+          const ry = gp.axes[3] || 0;
+          if (Math.abs(rx) > deadZone || Math.abs(ry) > deadZone) {
+            const sens = 0.005;
+            yaw -= rx * sens;
+            pitch -= ry * sens;
+            pitch = Math.max(-Math.PI / 2.2, Math.min(Math.PI / 2.2, pitch));
+            camera.rotation.order = 'YXZ';
+            camera.rotation.y = yaw;
+            camera.rotation.x = pitch;
+          }
+          
+          // Botón A para correr (shift)
+          if (gp.buttons[GAMEPAD_BUTTONS.A]?.pressed) {
+            keys.shift = true;
+            runningMult = 1.85;
+          } else {
+            keys.shift = false;
+            runningMult = 1.0;
+          }
+        }
+        
+        const chaseGamepadInterval = setInterval(handleChaseGamepad, 50);
+        
         let lastTimestamp = performance.now();
         chaseStartTime = performance.now() / 1000;
         
@@ -2788,32 +3039,14 @@
           
           const currentPlayerSpeed = playerBaseSpeed * runningMult;
           let moveX = 0, moveZ = 0;
-          
           if (keys.w) moveZ = 1;
           if (keys.s) moveZ = -1;
           if (keys.a) moveX = -1;
           if (keys.d) moveX = 1;
           
-          if (gamepad.connected) {
-            const stick = gamepad.getLeftStick();
-            const deadZone = 0.2;
-            if (Math.abs(stick.x) > deadZone || Math.abs(stick.y) > deadZone) {
-              const mag = Math.min(1, Math.hypot(stick.x, stick.y));
-              const normX = stick.x / mag;
-              const normY = stick.y / mag;
-              moveX += normX * 1.5;
-              moveZ += normY * 1.5;
-            }
-          }
-          
-          const maxMove = 1;
-          const len = Math.hypot(moveX, moveZ);
-          if (len > maxMove) {
-            moveX = (moveX / len) * maxMove;
-            moveZ = (moveZ / len) * maxMove;
-          }
-          
           if (moveX !== 0 || moveZ !== 0) {
+            const len = Math.hypot(moveX, moveZ);
+            moveX /= len; moveZ /= len;
             const forward = new THREE.Vector3(-Math.sin(yaw), 0, -Math.cos(yaw));
             const right = new THREE.Vector3(Math.cos(yaw), 0, -Math.sin(yaw));
             playerPos.x += (forward.x * moveZ + right.x * moveX) * currentPlayerSpeed * delta;
@@ -2864,6 +3097,7 @@
             stopHeartbeat();
             chaseMusic.pause();
             chaseContainer.style.display = "none";
+            if (chaseGamepadInterval) clearInterval(chaseGamepadInterval);
             triggerJumpscareFinal();
             return;
           }
@@ -2903,20 +3137,30 @@
       function onRageReachedTen() {
         if (!gameActive) return;
         gameActive = false;
-        isInGame = false;
         roomMusic.pause();
         gameScreen.style.display = "none";
         startChaseMinigame();
       }
       
       // ==================== EVENTOS DE LOS BOTONES ====================
-      buttons.forEach((btn, index) => {
+      // Inicializar navegador de animales
+      animalNavigator.init(
+        document.getElementById('animalOptions'),
+        'button',
+        (el) => {
+          // Simular click
+          el.click();
+        }
+      );
+      
+      buttons.forEach(btn => {
         btn.addEventListener('click', () => {
           if (!gameActive) return;
           if (bossTriggered) return;
           
-          if (btn.innerText === currentAnimal.name) {
+          if (btn.dataset.animal === currentAnimal.name) {
             btn.style.backgroundColor = "#2a6a2a";
+            btn.classList.add('correct');
             correctCount++;
             updateUI();
             const sound = getRandomSound(correctSounds);
@@ -2926,6 +3170,7 @@
               if (day < 5) {
                 showDialogue(`✨ ¡Completaste el Día ${day}! ✨`, null, 1500);
                 gameActive = false;
+                animalNavigator.deactivate();
                 playAudioFile('Door.mp3');
                 setTimeout(() => {
                   playAudioFile('DoorC.mp3');
@@ -2948,7 +3193,13 @@
             setTimeout(nextAnimal, 1500);
           } else {
             btn.style.backgroundColor = "#882222";
-            buttons.forEach(b => { if (b.innerText === currentAnimal.name) b.style.backgroundColor = "#aa6644"; });
+            btn.classList.add('wrong');
+            buttons.forEach(b => { 
+              if (b.dataset.animal === currentAnimal.name) {
+                b.style.backgroundColor = "#aa6644";
+                b.classList.add('correct');
+              }
+            });
             rage++;
             totalErrors++;
             updateUI();
@@ -2965,49 +3216,60 @@
         });
       });
       
+      // Controles táctiles para móvil/consola
+      const touchControls = document.getElementById('touchControls');
+      const btnUp = document.getElementById('btnUp');
+      const btnDown = document.getElementById('btnDown');
+      const btnLeft = document.getElementById('btnLeft');
+      const btnRight = document.getElementById('btnRight');
+      const btnAction = document.getElementById('btnAction');
+      const btnAction2 = document.getElementById('btnAction2');
+      const btnStart = document.getElementById('btnStart');
+      
+      // Navegación con botones táctiles
+      btnUp.addEventListener('click', () => {
+        if (animalNavigator.isActive) animalNavigator.prev();
+      });
+      btnDown.addEventListener('click', () => {
+        if (animalNavigator.isActive) animalNavigator.next();
+      });
+      btnLeft.addEventListener('click', () => {
+        if (animalNavigator.isActive) animalNavigator.prev();
+      });
+      btnRight.addEventListener('click', () => {
+        if (animalNavigator.isActive) animalNavigator.next();
+      });
+      btnAction.addEventListener('click', () => {
+        if (animalNavigator.isActive) animalNavigator.select();
+        // También para el boss
+        if (bossFightActive) {
+          const eEvent = new KeyboardEvent('keydown', { key: 'e' });
+          document.dispatchEvent(eEvent);
+        }
+      });
+      btnAction2.addEventListener('click', () => {
+        // Botón B - Enter para golpear en el boss
+        if (bossFightActive) {
+          const enterEvent = new KeyboardEvent('keydown', { key: 'Enter' });
+          document.dispatchEvent(enterEvent);
+        }
+      });
+      btnStart.addEventListener('click', () => {
+        // Menú / Pausa
+        if (document.getElementById('gameScreen').style.display === 'block') {
+          // Volver al menú
+          if (gameActive) {
+            gameActive = false;
+            animalNavigator.deactivate();
+            returnToMenu();
+          }
+        }
+      });
+      
       gameActive = true;
-      isInGame = true;
-      isInOptions = true;
-      optionSelectedIndex = 0;
-      updateOptionSelection();
       updateUI();
       nextAnimal();
     }
-
-    // ==================== INICIALIZACIÓN DEL MENÚ ====================
-    isInMenu = true;
-    menuRow = 0;
-    menuSelectedIndex = 0;
-    updateMenuSelection();
-
-    document.getElementById("bananaPlay").addEventListener("click", function(e) {
-      e.preventDefault();
-      enterRoom();
-    });
-
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Enter' && isInMenu) {
-        if (menuRow === 0) {
-          document.getElementById('bananaPlay').click();
-        } else {
-          const btn = document.getElementById(menuButtons[menuSelectedIndex % menuButtons.length]);
-          if (btn) btn.click();
-        }
-      }
-    });
-
-    // ==================== VERIFICAR ESTADO INICIAL ====================
-    if (isFinalMode()) {
-      iniciarJuegoFinalMode();
-    }
-
-    // Intentar reproducir música del menú (silenciosamente si no existe)
-    setTimeout(() => {
-      playMenuMusic();
-    }, 1000);
-
-    console.log("🍌 Ms. BananaS - ¡Con soporte completo para gamepad!");
-    console.log("🎮 Controles: A=Seleccionar, B=Cancelar, D-Pad/Joystick=Navegar en todas direcciones");
   </script>
 </body>
 </html>
