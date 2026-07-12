@@ -124,6 +124,7 @@
     .menuPanel { background: rgba(0,0,0,0.7); padding: 30px; border: 3px solid #FF6600; border-radius: 15px; box-shadow: 0 0 30px #ff3300; display: flex; flex-direction: row; gap: 40px; align-items: center; justify-content: center; flex-wrap: wrap; }
     .menuBtn { font-size: 1.3em; padding: 15px 25px; margin: 10px; background: #1a0a00; color: #FF9900; border: 2px solid #FF6600; cursor: pointer; transition: transform .2s ease, box-shadow .2s ease; border-radius: 8px; }
     .menuBtn:hover { transform: scale(1.1); box-shadow: 0 0 15px #FF6600; background: #331100; }
+    .menuBtn.highlighted { transform: scale(1.15); box-shadow: 0 0 25px #FF6600; background: #442200; border-color: #FFAA00; }
     
     #bananaPlay { width: 180px; cursor: pointer; transition: transform .3s ease, filter .3s ease; animation: float 3s ease-in-out infinite; margin: 20px; filter: drop-shadow(0 0 10px #ffaa00); }
     #bananaPlay:hover { transform: scale(1.1) rotate(-5deg); filter: drop-shadow(0 0 20px #ffcc00); }
@@ -188,8 +189,73 @@
     }
     @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
     
+    /* ===== VIRTUAL KEYBOARD ===== */
+    #virtualKeyboard {
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.92);
+      border: 2px solid #00ff88;
+      border-radius: 15px;
+      padding: 12px 16px;
+      z-index: 9996;
+      display: none;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 6px;
+      max-width: 95%;
+      box-shadow: 0 0 40px rgba(0,255,136,0.15);
+    }
+    #virtualKeyboard.active { display: flex; }
+    #virtualKeyboard .kb-row {
+      display: flex;
+      gap: 6px;
+      width: 100%;
+      justify-content: center;
+      margin-bottom: 4px;
+      flex-wrap: wrap;
+    }
+    #virtualKeyboard .kb-key {
+      background: #1a1a2e;
+      color: #88ff88;
+      border: 1px solid #00ff88;
+      border-radius: 6px;
+      padding: 8px 12px;
+      min-width: 32px;
+      font-family: 'Press Start 2P', monospace !important;
+      font-size: 0.7rem;
+      cursor: pointer;
+      transition: all 0.1s;
+      text-align: center;
+      image-rendering: pixelated;
+    }
+    #virtualKeyboard .kb-key:hover {
+      background: #00ff8844;
+      transform: scale(1.05);
+    }
+    #virtualKeyboard .kb-key.highlighted {
+      background: #00ff8866;
+      transform: scale(1.1);
+      box-shadow: 0 0 20px #00ff88;
+    }
+    #virtualKeyboard .kb-key.special {
+      background: #2a1a0a;
+      border-color: #ff8800;
+      color: #ffaa44;
+      min-width: 60px;
+    }
+    #virtualKeyboard .kb-key.special.highlighted {
+      background: #ff880066;
+      border-color: #ffaa00;
+    }
+    #virtualKeyboard .kb-key.space {
+      min-width: 120px;
+    }
+    
     .options { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; z-index: 5; }
     .options button { font-size: 1.2em; padding: 10px 20px; background: #1a0a00; color: #FF9900; border: 2px solid #FF6600; cursor: pointer; transition: 0.1s; }
+    .options button.highlighted { transform: scale(1.1); box-shadow: 0 0 20px #FF6600; background: #442200; border-color: #FFAA00; }
     
     #dialogueBox { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); width: 70%; padding: 15px; background: rgba(0,0,0,.9); color: #FFD700; font-size: 1.3em; border: 2px solid #FF6600; border-radius: 10px; display: none; z-index: 15; font-weight: bold; text-shadow: 0 0 5px #ff6600; }
     #rageText { position: absolute; top: 80px; left: 50%; transform: translateX(-50%); font-size: 1.5em; color: #ff4444; background: rgba(0,0,0,0.7); padding: 5px 15px; border-radius: 20px; font-weight: bold; z-index: 5; }
@@ -428,7 +494,6 @@
       animation: bossShake 1s ease-in-out;
     }
 
-    /* Gamepad indicator */
     #gamepadIndicator {
       position: fixed;
       bottom: 10px;
@@ -447,12 +512,32 @@
       text-shadow: 0 0 10px #44ff88;
     }
     #gamepadIndicator.active { display: block; }
+    
+    .focus-indicator {
+      position: fixed;
+      pointer-events: none;
+      border: 3px solid #00ff88;
+      border-radius: 10px;
+      box-shadow: 0 0 30px #00ff8866;
+      z-index: 9997;
+      display: none;
+      transition: all 0.05s;
+    }
+    .focus-indicator.active { display: block; }
   </style>
 </head>
 <body>
 
   <div class="reset-polling-badge" id="pollingBadge">🔄</div>
-  <div id="gamepadIndicator" class="active">🎮 CONTROL DETECTADO</div>
+  <div id="gamepadIndicator">🎮 CONTROL DETECTADO</div>
+  
+  <div id="virtualKeyboard">
+    <div class="kb-row" id="kbRow1"></div>
+    <div class="kb-row" id="kbRow2"></div>
+    <div class="kb-row" id="kbRow3"></div>
+    <div class="kb-row" id="kbRow4"></div>
+  </div>
+  
   <div id="text-input-display">
     <span class="input-label">>_</span>
     <span id="inputText"></span><span class="cursor">|</span>
@@ -539,9 +624,9 @@
       <div class="menuPanel">
         <img id="bananaPlay" src="https://raw.githubusercontent.com/Raphapro900/Ms.BananaS/refs/heads/main/banana.png" alt="Ms.BananaS">
         <div>
-          <button class="menuBtn" id="howBtn">📖 How to Play</button><br>
-          <button class="menuBtn" id="shopBtn">🛒 Shop</button><br>
-          <button class="menuBtn" id="exitBtn">🚪 Exit</button>
+          <button class="menuBtn" id="howBtn" data-index="0">📖 How to Play</button><br>
+          <button class="menuBtn" id="shopBtn" data-index="1">🛒 Shop</button><br>
+          <button class="menuBtn" id="exitBtn" data-index="2">🚪 Exit</button>
         </div>
       </div>
       <audio id="menuMusic" src="bananamenu.mp3" loop></audio>
@@ -562,9 +647,9 @@
           <div class="signature">- Ms. BananaS 🍌</div>
         </div>
       </div>
-      <div class="options">
-        <button>Seal</button><button>Dog</button><button>Cat</button>
-        <button>Duck</button><button>Eagle</button><button>Snake</button>
+      <div class="options" id="animalOptions">
+        <button data-index="0">Seal</button><button data-index="1">Dog</button><button data-index="2">Cat</button>
+        <button data-index="3">Duck</button><button data-index="4">Eagle</button><button data-index="5">Snake</button>
       </div>
       <div id="dialogueBox"></div>
       <audio id="dialogueAudio" preload="auto"></audio>
@@ -599,26 +684,12 @@
     let gamepadConnected = false;
     let gamepadButtons = {};
     
-    // Gamepad mapping for PS5 / Xbox
     const BUTTON_MAP = {
-      // Standard buttons
-      'a': 0,        // Cross (PS) / A (Xbox)
-      'b': 1,        // Circle (PS) / B (Xbox)
-      'x': 2,        // Square (PS) / X (Xbox)
-      'y': 3,        // Triangle (PS) / Y (Xbox)
-      'lb': 4,       // L1 (PS) / LB (Xbox)
-      'rb': 5,       // R1 (PS) / RB (Xbox)
-      'lt': 6,       // L2 (PS) / LT (Xbox)
-      'rt': 7,       // R2 (PS) / RT (Xbox)
-      'select': 8,   // Share (PS) / View (Xbox)
-      'start': 9,    // Options (PS) / Menu (Xbox)
-      'ls': 10,      // L3 (PS) / LS (Xbox)
-      'rs': 11,      // R3 (PS) / RS (Xbox)
-      'up': 12,
-      'down': 13,
-      'left': 14,
-      'right': 15,
-      'ps': 16,      // PS Button / Xbox Button
+      'a': 0, 'b': 1, 'x': 2, 'y': 3,
+      'lb': 4, 'rb': 5, 'lt': 6, 'rt': 7,
+      'select': 8, 'start': 9, 'ls': 10, 'rs': 11,
+      'up': 12, 'down': 13, 'left': 14, 'right': 15,
+      'ps': 16
     };
     
     function detectGamepad() {
@@ -639,7 +710,6 @@
           gamepadIndicator.classList.add('active');
           gamepadIndicator.textContent = '🎮 CONTROL DETECTADO';
         }
-        // Store button states
         for (let i = 0; i < gp.buttons.length; i++) {
           const key = Object.keys(BUTTON_MAP).find(k => BUTTON_MAP[k] === i);
           if (key) {
@@ -656,10 +726,8 @@
       }
     }
     
-    // Poll gamepad status
     setInterval(updateGamepadStatus, 100);
     
-    // ==================== GAMEPAD INPUT HANDLER ====================
     function isGamepadButtonPressed(buttonName) {
       return gamepadConnected && gamepadButtons[buttonName] === true;
     }
@@ -670,6 +738,168 @@
         return gp.axes[axisIndex];
       }
       return 0;
+    }
+    
+    // ==================== VIRTUAL KEYBOARD ====================
+    const virtualKeyboard = document.getElementById('virtualKeyboard');
+    const kbRow1 = document.getElementById('kbRow1');
+    const kbRow2 = document.getElementById('kbRow2');
+    const kbRow3 = document.getElementById('kbRow3');
+    const kbRow4 = document.getElementById('kbRow4');
+    let kbKeys = [];
+    let kbSelectedIndex = 0;
+    let kbActive = false;
+    let kbOnKeyPress = null;
+    
+    const keyboardLayout = [
+      ['Q','W','E','R','T','Y','U','I','O','P'],
+      ['A','S','D','F','G','H','J','K','L','Ñ'],
+      ['Z','X','C','V','B','N','M',',','.','-'],
+      ['SPACE','BACK','ENTER']
+    ];
+    
+    function buildVirtualKeyboard() {
+      kbKeys = [];
+      const rows = [kbRow1, kbRow2, kbRow3, kbRow4];
+      keyboardLayout.forEach((row, rowIndex) => {
+        const rowEl = rows[rowIndex] || document.createElement('div');
+        rowEl.className = 'kb-row';
+        rowEl.innerHTML = '';
+        row.forEach(key => {
+          const btn = document.createElement('button');
+          btn.className = 'kb-key';
+          if (['SPACE','BACK','ENTER'].includes(key)) {
+            btn.classList.add('special');
+            if (key === 'SPACE') btn.classList.add('space');
+            btn.textContent = key === 'SPACE' ? '␣' : key === 'BACK' ? '⌫' : '↵';
+          } else {
+            btn.textContent = key;
+          }
+          btn.dataset.key = key;
+          btn.dataset.index = kbKeys.length;
+          btn.addEventListener('click', () => handleKbPress(key));
+          rowEl.appendChild(btn);
+          kbKeys.push(btn);
+        });
+      });
+    }
+    buildVirtualKeyboard();
+    
+    function showVirtualKeyboard(callback) {
+      kbActive = true;
+      kbSelectedIndex = 0;
+      kbOnKeyPress = callback;
+      virtualKeyboard.classList.add('active');
+      updateKbHighlight();
+    }
+    
+    function hideVirtualKeyboard() {
+      kbActive = false;
+      virtualKeyboard.classList.remove('active');
+      kbKeys.forEach(k => k.classList.remove('highlighted'));
+      kbOnKeyPress = null;
+    }
+    
+    function handleKbPress(key) {
+      if (!kbOnKeyPress) return;
+      if (key === 'ENTER') {
+        kbOnKeyPress('enter');
+        hideVirtualKeyboard();
+        return;
+      }
+      if (key === 'BACK') {
+        kbOnKeyPress('backspace');
+        return;
+      }
+      if (key === 'SPACE') {
+        kbOnKeyPress(' ');
+        return;
+      }
+      kbOnKeyPress(key);
+    }
+    
+    function updateKbHighlight() {
+      kbKeys.forEach((k, i) => {
+        k.classList.toggle('highlighted', i === kbSelectedIndex);
+      });
+    }
+    
+    function moveKbSelection(dx, dy) {
+      const cols = [10, 10, 10, 3];
+      let row = 0, col = 0;
+      let temp = kbSelectedIndex;
+      for (let i = 0; i < cols.length; i++) {
+        if (temp < cols[i]) { row = i; col = temp; break; }
+        temp -= cols[i];
+      }
+      
+      col += dx;
+      row += dy;
+      
+      if (row < 0) row = 0;
+      if (row >= cols.length) row = cols.length - 1;
+      if (col < 0) col = 0;
+      if (col >= cols[row]) col = cols[row] - 1;
+      
+      let newIndex = 0;
+      for (let i = 0; i < row; i++) newIndex += cols[i];
+      newIndex += col;
+      if (newIndex < kbKeys.length) {
+        kbSelectedIndex = newIndex;
+        updateKbHighlight();
+      }
+    }
+    
+    // ==================== GAMEPAD NAVIGATION ====================
+    let navItems = [];
+    let navSelectedIndex = 0;
+    let navActive = false;
+    let navType = 'menu'; // 'menu', 'animals', 'kb'
+    
+    function setupNav(items, type = 'menu') {
+      navItems = items;
+      navSelectedIndex = 0;
+      navActive = true;
+      navType = type;
+      updateNavHighlight();
+    }
+    
+    function updateNavHighlight() {
+      navItems.forEach((el, i) => {
+        if (el) {
+          el.classList.toggle('highlighted', i === navSelectedIndex);
+        }
+      });
+    }
+    
+    function moveNavSelection(dx, dy) {
+      if (!navActive || navItems.length === 0) return;
+      
+      if (navType === 'menu') {
+        navSelectedIndex = (navSelectedIndex + dy + navItems.length) % navItems.length;
+      } else if (navType === 'animals') {
+        const cols = 6;
+        const rows = Math.ceil(navItems.length / cols);
+        let row = Math.floor(navSelectedIndex / cols);
+        let col = navSelectedIndex % cols;
+        row += dy;
+        col += dx;
+        if (row < 0) row = 0;
+        if (row >= rows) row = rows - 1;
+        if (col < 0) col = 0;
+        if (col >= cols) col = cols - 1;
+        const newIndex = row * cols + col;
+        if (newIndex < navItems.length) {
+          navSelectedIndex = newIndex;
+        }
+      }
+      updateNavHighlight();
+    }
+    
+    function activateNavSelection() {
+      if (!navActive || navItems.length === 0) return;
+      const el = navItems[navSelectedIndex];
+      if (el) el.click();
     }
     
     // ==================== FUNCIONES EXISTENTES ====================
@@ -1003,7 +1233,6 @@
             const clickHandler = () => {
               document.removeEventListener('click', clickHandler);
               document.removeEventListener('keydown', keyHandler);
-              // Also remove gamepad handler
               document.removeEventListener('gamepadbutton', gamepadHandler);
               undertaleDialog.classList.remove('active');
               resolve();
@@ -1394,13 +1623,11 @@
         mouseY = (e.clientY - rect.top) * scaleY;
       });
 
-      // ===== GAMEPAD SUPPORT FOR BOSS =====
       let bossGamepadInterval = null;
       
       function checkBossGamepadInput() {
         if (!bossFightActive || deathSequenceStarted || !gameActive) return;
         
-        // Movement: left stick for mouse movement
         const stickX = getGamepadAxis(0);
         const stickY = getGamepadAxis(1);
         if (Math.abs(stickX) > 0.2 || Math.abs(stickY) > 0.2) {
@@ -1413,16 +1640,13 @@
           mouseY = Math.max(0, Math.min(H, mouseY));
         }
         
-        // Attack: X button (PS) / A button (Xbox) for 'e'
         if (isGamepadButtonPressed('x') || isGamepadButtonPressed('a')) {
           if (phase === 'player_turn' && canAttack && gameActive && !deathSequenceStarted) {
-            // Simulate 'e' press
             const eEvent = new KeyboardEvent('keydown', { key: 'e' });
             document.dispatchEvent(eEvent);
           }
         }
         
-        // Confirm attack: Start button or Square (PS) / X (Xbox) for Enter
         if (isGamepadButtonPressed('start') || isGamepadButtonPressed('x')) {
           if (isLineMoving) {
             const enterEvent = new KeyboardEvent('keydown', { key: 'Enter' });
@@ -1830,7 +2054,6 @@
           setTimeout(() => {
             startListeningForInput();
             document.addEventListener('keydown', handleTextInput);
-            // Also listen for gamepad input
             document.addEventListener('gamepadbutton', handleGamepadTextInput);
             showDialogue("🔑 Escribe 'Inside' o 'Leave'", null, 3000);
           }, 500);
@@ -1841,20 +2064,8 @@
     function handleGamepadTextInput(e) {
       if (!isListeningForInput) return;
       const button = e.detail.button;
-      // Map gamepad buttons to text input
-      const charMap = {
-        'x': 'I',  // Square -> I
-        'y': 'L',  // Triangle -> L
-        'a': 'E',  // Cross -> E
-        'b': 'V',  // Circle -> V
-        'lb': 'n', // L1 -> n
-        'rb': 's', // R1 -> s
-        'start': 'i', // Start -> i
-        'select': 'd' // Select -> d
-      };
       
       if (button === 'start') {
-        // Enter command
         const command = currentInput.toLowerCase().trim();
         if (command === 'banana' || command === 'ms.bananas' || command === 'inside') {
           document.removeEventListener('keydown', handleTextInput);
@@ -1876,15 +2087,9 @@
       }
       
       if (button === 'b') {
-        // Backspace
         currentInput = currentInput.slice(0, -1);
         inputTextSpan.textContent = currentInput;
         return;
-      }
-      
-      if (charMap[button]) {
-        currentInput += charMap[button];
-        inputTextSpan.textContent = currentInput;
       }
     }
     
@@ -1946,11 +2151,44 @@
       isListeningForInput = true; 
       currentInput = ''; 
       updateInputDisplay(); 
+      // Show virtual keyboard
+      showVirtualKeyboard((key) => {
+        if (key === 'enter') {
+          const command = currentInput.toLowerCase().trim();
+          if (command === 'banana' || command === 'ms.bananas' || command === 'inside') {
+            document.removeEventListener('keydown', handleTextInput);
+            document.removeEventListener('gamepadbutton', handleGamepadTextInput);
+            stopListeningForInput();
+            dialogueBox.style.display = 'none';
+            enterInside();
+          } else if (command === 'leave') {
+            document.removeEventListener('keydown', handleTextInput);
+            document.removeEventListener('gamepadbutton', handleGamepadTextInput);
+            stopListeningForInput();
+            leaveHouse();
+          } else {
+            showDialogue(`❌ "${command}" no reconocido.`, null, 1500);
+            currentInput = '';
+            inputTextSpan.textContent = '';
+          }
+          return;
+        }
+        if (key === 'backspace') {
+          currentInput = currentInput.slice(0, -1);
+          inputTextSpan.textContent = currentInput;
+          return;
+        }
+        currentInput += key;
+        inputTextSpan.textContent = currentInput;
+      });
+      // Setup keyboard navigation
+      setupNav(kbKeys, 'kb');
     }
     
     function stopListeningForInput() { 
       isListeningForInput = false; 
       hideInputDisplay(); 
+      hideVirtualKeyboard();
     }
 
     function handleTextInput(e) {
@@ -2147,7 +2385,6 @@
       if (document.getElementById('startScreen').style.display !== 'none') return;
       if (document.getElementById('gameScreen').style.display !== 'block') return;
       
-      // Map gamepad buttons to direction names
       let mappedBtn = btn;
       if (btn === 'up' || btn === 'down' || btn === 'left' || btn === 'right') {
         mappedBtn = btn;
@@ -2270,6 +2507,10 @@
         document.getElementById('startScreen').style.display = 'none';
         enterRoom();
       });
+      
+      // Setup menu navigation
+      const menuBtns = [howBtn, shopBtn, exitBtn];
+      setupNav(menuBtns, 'menu');
     }
 
     // ==================== POLLING ====================
@@ -2350,6 +2591,9 @@
       const buttons = document.querySelectorAll(".options button");
       const jumpscareDiv = document.getElementById("jumpscare");
       const jumpscareVideo = document.getElementById("jumpscareVideo");
+      
+      // Setup animal navigation
+      setupNav(Array.from(buttons), 'animals');
       
       window.chaseMusic = chaseMusic;
       window.heartbeatSound = heartbeatSound;
@@ -2454,6 +2698,9 @@
         currentAnimal = animals[Math.floor(Math.random() * animals.length)];
         loadAnimalImage(currentAnimal);
         buttons.forEach(btn => btn.style.backgroundColor = "#1a0a00");
+        // Reset highlights
+        buttons.forEach(btn => btn.classList.remove('highlighted'));
+        setupNav(Array.from(buttons), 'animals');
       }
 
       function updateUI() {
@@ -2470,6 +2717,9 @@
         document.getElementById('startScreen').style.display = "flex";
         if (roomMusic) roomMusic.pause();
         playMenuMusic();
+        // Setup menu navigation again
+        const menuBtns = [howBtn, shopBtn, exitBtn];
+        setupNav(menuBtns, 'menu');
       }
 
       function triggerJumpscareFinal() {
@@ -2531,7 +2781,6 @@
       let chaseStartTime = 0;
       let heartbeatInterval = null;
       
-      // ===== Gamepad controls for chase =====
       let chaseGamepadInterval = null;
       let gpStickX = 0, gpStickY = 0;
       
@@ -2550,12 +2799,6 @@
             gpStickY = gpy;
           } else {
             gpStickY = 0;
-          }
-          
-          // Map gamepad buttons to keys
-          if (isGamepadButtonPressed('a')) {
-            // Jump / interact (space in chase)
-            // Not used in chase
           }
         }, 50);
       }
@@ -2726,7 +2969,6 @@
           if (key === 'shift') { keys.shift = false; runningMult = 1.0; }
         });
         
-        // Setup gamepad
         setupChaseGamepad();
         
         let lastTimestamp = performance.now();
@@ -2749,13 +2991,11 @@
           const currentPlayerSpeed = playerBaseSpeed * runningMult;
           let moveX = 0, moveZ = 0;
           
-          // Keyboard input
           if (keys.w) moveZ = 1;
           if (keys.s) moveZ = -1;
           if (keys.a) moveX = -1;
           if (keys.d) moveX = 1;
           
-          // Gamepad input (override keyboard if gamepad is active)
           if (gamepadConnected) {
             if (Math.abs(gpStickY) > 0.3) {
               moveZ = -gpStickY;
@@ -2925,7 +3165,6 @@
     }
 
     // ==================== GAMEPAD CUSTOM EVENT ====================
-    // Emit custom events for gamepad buttons
     let lastGamepadState = {};
     
     function emitGamepadEvents() {
@@ -2949,6 +3188,45 @@
     }
     
     setInterval(emitGamepadEvents, 50);
+    
+    // ==================== GAMEPAD NAVIGATION LOOP ====================
+    let navInterval = setInterval(() => {
+      if (!gamepadConnected) return;
+      
+      // D-pad navigation
+      const up = isGamepadButtonPressed('up');
+      const down = isGamepadButtonPressed('down');
+      const left = isGamepadButtonPressed('left');
+      const right = isGamepadButtonPressed('right');
+      
+      // Also check stick for navigation when not in boss/chase
+      const stickY = getGamepadAxis(1);
+      const stickX = getGamepadAxis(0);
+      
+      let dy = 0, dx = 0;
+      if (up || stickY < -0.5) dy = -1;
+      if (down || stickY > 0.5) dy = 1;
+      if (left || stickX < -0.5) dx = -1;
+      if (right || stickX > 0.5) dx = 1;
+      
+      if (dy !== 0 || dx !== 0) {
+        if (navActive) {
+          moveNavSelection(dx, dy);
+        } else if (kbActive) {
+          moveKbSelection(dx, dy);
+        }
+      }
+      
+      // Activate selection
+      if (isGamepadButtonPressed('a') || isGamepadButtonPressed('x') || isGamepadButtonPressed('start')) {
+        if (navActive) {
+          activateNavSelection();
+        } else if (kbActive) {
+          const key = kbKeys[kbSelectedIndex]?.dataset.key;
+          if (key) handleKbPress(key);
+        }
+      }
+    }, 100);
   </script>
 </body>
 </html>
