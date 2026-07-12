@@ -124,7 +124,6 @@
     .menuPanel { background: rgba(0,0,0,0.7); padding: 30px; border: 3px solid #FF6600; border-radius: 15px; box-shadow: 0 0 30px #ff3300; display: flex; flex-direction: row; gap: 40px; align-items: center; justify-content: center; flex-wrap: wrap; }
     .menuBtn { font-size: 1.3em; padding: 15px 25px; margin: 10px; background: #1a0a00; color: #FF9900; border: 2px solid #FF6600; cursor: pointer; transition: transform .2s ease, box-shadow .2s ease; border-radius: 8px; }
     .menuBtn:hover { transform: scale(1.1); box-shadow: 0 0 15px #FF6600; background: #331100; }
-    .menuBtn:focus-visible { outline: 3px solid #FFD700; outline-offset: 2px; }
     
     #bananaPlay { width: 180px; cursor: pointer; transition: transform .3s ease, filter .3s ease; animation: float 3s ease-in-out infinite; margin: 20px; filter: drop-shadow(0 0 10px #ffaa00); }
     #bananaPlay:hover { transform: scale(1.1) rotate(-5deg); filter: drop-shadow(0 0 20px #ffcc00); }
@@ -190,23 +189,7 @@
     @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
     
     .options { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; z-index: 5; }
-    .options button { 
-      font-size: 1.2em; 
-      padding: 10px 20px; 
-      background: #1a0a00; 
-      color: #FF9900; 
-      border: 2px solid #FF6600; 
-      cursor: pointer; 
-      transition: 0.1s;
-      min-width: 80px;
-      font-family: 'Press Start 2P', monospace !important;
-      font-size: 0.8rem;
-    }
-    .options button:focus-visible { outline: 3px solid #FFD700; outline-offset: 2px; }
-    .options button:hover { background: #331100; }
-    .options button.selected { background: #2a6a2a; border-color: #00ff00; }
-    .options button.wrong { background: #882222; border-color: #ff0000; }
-    .options button.correct { background: #2a6a2a; border-color: #00ff00; }
+    .options button { font-size: 1.2em; padding: 10px 20px; background: #1a0a00; color: #FF9900; border: 2px solid #FF6600; cursor: pointer; transition: 0.1s; }
     
     #dialogueBox { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); width: 70%; padding: 15px; background: rgba(0,0,0,.9); color: #FFD700; font-size: 1.3em; border: 2px solid #FF6600; border-radius: 10px; display: none; z-index: 15; font-weight: bold; text-shadow: 0 0 5px #ff6600; }
     #rageText { position: absolute; top: 80px; left: 50%; transform: translateX(-50%); font-size: 1.5em; color: #ff4444; background: rgba(0,0,0,0.7); padding: 5px 15px; border-radius: 20px; font-weight: bold; z-index: 5; }
@@ -231,8 +214,7 @@
       width: 100%;
       height: 100%;
       background: #0a0a1a;
-      cursor: url('https://raw.githubusercontent.com/Raphapro900/Ms.BananaS/refs/heads/main/heart.png') 16 16, auto;
-      touch-action: none;
+      cursor: none;
     }
     
     .boss-ui {
@@ -445,77 +427,32 @@
     .shake-boss {
       animation: bossShake 1s ease-in-out;
     }
-    
-    /* Controles en pantalla para móvil/táctil */
-    .touch-controls {
+
+    /* Gamepad indicator */
+    #gamepadIndicator {
       position: fixed;
-      bottom: 20px;
-      left: 0;
-      width: 100%;
-      display: none;
-      justify-content: space-between;
-      padding: 0 20px;
-      box-sizing: border-box;
-      z-index: 9996;
-      pointer-events: none;
-    }
-    .touch-controls .btn-group {
-      display: flex;
-      gap: 10px;
-      pointer-events: auto;
-    }
-    .touch-controls button {
-      background: rgba(255,255,255,0.15);
-      border: 2px solid rgba(255,255,255,0.3);
-      color: white;
-      font-size: 1.5rem;
-      padding: 15px 20px;
-      border-radius: 12px;
-      backdrop-filter: blur(4px);
-      min-width: 60px;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: #44ff88;
       font-family: 'Press Start 2P', monospace !important;
-      touch-action: manipulation;
-      user-select: none;
-    }
-    .touch-controls button:active {
-      background: rgba(255,255,255,0.3);
-      transform: scale(0.95);
-    }
-    .touch-controls .action-btn {
-      background: rgba(255,50,50,0.3);
-      border-color: #ff4444;
-    }
-    .touch-controls .action-btn:active {
-      background: rgba(255,50,50,0.6);
-    }
-    @media (pointer: coarse) {
-      .touch-controls { display: flex !important; }
-    }
-    
-    /* Indicador de mando conectado */
-    .controller-status {
-      position: fixed;
-      top: 10px;
-      right: 10px;
-      color: #00ff88;
-      font-size: 0.7rem;
-      font-family: 'Press Start 2P', monospace !important;
+      font-size: 0.6rem;
       background: rgba(0,0,0,0.7);
-      padding: 5px 12px;
-      border-radius: 8px;
-      border: 1px solid #00ff88;
+      padding: 4px 12px;
+      border-radius: 20px;
+      border: 1px solid #44ff88;
       z-index: 9999;
       display: none;
       pointer-events: none;
+      text-shadow: 0 0 10px #44ff88;
     }
-    .controller-status.show { display: block; }
+    #gamepadIndicator.active { display: block; }
   </style>
 </head>
 <body>
 
   <div class="reset-polling-badge" id="pollingBadge">🔄</div>
-  <div class="controller-status" id="controllerStatus">🎮 Mando Conectado</div>
-  
+  <div id="gamepadIndicator" class="active">🎮 CONTROL DETECTADO</div>
   <div id="text-input-display">
     <span class="input-label">>_</span>
     <span id="inputText"></span><span class="cursor">|</span>
@@ -591,25 +528,10 @@
     </div>
   </div>
 
-  <div id="creditssContainer" class="credits-container" style="z-index: 9998;"><video id="creditssVideo" src="creditsss.mp4"></video></div>
+  <div id="creditsssContainer" class="credits-container" style="z-index: 9998;"><video id="creditsssVideo" src="creditsss.mp4"></video></div>
   <div id="creditsContainer" class="credits-container"><video id="creditsVideo" src="Creditos Ms.BananaS.mp4"></video></div>
 
   <div id="speedIndicator" class="speed-indicator">⏩ x4</div>
-
-  <!-- Controles táctiles para móvil/consola -->
-  <div class="touch-controls" id="touchControls">
-    <div class="btn-group">
-      <button id="btnUp">▲</button>
-      <button id="btnDown">▼</button>
-      <button id="btnLeft">◄</button>
-      <button id="btnRight">►</button>
-    </div>
-    <div class="btn-group">
-      <button id="btnAction" class="action-btn">A</button>
-      <button id="btnAction2" class="action-btn">B</button>
-      <button id="btnStart" class="action-btn">▶</button>
-    </div>
-  </div>
 
   <div id="gameContent">
     <div id="startScreen">
@@ -640,13 +562,9 @@
           <div class="signature">- Ms. BananaS 🍌</div>
         </div>
       </div>
-      <div class="options" id="animalOptions">
-        <button data-animal="Seal">Seal</button>
-        <button data-animal="Dog">Dog</button>
-        <button data-animal="Cat">Cat</button>
-        <button data-animal="Duck">Duck</button>
-        <button data-animal="Eagle">Eagle</button>
-        <button data-animal="Snake">Snake</button>
+      <div class="options">
+        <button>Seal</button><button>Dog</button><button>Cat</button>
+        <button>Duck</button><button>Eagle</button><button>Snake</button>
       </div>
       <div id="dialogueBox"></div>
       <audio id="dialogueAudio" preload="auto"></audio>
@@ -676,335 +594,82 @@
     const BASE_URL = "https://raw.githubusercontent.com/Raphapro900/Ms.BananaS/refs/heads/main/";
     const RESET_URL = "https://raphapro900.github.io/reset/";
     
-    // ==================== SISTEMA DE MANDO ====================
-    const controllerStatus = document.getElementById('controllerStatus');
+    // ==================== GAMEPAD DETECTION & MAPPING ====================
+    const gamepadIndicator = document.getElementById('gamepadIndicator');
     let gamepadConnected = false;
-    let gamepadIndex = null;
-    let gamepadCheckInterval = null;
+    let gamepadButtons = {};
     
-    // Mapeo de botones de mando
-    const GAMEPAD_BUTTONS = {
-      A: 0,      // PlayStation: X, Xbox: A
-      B: 1,      // PlayStation: Circle, Xbox: B
-      X: 2,      // PlayStation: Square, Xbox: X
-      Y: 3,      // PlayStation: Triangle, Xbox: Y
-      LB: 4,     // L1
-      RB: 5,     // R1
-      LT: 6,     // L2
-      RT: 7,     // R2
-      SELECT: 8,
-      START: 9,
-      LEFT_STICK: 10,
-      RIGHT_STICK: 11,
-      DPAD_UP: 12,
-      DPAD_DOWN: 13,
-      DPAD_LEFT: 14,
-      DPAD_RIGHT: 15,
-      HOME: 16
+    // Gamepad mapping for PS5 / Xbox
+    const BUTTON_MAP = {
+      // Standard buttons
+      'a': 0,        // Cross (PS) / A (Xbox)
+      'b': 1,        // Circle (PS) / B (Xbox)
+      'x': 2,        // Square (PS) / X (Xbox)
+      'y': 3,        // Triangle (PS) / Y (Xbox)
+      'lb': 4,       // L1 (PS) / LB (Xbox)
+      'rb': 5,       // R1 (PS) / RB (Xbox)
+      'lt': 6,       // L2 (PS) / LT (Xbox)
+      'rt': 7,       // R2 (PS) / RT (Xbox)
+      'select': 8,   // Share (PS) / View (Xbox)
+      'start': 9,    // Options (PS) / Menu (Xbox)
+      'ls': 10,      // L3 (PS) / LS (Xbox)
+      'rs': 11,      // R3 (PS) / RS (Xbox)
+      'up': 12,
+      'down': 13,
+      'left': 14,
+      'right': 15,
+      'ps': 16,      // PS Button / Xbox Button
     };
     
-    // Estado del mando
-    const gamepadState = {
-      buttons: {},
-      axes: { leftX: 0, leftY: 0, rightX: 0, rightY: 0 },
-      touchpad: { x: 0, y: 0, active: false }
-    };
-    
-    function initGamepadSupport() {
-      // Detectar conexión de mando
-      window.addEventListener('gamepadconnected', (e) => {
-        gamepadConnected = true;
-        gamepadIndex = e.gamepad.index;
-        controllerStatus.classList.add('show');
-        console.log('🎮 Mando conectado:', e.gamepad.id);
-        if (gamepadCheckInterval) clearInterval(gamepadCheckInterval);
-        gamepadCheckInterval = setInterval(updateGamepadState, 16);
-      });
-      
-      window.addEventListener('gamepaddisconnected', (e) => {
-        if (gamepadIndex === e.gamepad.index) {
-          gamepadConnected = false;
-          gamepadIndex = null;
-          controllerStatus.classList.remove('show');
-          if (gamepadCheckInterval) {
-            clearInterval(gamepadCheckInterval);
-            gamepadCheckInterval = null;
-          }
-        }
-      });
-      
-      // Detectar si ya hay un mando conectado
+    function detectGamepad() {
       const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
-      for (const gp of gamepads) {
-        if (gp) {
+      for (let gp of gamepads) {
+        if (gp && gp.connected) {
+          return gp;
+        }
+      }
+      return null;
+    }
+    
+    function updateGamepadStatus() {
+      const gp = detectGamepad();
+      if (gp) {
+        if (!gamepadConnected) {
           gamepadConnected = true;
-          gamepadIndex = gp.index;
-          controllerStatus.classList.add('show');
-          if (gamepadCheckInterval) clearInterval(gamepadCheckInterval);
-          gamepadCheckInterval = setInterval(updateGamepadState, 16);
-          break;
+          gamepadIndicator.classList.add('active');
+          gamepadIndicator.textContent = '🎮 CONTROL DETECTADO';
         }
-      }
-      
-      // Soporte para touchpad de DualSense (Gamepad API)
-      // Nota: El touchpad no es directamente accesible via Gamepad API estándar,
-      // pero podemos usar eventos de mouse/touch que ya funcionan
-    }
-    
-    function updateGamepadState() {
-      if (!gamepadConnected || gamepadIndex === null) return;
-      
-      const gp = navigator.getGamepads()[gamepadIndex];
-      if (!gp) {
-        gamepadConnected = false;
-        controllerStatus.classList.remove('show');
-        return;
-      }
-      
-      // Leer botones
-      for (const [name, index] of Object.entries(GAMEPAD_BUTTONS)) {
-        if (gp.buttons[index]) {
-          gamepadState.buttons[name] = gp.buttons[index].pressed;
+        // Store button states
+        for (let i = 0; i < gp.buttons.length; i++) {
+          const key = Object.keys(BUTTON_MAP).find(k => BUTTON_MAP[k] === i);
+          if (key) {
+            gamepadButtons[key] = gp.buttons[i].pressed;
+          }
         }
-      }
-      
-      // Leer ejes
-      if (gp.axes.length >= 2) {
-        gamepadState.axes.leftX = gp.axes[0] || 0;
-        gamepadState.axes.leftY = gp.axes[1] || 0;
-      }
-      if (gp.axes.length >= 4) {
-        gamepadState.axes.rightX = gp.axes[2] || 0;
-        gamepadState.axes.rightY = gp.axes[3] || 0;
-      }
-      
-      // Emular touchpad con el stick derecho
-      const threshold = 0.3;
-      const moveX = gamepadState.axes.rightX;
-      const moveY = gamepadState.axes.rightY;
-      
-      if (Math.abs(moveX) > threshold || Math.abs(moveY) > threshold) {
-        // Mover el cursor con el stick derecho
-        const canvas = document.getElementById('bossCanvas');
-        if (canvas && document.getElementById('bossContainer').classList.contains('active')) {
-          const rect = canvas.getBoundingClientRect();
-          const currentX = parseFloat(canvas.dataset.mouseX) || window.innerWidth / 2;
-          const currentY = parseFloat(canvas.dataset.mouseY) || window.innerHeight / 2;
-          const speed = 8;
-          let newX = currentX + moveX * speed * 1.5;
-          let newY = currentY + moveY * speed * 1.5;
-          newX = Math.max(0, Math.min(window.innerWidth, newX));
-          newY = Math.max(0, Math.min(window.innerHeight, newY));
-          canvas.dataset.mouseX = newX;
-          canvas.dataset.mouseY = newY;
-          
-          // Disparar evento de mousemove
-          const event = new MouseEvent('mousemove', {
-            clientX: (newX / window.innerWidth) * window.innerWidth,
-            clientY: (newY / window.innerHeight) * window.innerHeight
-          });
-          canvas.dispatchEvent(event);
+        return true;
+      } else {
+        if (gamepadConnected) {
+          gamepadConnected = false;
+          gamepadIndicator.classList.remove('active');
         }
+        return false;
       }
     }
     
-    // Inicializar soporte de mando
-    initGamepadSupport();
+    // Poll gamepad status
+    setInterval(updateGamepadStatus, 100);
     
-    // ==================== SISTEMA DE NAVEGACIÓN POR TECLADO/MANDO ====================
-    class FocusNavigator {
-      constructor() {
-        this.focusableElements = [];
-        this.currentIndex = -1;
-        this.isActive = false;
-        this.container = null;
-        this.onSelect = null;
-        this.selector = '';
-      }
-      
-      init(container, selector, onSelect) {
-        this.container = container;
-        this.selector = selector;
-        this.onSelect = onSelect;
-        this.updateElements();
-        
-        // Escuchar eventos de teclado
-        document.addEventListener('keydown', (e) => {
-          if (!this.isActive) return;
-          const key = e.key;
-          if (key === 'ArrowDown' || key === 'ArrowRight') {
-            e.preventDefault();
-            this.next();
-          } else if (key === 'ArrowUp' || key === 'ArrowLeft') {
-            e.preventDefault();
-            this.prev();
-          } else if (key === 'Enter' || key === ' ') {
-            e.preventDefault();
-            this.select();
-          }
-        });
-        
-        // También escuchar eventos de mando
-        this.gamepadInterval = setInterval(() => {
-          if (!this.isActive || !gamepadConnected) return;
-          const gp = navigator.getGamepads()[gamepadIndex];
-          if (!gp) return;
-          
-          // DPAD
-          if (gp.buttons[GAMEPAD_BUTTONS.DPAD_DOWN]?.pressed || gp.buttons[GAMEPAD_BUTTONS.DPAD_RIGHT]?.pressed) {
-            if (!this._dpadNext) {
-              this._dpadNext = true;
-              this.next();
-              setTimeout(() => { this._dpadNext = false; }, 300);
-            }
-          } else if (gp.buttons[GAMEPAD_BUTTONS.DPAD_UP]?.pressed || gp.buttons[GAMEPAD_BUTTONS.DPAD_LEFT]?.pressed) {
-            if (!this._dpadPrev) {
-              this._dpadPrev = true;
-              this.prev();
-              setTimeout(() => { this._dpadPrev = false; }, 300);
-            }
-          }
-          
-          // Botón A (X en PlayStation) para seleccionar
-          if (gp.buttons[GAMEPAD_BUTTONS.A]?.pressed && !this._aPressed) {
-            this._aPressed = true;
-            this.select();
-            setTimeout(() => { this._aPressed = false; }, 200);
-          }
-          if (!gp.buttons[GAMEPAD_BUTTONS.A]?.pressed) {
-            this._aPressed = false;
-          }
-        }, 50);
-      }
-      
-      updateElements() {
-        if (!this.container) return;
-        this.focusableElements = Array.from(this.container.querySelectorAll(this.selector));
-        if (this.focusableElements.length > 0 && this.currentIndex === -1) {
-          this.currentIndex = 0;
-        }
-        this.updateFocus();
-      }
-      
-      updateFocus() {
-        this.focusableElements.forEach((el, i) => {
-          if (i === this.currentIndex) {
-            el.focus();
-            el.style.outline = '3px solid #FFD700';
-            el.style.outlineOffset = '2px';
-          } else {
-            el.style.outline = 'none';
-          }
-        });
-      }
-      
-      next() {
-        if (this.focusableElements.length === 0) return;
-        this.currentIndex = (this.currentIndex + 1) % this.focusableElements.length;
-        this.updateFocus();
-      }
-      
-      prev() {
-        if (this.focusableElements.length === 0) return;
-        this.currentIndex = (this.currentIndex - 1 + this.focusableElements.length) % this.focusableElements.length;
-        this.updateFocus();
-      }
-      
-      select() {
-        if (this.currentIndex >= 0 && this.currentIndex < this.focusableElements.length) {
-          const el = this.focusableElements[this.currentIndex];
-          if (this.onSelect) {
-            this.onSelect(el);
-          } else {
-            el.click();
-          }
-        }
-      }
-      
-      activate() {
-        this.isActive = true;
-        if (this.focusableElements.length > 0 && this.currentIndex === -1) {
-          this.currentIndex = 0;
-        }
-        this.updateFocus();
-      }
-      
-      deactivate() {
-        this.isActive = false;
-        this.focusableElements.forEach(el => el.style.outline = 'none');
-      }
-      
-      destroy() {
-        if (this.gamepadInterval) clearInterval(this.gamepadInterval);
-        this.deactivate();
-      }
+    // ==================== GAMEPAD INPUT HANDLER ====================
+    function isGamepadButtonPressed(buttonName) {
+      return gamepadConnected && gamepadButtons[buttonName] === true;
     }
     
-    // Crear navegador para el menú de animales
-    const animalNavigator = new FocusNavigator();
-    
-    // ==================== SISTEMA DE ENTRADA DE TEXTO CON MANDO ====================
-    let textInputActive = false;
-    let textInputCallback = null;
-    let textInputValue = '';
-    
-    function startTextInput(callback, initialValue = '') {
-      textInputActive = true;
-      textInputCallback = callback;
-      textInputValue = initialValue;
-      document.getElementById('text-input-display').style.display = 'block';
-      document.getElementById('inputText').textContent = textInputValue;
-      
-      // Enfocar para teclado
-      document.addEventListener('keydown', handleTextInputKeyboard);
-      
-      // También manejar entrada con mando
-      textInputGamepadInterval = setInterval(() => {
-        if (!textInputActive || !gamepadConnected) return;
-        const gp = navigator.getGamepads()[gamepadIndex];
-        if (!gp) return;
-        
-        // Usar el stick izquierdo o DPAD para navegar
-        // Por simplicidad, usamos un teclado virtual simple
-        // El usuario puede usar el teclado físico o escribir con el mando
-      }, 50);
-    }
-    
-    let textInputGamepadInterval = null;
-    
-    function stopTextInput() {
-      textInputActive = false;
-      textInputCallback = null;
-      document.getElementById('text-input-display').style.display = 'none';
-      document.removeEventListener('keydown', handleTextInputKeyboard);
-      if (textInputGamepadInterval) {
-        clearInterval(textInputGamepadInterval);
-        textInputGamepadInterval = null;
+    function getGamepadAxis(axisIndex) {
+      const gp = detectGamepad();
+      if (gp && gp.axes && gp.axes.length > axisIndex) {
+        return gp.axes[axisIndex];
       }
-    }
-    
-    function handleTextInputKeyboard(e) {
-      if (!textInputActive) return;
-      const key = e.key;
-      if (key === 'Enter') {
-        e.preventDefault();
-        if (textInputCallback) {
-          textInputCallback(textInputValue);
-        }
-        stopTextInput();
-        return;
-      }
-      if (key === 'Backspace') {
-        e.preventDefault();
-        textInputValue = textInputValue.slice(0, -1);
-        document.getElementById('inputText').textContent = textInputValue;
-        return;
-      }
-      if (key.length === 1 && key.match(/[a-zA-Z.]/)) {
-        e.preventDefault();
-        textInputValue += key;
-        document.getElementById('inputText').textContent = textInputValue;
-      }
+      return 0;
     }
     
     // ==================== FUNCIONES EXISTENTES ====================
@@ -1163,7 +828,7 @@
     const glitchResetSignalDiv = document.getElementById('glitchResetSignal');
     const glitchVideo = document.getElementById('glitchVideo'), glitchVideoPlayer = document.getElementById('glitchVideoPlayer');
     const creditsContainer = document.getElementById('creditsContainer'), creditsVideo = document.getElementById('creditsVideo');
-    const creditssContainer = document.getElementById('creditssContainer'), creditssVideo = document.getElementById('creditssVideo');
+    const creditsssContainer = document.getElementById('creditsssContainer'), creditsssVideo = document.getElementById('creditsssVideo');
     const speedIndicator = document.getElementById('speedIndicator');
     const bananaPlayImg = document.getElementById('bananaPlay');
     const tvAnimal = document.getElementById('animal'), tvMessage = document.getElementById('tv-message');
@@ -1181,7 +846,9 @@
     const bossContainer = document.getElementById('bossContainer');
     const bossCanvas = document.getElementById('bossCanvas');
     const bossUI = document.getElementById('bossUI');
+    const bossHPContainer = document.getElementById('bossHPContainer');
     const bossHPDisplay = document.getElementById('bossHP');
+    const playerHPContainer = document.getElementById('playerHPContainer');
     const playerHPDisplay = document.getElementById('playerHP');
     const bossTimer = document.getElementById('bossTimer');
     const bossCountdownEl = document.getElementById('bossCountdown');
@@ -1238,13 +905,6 @@
         <p><strong>🎮 CÓDIGOS SECRETOS:</strong><br>
         <strong>↑ ↑ ↓ ↓ ← → ← → B A</strong> → Final feliz<br>
         <strong>↓ ↑ B A</strong> → Bossfight</p>
-        <br>
-        <p><strong>🎮 CONTROLES DE MANDO:</strong><br>
-        • DPAD/Stick Izquierdo: Navegar menús<br>
-        • Botón A (X): Seleccionar/Atacar<br>
-        • Botón B (Círculo): Cancelar/Volver<br>
-        • Stick Derecho: Mover cursor en Bossfight<br>
-        • Botón Start: Pausa/Menú</p>
         <br>
         <p><strong>🔓 Código de reseteo:</strong></p>
         <div class="binary-code" id="binaryClick">${binaryCode}</div>
@@ -1343,19 +1003,32 @@
             const clickHandler = () => {
               document.removeEventListener('click', clickHandler);
               document.removeEventListener('keydown', keyHandler);
+              // Also remove gamepad handler
+              document.removeEventListener('gamepadbutton', gamepadHandler);
               undertaleDialog.classList.remove('active');
               resolve();
             };
             const keyHandler = (e) => {
-              if (e.key === 'Enter' || e.key === ' ' || e.key === 'z' || e.key === 'a') {
+              if (e.key === 'Enter' || e.key === ' ' || e.key === 'z') {
                 document.removeEventListener('click', clickHandler);
                 document.removeEventListener('keydown', keyHandler);
+                document.removeEventListener('gamepadbutton', gamepadHandler);
+                undertaleDialog.classList.remove('active');
+                resolve();
+              }
+            };
+            const gamepadHandler = (e) => {
+              if (e.detail.button === 'a' || e.detail.button === 'start' || e.detail.button === 'x') {
+                document.removeEventListener('click', clickHandler);
+                document.removeEventListener('keydown', keyHandler);
+                document.removeEventListener('gamepadbutton', gamepadHandler);
                 undertaleDialog.classList.remove('active');
                 resolve();
               }
             };
             document.addEventListener('click', clickHandler);
             document.addEventListener('keydown', keyHandler);
+            document.addEventListener('gamepadbutton', gamepadHandler);
             return;
           }
           
@@ -1447,51 +1120,32 @@
       );
       
       setTimeout(() => {
-        try {
-          const underrrAudio = new Audio(BASE_URL + 'Underrr.mp3');
-          underrrAudio.volume = 0.8;
-          underrrAudio.play().catch(e => {
-            console.log("Underrr.mp3 no encontrado, usando sonido alternativo");
-            const fallbackAudio = new Audio(BASE_URL + 'Talkk.wav');
-            fallbackAudio.volume = 0.5;
-            fallbackAudio.play().catch(e => {});
-          });
-        } catch(e) {
-          console.log("Error reproduciendo Underrr.mp3");
-        }
+        const underrrAudio = new Audio(BASE_URL + 'Underrr.mp3');
+        underrrAudio.volume = 0.8;
+        underrrAudio.play().catch(e => console.log("Underrr.mp3 error:", e));
       }, 500);
       
       setTimeout(() => {
-        showCreditssVideo();
+        showCreditsssVideo();
       }, 5500);
     }
 
-    function showCreditssVideo() {
-      creditssContainer.style.display = 'flex'; 
-      creditssVideo.currentTime = 0; 
-      creditssVideo.playbackRate = 1.0;
+    function showCreditsssVideo() {
+      creditsssContainer.style.display = 'flex'; 
+      creditsssVideo.currentTime = 0; 
+      creditsssVideo.playbackRate = 1.0;
+      creditsssVideo.play();
       
-      creditssVideo.play().catch(e => {
-        console.log("creditsss.mp4 no encontrado, mostrando mensaje alternativo");
-        creditssContainer.style.display = 'none';
-        dialogueBox.innerText = "🎬 CRÉDITOS - Ms. BananaS";
-        dialogueBox.style.display = "block";
-        setTimeout(() => {
-          dialogueBox.style.display = "none";
-          goToWaitingScreen();
-        }, 5000);
-      });
-      
-      const cleanup = setupCreditsSpeedControl(creditssVideo, speedIndicator);
+      const cleanup = setupCreditsSpeedControl(creditsssVideo, speedIndicator);
       
       setTimeout(() => {
-        creditssContainer.style.display = 'none'; 
+        creditsssContainer.style.display = 'none'; 
         cleanup();
         goToWaitingScreen();
       }, 70000);
       
-      creditssVideo.onended = () => { 
-        creditssContainer.style.display = 'none'; 
+      creditsssVideo.onended = () => { 
+        creditsssContainer.style.display = 'none'; 
         cleanup();
         goToWaitingScreen(); 
       };
@@ -1519,11 +1173,11 @@
       
       setTimeout(() => { 
         dialogueBox.style.display = "none"; 
-        showCreditsVideoOld(); 
+        showCreditsVideo(); 
       }, 21000);
     }
 
-    function showCreditsVideoOld() {
+    function showCreditsVideo() {
       dialogueBox.innerText = "🎬 CRÉDITOS - Mantén SHIFT para x4"; 
       dialogueBox.style.display = "block";
       creditsContainer.style.display = 'flex'; 
@@ -1713,8 +1367,6 @@
         bossY = H / 2 - 50;
         mouseX = W / 2;
         mouseY = H / 2;
-        canvas.dataset.mouseX = mouseX;
-        canvas.dataset.mouseY = mouseY;
       }
       window.addEventListener('resize', resize);
       resize();
@@ -1734,78 +1386,54 @@
       playerHPDisplay.textContent = `❤️ ${playerHP}`;
       bossTimer.textContent = '⏱️ 5';
 
-      // Mouse/Touch events para mover el corazón
       document.addEventListener('mousemove', (e) => {
         const rect = canvas.getBoundingClientRect();
         const scaleX = W / rect.width;
         const scaleY = H / rect.height;
         mouseX = (e.clientX - rect.left) * scaleX;
         mouseY = (e.clientY - rect.top) * scaleY;
-        canvas.dataset.mouseX = mouseX;
-        canvas.dataset.mouseY = mouseY;
       });
 
-      // Soporte para touch
-      canvas.addEventListener('touchmove', (e) => {
-        e.preventDefault();
-        const rect = canvas.getBoundingClientRect();
-        const touch = e.touches[0];
-        const scaleX = W / rect.width;
-        const scaleY = H / rect.height;
-        mouseX = (touch.clientX - rect.left) * scaleX;
-        mouseY = (touch.clientY - rect.top) * scaleY;
-        canvas.dataset.mouseX = mouseX;
-        canvas.dataset.mouseY = mouseY;
-      }, { passive: false });
-
-      canvas.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        const rect = canvas.getBoundingClientRect();
-        const touch = e.touches[0];
-        const scaleX = W / rect.width;
-        const scaleY = H / rect.height;
-        mouseX = (touch.clientX - rect.left) * scaleX;
-        mouseY = (touch.clientY - rect.top) * scaleY;
-        canvas.dataset.mouseX = mouseX;
-        canvas.dataset.mouseY = mouseY;
-      }, { passive: false });
-
-      document.addEventListener('keydown', handleKeyDown);
+      // ===== GAMEPAD SUPPORT FOR BOSS =====
+      let bossGamepadInterval = null;
       
-      // También manejar eventos de mando para el boss
-      function handleGamepadBoss() {
-        if (!bossFightActive || !gamepadConnected) return;
-        const gp = navigator.getGamepads()[gamepadIndex];
-        if (!gp) return;
+      function checkBossGamepadInput() {
+        if (!bossFightActive || deathSequenceStarted || !gameActive) return;
         
-        // Botón A para atacar (E)
-        if (gp.buttons[GAMEPAD_BUTTONS.A]?.pressed && !window._bossAPressed) {
-          window._bossAPressed = true;
-          // Simular tecla E
-          const eEvent = new KeyboardEvent('keydown', { key: 'e' });
-          document.dispatchEvent(eEvent);
-          setTimeout(() => { window._bossAPressed = false; }, 300);
-        }
-        if (!gp.buttons[GAMEPAD_BUTTONS.A]?.pressed) {
-          window._bossAPressed = false;
+        // Movement: left stick for mouse movement
+        const stickX = getGamepadAxis(0);
+        const stickY = getGamepadAxis(1);
+        if (Math.abs(stickX) > 0.2 || Math.abs(stickY) > 0.2) {
+          const rect = canvas.getBoundingClientRect();
+          const scaleX = W / rect.width;
+          const scaleY = H / rect.height;
+          mouseX += stickX * 15 * scaleX;
+          mouseY += stickY * 15 * scaleY;
+          mouseX = Math.max(0, Math.min(W, mouseX));
+          mouseY = Math.max(0, Math.min(H, mouseY));
         }
         
-        // Botón B (Círculo) para Enter (golpear)
-        if (gp.buttons[GAMEPAD_BUTTONS.B]?.pressed && !window._bossBPressed) {
-          window._bossBPressed = true;
-          const enterEvent = new KeyboardEvent('keydown', { key: 'Enter' });
-          document.dispatchEvent(enterEvent);
-          setTimeout(() => { window._bossBPressed = false; }, 300);
-        }
-        if (!gp.buttons[GAMEPAD_BUTTONS.B]?.pressed) {
-          window._bossBPressed = false;
+        // Attack: X button (PS) / A button (Xbox) for 'e'
+        if (isGamepadButtonPressed('x') || isGamepadButtonPressed('a')) {
+          if (phase === 'player_turn' && canAttack && gameActive && !deathSequenceStarted) {
+            // Simulate 'e' press
+            const eEvent = new KeyboardEvent('keydown', { key: 'e' });
+            document.dispatchEvent(eEvent);
+          }
         }
         
-        // Stick derecho para mover el cursor (ya se maneja en updateGamepadState)
+        // Confirm attack: Start button or Square (PS) / X (Xbox) for Enter
+        if (isGamepadButtonPressed('start') || isGamepadButtonPressed('x')) {
+          if (isLineMoving) {
+            const enterEvent = new KeyboardEvent('keydown', { key: 'Enter' });
+            document.dispatchEvent(enterEvent);
+          }
+        }
       }
       
-      // Intervalo para procesar entrada de mando en el boss
-      const bossGamepadInterval = setInterval(handleGamepadBoss, 50);
+      bossGamepadInterval = setInterval(checkBossGamepadInput, 50);
+
+      document.addEventListener('keydown', handleKeyDown);
 
       function handleKeyDown(e) {
         if (e.key === 'Enter' && isLineMoving) {
@@ -2005,6 +1633,7 @@
           window.bossMusic.pause();
           window.bossMusic.currentTime = 0;
         }
+        if (bossGamepadInterval) clearInterval(bossGamepadInterval);
         
         const ohAudio = new Audio(BASE_URL + 'Oh.wav');
         ohAudio.playbackRate = 0.7;
@@ -2015,7 +1644,6 @@
           bossDefeat.classList.remove('show');
           bossContainer.classList.remove('active');
           bossFightActive = false;
-          if (bossGamepadInterval) clearInterval(bossGamepadInterval);
           showDefeatMessages();
         }, 2000);
       }
@@ -2058,23 +1686,14 @@
           ctx.fillText('🍌', bossX, bossY);
         }
         
-        // Dibujar corazón del jugador
-        const heartImg = new Image();
-        heartImg.src = BASE_URL + 'heart.png';
-        if (heartImg.complete && heartImg.naturalWidth > 0) {
-          const heartSize = 30;
-          ctx.drawImage(heartImg, mouseX - heartSize/2, mouseY - heartSize/2, heartSize, heartSize);
-        } else {
-          ctx.fillStyle = '#ff0044';
-          ctx.shadowColor = '#ff0044';
-          ctx.shadowBlur = 20;
-          ctx.font = '30px Arial';
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.fillText('❤️', mouseX, mouseY);
-          ctx.shadowBlur = 0;
-          heartImg.src = BASE_URL + 'heart.png';
-        }
+        ctx.fillStyle = '#ff0044';
+        ctx.shadowColor = '#ff0044';
+        ctx.shadowBlur = 20;
+        ctx.font = '30px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('❤️', mouseX, mouseY);
+        ctx.shadowBlur = 0;
         
         if (phase === 'attack') {
           const cubesToRemove = [];
@@ -2210,10 +1829,63 @@
           
           setTimeout(() => {
             startListeningForInput();
+            document.addEventListener('keydown', handleTextInput);
+            // Also listen for gamepad input
+            document.addEventListener('gamepadbutton', handleGamepadTextInput);
             showDialogue("🔑 Escribe 'Inside' o 'Leave'", null, 3000);
           }, 500);
         }, 500);
       }, 1000);
+    }
+    
+    function handleGamepadTextInput(e) {
+      if (!isListeningForInput) return;
+      const button = e.detail.button;
+      // Map gamepad buttons to text input
+      const charMap = {
+        'x': 'I',  // Square -> I
+        'y': 'L',  // Triangle -> L
+        'a': 'E',  // Cross -> E
+        'b': 'V',  // Circle -> V
+        'lb': 'n', // L1 -> n
+        'rb': 's', // R1 -> s
+        'start': 'i', // Start -> i
+        'select': 'd' // Select -> d
+      };
+      
+      if (button === 'start') {
+        // Enter command
+        const command = currentInput.toLowerCase().trim();
+        if (command === 'banana' || command === 'ms.bananas' || command === 'inside') {
+          document.removeEventListener('keydown', handleTextInput);
+          document.removeEventListener('gamepadbutton', handleGamepadTextInput);
+          stopListeningForInput();
+          dialogueBox.style.display = 'none';
+          enterInside();
+        } else if (command === 'leave') {
+          document.removeEventListener('keydown', handleTextInput);
+          document.removeEventListener('gamepadbutton', handleGamepadTextInput);
+          stopListeningForInput();
+          leaveHouse();
+        } else {
+          showDialogue(`❌ "${command}" no reconocido.`, null, 1500);
+          currentInput = '';
+          inputTextSpan.textContent = '';
+        }
+        return;
+      }
+      
+      if (button === 'b') {
+        // Backspace
+        currentInput = currentInput.slice(0, -1);
+        inputTextSpan.textContent = currentInput;
+        return;
+      }
+      
+      if (charMap[button]) {
+        currentInput += charMap[button];
+        inputTextSpan.textContent = currentInput;
+      }
     }
     
     function enterInside() {
@@ -2245,6 +1917,8 @@
                     insideBg.style.filter = 'none';
                     
                     startListeningForInput();
+                    document.addEventListener('keydown', handleTextInput);
+                    document.addEventListener('gamepadbutton', handleGamepadTextInput);
                   }, 500);
                 }, 500);
               }, 16000);
@@ -2285,12 +1959,14 @@
       if (key === 'Enter') {
         const command = currentInput.toLowerCase().trim();
         if (command === 'banana' || command === 'ms.bananas' || command === 'inside') {
-          document.removeEventListener('keydown', handleTextInput); 
+          document.removeEventListener('keydown', handleTextInput);
+          document.removeEventListener('gamepadbutton', handleGamepadTextInput);
           stopListeningForInput(); 
           dialogueBox.style.display = 'none';
           enterInside();
         } else if (command === 'leave') {
-          document.removeEventListener('keydown', handleTextInput); 
+          document.removeEventListener('keydown', handleTextInput);
+          document.removeEventListener('gamepadbutton', handleGamepadTextInput);
           stopListeningForInput(); 
           leaveHouse();
         } else {
@@ -2318,6 +1994,7 @@
         isInHouse = false; 
         isInside = false;
         document.removeEventListener('keydown', handleTextInput);
+        document.removeEventListener('gamepadbutton', handleGamepadTextInput);
         stopListeningForInput();
         gameScreen.classList.add('final-mode');
         tvMessage.style.display = 'flex';
@@ -2329,6 +2006,7 @@
         document.getElementById('gameScreen').style.display = 'block';
         showDialogue("🍔 Hay una hamburguesa. (E)", null, 5000);
         document.addEventListener('keydown', eatHandler);
+        document.addEventListener('gamepadbutton', eatGamepadHandler);
       }, 1500);
     }
     
@@ -2336,6 +2014,16 @@
       const key = e.key.toLowerCase();
       if (key === 'e' || key === 'enter') {
         document.removeEventListener('keydown', eatHandler);
+        document.removeEventListener('gamepadbutton', eatGamepadHandler);
+        eatBurger();
+      }
+    }
+    
+    function eatGamepadHandler(e) {
+      const button = e.detail.button;
+      if (button === 'a' || button === 'x' || button === 'start') {
+        document.removeEventListener('keydown', eatHandler);
+        document.removeEventListener('gamepadbutton', eatGamepadHandler);
         eatBurger();
       }
     }
@@ -2441,6 +2129,56 @@
         
         if (bossMatch && keySequence.length >= 4) {
           bossCodeTriggered = true;
+          activateBossEnding();
+          return;
+        }
+      }
+    });
+
+    // ===== Gamepad secret codes =====
+    let gamepadSequence = [];
+    const GP_KONAMI = ['up', 'up', 'down', 'down', 'left', 'right', 'left', 'right', 'b', 'a'];
+    const GP_BOSS = ['down', 'up', 'b', 'a'];
+    let gpKonamiTriggered = false;
+    let gpBossTriggered = false;
+    
+    document.addEventListener('gamepadbutton', (e) => {
+      const btn = e.detail.button;
+      if (document.getElementById('startScreen').style.display !== 'none') return;
+      if (document.getElementById('gameScreen').style.display !== 'block') return;
+      
+      // Map gamepad buttons to direction names
+      let mappedBtn = btn;
+      if (btn === 'up' || btn === 'down' || btn === 'left' || btn === 'right') {
+        mappedBtn = btn;
+      } else if (btn === 'b') mappedBtn = 'b';
+      else if (btn === 'a') mappedBtn = 'a';
+      else return;
+      
+      gamepadSequence.push(mappedBtn);
+      if (gamepadSequence.length > 10) gamepadSequence.shift();
+      
+      if (!gpKonamiTriggered) {
+        const match = GP_KONAMI.every((val, index) => {
+          if (index >= gamepadSequence.length) return false;
+          const seqKey = gamepadSequence[gamepadSequence.length - GP_KONAMI.length + index];
+          return seqKey === val;
+        });
+        if (match && gamepadSequence.length >= 10) {
+          gpKonamiTriggered = true;
+          activateHappyEnding();
+          return;
+        }
+      }
+      
+      if (!gpBossTriggered && gamepadSequence.length >= 4) {
+        const match = GP_BOSS.every((val, index) => {
+          if (index >= gamepadSequence.length) return false;
+          const seqKey = gamepadSequence[gamepadSequence.length - GP_BOSS.length + index];
+          return seqKey === val;
+        });
+        if (match && gamepadSequence.length >= 4) {
+          gpBossTriggered = true;
           activateBossEnding();
           return;
         }
@@ -2598,6 +2336,7 @@
         if (roomMusic) roomMusic.pause();
         startListeningForInput();
         document.addEventListener('keydown', handleTextInput);
+        document.addEventListener('gamepadbutton', handleGamepadTextInput);
         showDialogue("🔑 Escribe 'Inside'", null, 3000);
       });
     }
@@ -2714,19 +2453,14 @@
         if (currentTimeout) clearTimeout(currentTimeout);
         currentAnimal = animals[Math.floor(Math.random() * animals.length)];
         loadAnimalImage(currentAnimal);
-        buttons.forEach(btn => {
-          btn.style.backgroundColor = "#1a0a00";
-          btn.classList.remove('selected', 'correct', 'wrong');
-        });
-        
-        // Actualizar navegador
-        animalNavigator.updateElements();
-        animalNavigator.activate();
+        buttons.forEach(btn => btn.style.backgroundColor = "#1a0a00");
       }
 
       function updateUI() {
-        document.getElementById('rageText').innerText = "💢 Furia: " + rage;
-        document.getElementById('dayText').innerText = "🌙 Día " + day + " — Animales: " + correctCount + "/" + dayTargets[day];
+        const rageText = document.getElementById('rageText');
+        const dayText = document.getElementById('dayText');
+        if (rageText) rageText.innerText = "💢 Furia: " + rage;
+        if (dayText) dayText.innerText = "🌙 Día " + day + " — Animales: " + correctCount + "/" + dayTargets[day];
       }
 
       function returnToMenu() {
@@ -2736,7 +2470,6 @@
         document.getElementById('startScreen').style.display = "flex";
         if (roomMusic) roomMusic.pause();
         playMenuMusic();
-        animalNavigator.deactivate();
       }
 
       function triggerJumpscareFinal() {
@@ -2751,7 +2484,6 @@
 
       function completeGame(hasErrors) {
         gameActive = false;
-        animalNavigator.deactivate();
         if (!hasErrors) {
           showThanksAndCredits();
         } else {
@@ -2798,6 +2530,35 @@
       let gameOverTriggered = false;
       let chaseStartTime = 0;
       let heartbeatInterval = null;
+      
+      // ===== Gamepad controls for chase =====
+      let chaseGamepadInterval = null;
+      let gpStickX = 0, gpStickY = 0;
+      
+      function setupChaseGamepad() {
+        if (chaseGamepadInterval) clearInterval(chaseGamepadInterval);
+        chaseGamepadInterval = setInterval(() => {
+          if (!chaseActive) return;
+          const gpx = getGamepadAxis(0);
+          const gpy = getGamepadAxis(1);
+          if (Math.abs(gpx) > 0.3) {
+            gpStickX = gpx;
+          } else {
+            gpStickX = 0;
+          }
+          if (Math.abs(gpy) > 0.3) {
+            gpStickY = gpy;
+          } else {
+            gpStickY = 0;
+          }
+          
+          // Map gamepad buttons to keys
+          if (isGamepadButtonPressed('a')) {
+            // Jump / interact (space in chase)
+            // Not used in chase
+          }
+        }, 50);
+      }
       
       const treeTextureUrl = BASE_URL + "tree_ps1.png";
       
@@ -2947,7 +2708,6 @@
           camera.rotation.x = pitch;
         }
         
-        // Controles de teclado
         window.addEventListener('keydown', (e) => {
           const key = e.key.toLowerCase();
           if (key === 'w') keys.w = true;
@@ -2966,68 +2726,17 @@
           if (key === 'shift') { keys.shift = false; runningMult = 1.0; }
         });
         
-        // Controles con mando para la persecución
-        function handleChaseGamepad() {
-          if (!chaseActive || gameOverTriggered || !gamepadConnected) return;
-          const gp = navigator.getGamepads()[gamepadIndex];
-          if (!gp) return;
-          
-          // Stick izquierdo para movimiento
-          const lx = gp.axes[0] || 0;
-          const ly = gp.axes[1] || 0;
-          const deadZone = 0.2;
-          
-          // Mapear a teclas WASD
-          if (Math.abs(ly) > deadZone) {
-            if (ly < -deadZone) keys.w = true;
-            else keys.w = false;
-            if (ly > deadZone) keys.s = true;
-            else keys.s = false;
-          } else {
-            keys.w = false;
-            keys.s = false;
-          }
-          
-          if (Math.abs(lx) > deadZone) {
-            if (lx < -deadZone) keys.a = true;
-            else keys.a = false;
-            if (lx > deadZone) keys.d = true;
-            else keys.d = false;
-          } else {
-            keys.a = false;
-            keys.d = false;
-          }
-          
-          // Stick derecho para mirar
-          const rx = gp.axes[2] || 0;
-          const ry = gp.axes[3] || 0;
-          if (Math.abs(rx) > deadZone || Math.abs(ry) > deadZone) {
-            const sens = 0.005;
-            yaw -= rx * sens;
-            pitch -= ry * sens;
-            pitch = Math.max(-Math.PI / 2.2, Math.min(Math.PI / 2.2, pitch));
-            camera.rotation.order = 'YXZ';
-            camera.rotation.y = yaw;
-            camera.rotation.x = pitch;
-          }
-          
-          // Botón A para correr (shift)
-          if (gp.buttons[GAMEPAD_BUTTONS.A]?.pressed) {
-            keys.shift = true;
-            runningMult = 1.85;
-          } else {
-            keys.shift = false;
-            runningMult = 1.0;
-          }
-        }
-        
-        const chaseGamepadInterval = setInterval(handleChaseGamepad, 50);
+        // Setup gamepad
+        setupChaseGamepad();
         
         let lastTimestamp = performance.now();
         chaseStartTime = performance.now() / 1000;
         
         function updateChase() {
-          if (!chaseActive) return;
+          if (!chaseActive) {
+            if (chaseAnimationId) cancelAnimationFrame(chaseAnimationId);
+            return;
+          }
           const now = performance.now();
           let delta = Math.min(0.033, (now - lastTimestamp) / 1000);
           lastTimestamp = now;
@@ -3039,10 +2748,22 @@
           
           const currentPlayerSpeed = playerBaseSpeed * runningMult;
           let moveX = 0, moveZ = 0;
+          
+          // Keyboard input
           if (keys.w) moveZ = 1;
           if (keys.s) moveZ = -1;
           if (keys.a) moveX = -1;
           if (keys.d) moveX = 1;
+          
+          // Gamepad input (override keyboard if gamepad is active)
+          if (gamepadConnected) {
+            if (Math.abs(gpStickY) > 0.3) {
+              moveZ = -gpStickY;
+            }
+            if (Math.abs(gpStickX) > 0.3) {
+              moveX = gpStickX;
+            }
+          }
           
           if (moveX !== 0 || moveZ !== 0) {
             const len = Math.hypot(moveX, moveZ);
@@ -3094,10 +2815,10 @@
             gameOverTriggered = true;
             chaseActive = false;
             if (chaseAnimationId) cancelAnimationFrame(chaseAnimationId);
+            if (chaseGamepadInterval) clearInterval(chaseGamepadInterval);
             stopHeartbeat();
             chaseMusic.pause();
             chaseContainer.style.display = "none";
-            if (chaseGamepadInterval) clearInterval(chaseGamepadInterval);
             triggerJumpscareFinal();
             return;
           }
@@ -3143,24 +2864,13 @@
       }
       
       // ==================== EVENTOS DE LOS BOTONES ====================
-      // Inicializar navegador de animales
-      animalNavigator.init(
-        document.getElementById('animalOptions'),
-        'button',
-        (el) => {
-          // Simular click
-          el.click();
-        }
-      );
-      
       buttons.forEach(btn => {
         btn.addEventListener('click', () => {
           if (!gameActive) return;
           if (bossTriggered) return;
           
-          if (btn.dataset.animal === currentAnimal.name) {
+          if (btn.innerText === currentAnimal.name) {
             btn.style.backgroundColor = "#2a6a2a";
-            btn.classList.add('correct');
             correctCount++;
             updateUI();
             const sound = getRandomSound(correctSounds);
@@ -3170,7 +2880,6 @@
               if (day < 5) {
                 showDialogue(`✨ ¡Completaste el Día ${day}! ✨`, null, 1500);
                 gameActive = false;
-                animalNavigator.deactivate();
                 playAudioFile('Door.mp3');
                 setTimeout(() => {
                   playAudioFile('DoorC.mp3');
@@ -3193,13 +2902,7 @@
             setTimeout(nextAnimal, 1500);
           } else {
             btn.style.backgroundColor = "#882222";
-            btn.classList.add('wrong');
-            buttons.forEach(b => { 
-              if (b.dataset.animal === currentAnimal.name) {
-                b.style.backgroundColor = "#aa6644";
-                b.classList.add('correct');
-              }
-            });
+            buttons.forEach(b => { if (b.innerText === currentAnimal.name) b.style.backgroundColor = "#aa6644"; });
             rage++;
             totalErrors++;
             updateUI();
@@ -3216,60 +2919,36 @@
         });
       });
       
-      // Controles táctiles para móvil/consola
-      const touchControls = document.getElementById('touchControls');
-      const btnUp = document.getElementById('btnUp');
-      const btnDown = document.getElementById('btnDown');
-      const btnLeft = document.getElementById('btnLeft');
-      const btnRight = document.getElementById('btnRight');
-      const btnAction = document.getElementById('btnAction');
-      const btnAction2 = document.getElementById('btnAction2');
-      const btnStart = document.getElementById('btnStart');
-      
-      // Navegación con botones táctiles
-      btnUp.addEventListener('click', () => {
-        if (animalNavigator.isActive) animalNavigator.prev();
-      });
-      btnDown.addEventListener('click', () => {
-        if (animalNavigator.isActive) animalNavigator.next();
-      });
-      btnLeft.addEventListener('click', () => {
-        if (animalNavigator.isActive) animalNavigator.prev();
-      });
-      btnRight.addEventListener('click', () => {
-        if (animalNavigator.isActive) animalNavigator.next();
-      });
-      btnAction.addEventListener('click', () => {
-        if (animalNavigator.isActive) animalNavigator.select();
-        // También para el boss
-        if (bossFightActive) {
-          const eEvent = new KeyboardEvent('keydown', { key: 'e' });
-          document.dispatchEvent(eEvent);
-        }
-      });
-      btnAction2.addEventListener('click', () => {
-        // Botón B - Enter para golpear en el boss
-        if (bossFightActive) {
-          const enterEvent = new KeyboardEvent('keydown', { key: 'Enter' });
-          document.dispatchEvent(enterEvent);
-        }
-      });
-      btnStart.addEventListener('click', () => {
-        // Menú / Pausa
-        if (document.getElementById('gameScreen').style.display === 'block') {
-          // Volver al menú
-          if (gameActive) {
-            gameActive = false;
-            animalNavigator.deactivate();
-            returnToMenu();
-          }
-        }
-      });
-      
       gameActive = true;
       updateUI();
       nextAnimal();
     }
+
+    // ==================== GAMEPAD CUSTOM EVENT ====================
+    // Emit custom events for gamepad buttons
+    let lastGamepadState = {};
+    
+    function emitGamepadEvents() {
+      const gp = detectGamepad();
+      if (!gp) return;
+      
+      for (let i = 0; i < gp.buttons.length; i++) {
+        const key = Object.keys(BUTTON_MAP).find(k => BUTTON_MAP[k] === i);
+        if (key) {
+          const pressed = gp.buttons[i].pressed;
+          const wasPressed = lastGamepadState[key] || false;
+          if (pressed && !wasPressed) {
+            const event = new CustomEvent('gamepadbutton', {
+              detail: { button: key, index: i, pressed: true }
+            });
+            document.dispatchEvent(event);
+          }
+          lastGamepadState[key] = pressed;
+        }
+      }
+    }
+    
+    setInterval(emitGamepadEvents, 50);
   </script>
 </body>
 </html>
