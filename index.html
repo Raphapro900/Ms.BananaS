@@ -854,7 +854,7 @@
     let navItems = [];
     let navSelectedIndex = 0;
     let navActive = false;
-    let navType = 'menu'; // 'menu', 'animals', 'kb'
+    let navType = 'menu';
     
     function setupNav(items, type = 'menu') {
       navItems = items;
@@ -1147,8 +1147,10 @@
       infoContent.innerHTML = `<h2>🛒 Tienda</h2><p>Próximamente...</p>`;
     });
 
+    // EXIT - Cierra la página
     exitBtn.addEventListener('click', function() {
       window.close();
+      // Fallback si window.close() no funciona
       setTimeout(() => {
         window.location.href = "about:blank";
       }, 100);
@@ -1588,6 +1590,9 @@
       const LINE_MOVE_MAX = 3;
       let shakeTimer = 0;
       let isShaking = false;
+      
+      // Para el control del stick en el boss
+      let bossStickX = 0;
 
       function resize() {
         W = canvas.width = window.innerWidth;
@@ -1628,18 +1633,18 @@
       function checkBossGamepadInput() {
         if (!bossFightActive || deathSequenceStarted || !gameActive) return;
         
+        // Stick izquierdo: mueve la línea de ataque de izquierda a derecha
         const stickX = getGamepadAxis(0);
-        const stickY = getGamepadAxis(1);
-        if (Math.abs(stickX) > 0.2 || Math.abs(stickY) > 0.2) {
-          const rect = canvas.getBoundingClientRect();
-          const scaleX = W / rect.width;
-          const scaleY = H / rect.height;
-          mouseX += stickX * 15 * scaleX;
-          mouseY += stickY * 15 * scaleY;
-          mouseX = Math.max(0, Math.min(W, mouseX));
-          mouseY = Math.max(0, Math.min(H, mouseY));
+        if (Math.abs(stickX) > 0.2) {
+          bossStickX = stickX;
+          // Movimiento suave de la línea
+          if (isLineMoving) {
+            lineX += stickX * 15;
+            lineX = Math.max(0, Math.min(W, lineX));
+          }
         }
         
+        // X (PS) / A (Xbox) = Atacar (E)
         if (isGamepadButtonPressed('x') || isGamepadButtonPressed('a')) {
           if (phase === 'player_turn' && canAttack && gameActive && !deathSequenceStarted) {
             const eEvent = new KeyboardEvent('keydown', { key: 'e' });
@@ -1647,7 +1652,8 @@
           }
         }
         
-        if (isGamepadButtonPressed('start') || isGamepadButtonPressed('x')) {
+        // Cuadrado (PS) / X (Xbox) = Confirmar golpe (ENTER)
+        if (isGamepadButtonPressed('y') || isGamepadButtonPressed('x')) {
           if (isLineMoving) {
             const enterEvent = new KeyboardEvent('keydown', { key: 'Enter' });
             document.dispatchEvent(enterEvent);
@@ -1735,9 +1741,16 @@
           const attackInterval = setInterval(() => {
             attackLineTime += 0.016;
             lineMoveDuration += 0.016;
-            lineX += lineDirection * (W / 2) * 0.016 * 1.8;
-            if (lineX >= W) { lineDirection = -1; }
-            else if (lineX <= 0) { lineDirection = 1; }
+            // Si el stick está controlando la línea, no usar el movimiento automático
+            if (Math.abs(bossStickX) < 0.2) {
+              lineX += lineDirection * (W / 2) * 0.016 * 1.8;
+              if (lineX >= W) { lineDirection = -1; }
+              else if (lineX <= 0) { lineDirection = 1; }
+            } else {
+              // El stick controla la línea manualmente
+              lineX += bossStickX * 8;
+              lineX = Math.max(0, Math.min(W, lineX));
+            }
             
             if (lineMoveDuration >= LINE_MOVE_MAX) {
               clearInterval(attackInterval);
@@ -2151,7 +2164,6 @@
       isListeningForInput = true; 
       currentInput = ''; 
       updateInputDisplay(); 
-      // Show virtual keyboard
       showVirtualKeyboard((key) => {
         if (key === 'enter') {
           const command = currentInput.toLowerCase().trim();
@@ -2181,7 +2193,6 @@
         currentInput += key;
         inputTextSpan.textContent = currentInput;
       });
-      // Setup keyboard navigation
       setupNav(kbKeys, 'kb');
     }
     
@@ -2508,7 +2519,6 @@
         enterRoom();
       });
       
-      // Setup menu navigation
       const menuBtns = [howBtn, shopBtn, exitBtn];
       setupNav(menuBtns, 'menu');
     }
@@ -2592,7 +2602,6 @@
       const jumpscareDiv = document.getElementById("jumpscare");
       const jumpscareVideo = document.getElementById("jumpscareVideo");
       
-      // Setup animal navigation
       setupNav(Array.from(buttons), 'animals');
       
       window.chaseMusic = chaseMusic;
@@ -2698,7 +2707,6 @@
         currentAnimal = animals[Math.floor(Math.random() * animals.length)];
         loadAnimalImage(currentAnimal);
         buttons.forEach(btn => btn.style.backgroundColor = "#1a0a00");
-        // Reset highlights
         buttons.forEach(btn => btn.classList.remove('highlighted'));
         setupNav(Array.from(buttons), 'animals');
       }
@@ -2717,7 +2725,6 @@
         document.getElementById('startScreen').style.display = "flex";
         if (roomMusic) roomMusic.pause();
         playMenuMusic();
-        // Setup menu navigation again
         const menuBtns = [howBtn, shopBtn, exitBtn];
         setupNav(menuBtns, 'menu');
       }
@@ -3193,13 +3200,11 @@
     let navInterval = setInterval(() => {
       if (!gamepadConnected) return;
       
-      // D-pad navigation
       const up = isGamepadButtonPressed('up');
       const down = isGamepadButtonPressed('down');
       const left = isGamepadButtonPressed('left');
       const right = isGamepadButtonPressed('right');
       
-      // Also check stick for navigation when not in boss/chase
       const stickY = getGamepadAxis(1);
       const stickX = getGamepadAxis(0);
       
@@ -3217,7 +3222,6 @@
         }
       }
       
-      // Activate selection
       if (isGamepadButtonPressed('a') || isGamepadButtonPressed('x') || isGamepadButtonPressed('start')) {
         if (navActive) {
           activateNavSelection();
